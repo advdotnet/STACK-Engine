@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StarFinder", "StarFinder\StarFinder.csproj", "{3785DF4D-65EF-40E4-9177-2A8B396AFB0C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{4B3B21EA-0DD4-4207-AD01-C39116AB7E9F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StarFinder.Test", "Tests\StarFinder.Test\StarFinder.Test.csproj", "{9DBF20E7-65F4-405E-B7C6-C51B4AC55C74}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3785DF4D-65EF-40E4-9177-2A8B396AFB0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3785DF4D-65EF-40E4-9177-2A8B396AFB0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3785DF4D-65EF-40E4-9177-2A8B396AFB0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3785DF4D-65EF-40E4-9177-2A8B396AFB0C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9DBF20E7-65F4-405E-B7C6-C51B4AC55C74}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9DBF20E7-65F4-405E-B7C6-C51B4AC55C74}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9DBF20E7-65F4-405E-B7C6-C51B4AC55C74}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9DBF20E7-65F4-405E-B7C6-C51B4AC55C74}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{9DBF20E7-65F4-405E-B7C6-C51B4AC55C74} = {4B3B21EA-0DD4-4207-AD01-C39116AB7E9F}
+	EndGlobalSection
+EndGlobal
