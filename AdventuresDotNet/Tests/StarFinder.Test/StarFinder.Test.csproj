@@ -35,6 +35,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="FNA">
+      <HintPath>..\..\..\lib\FNA.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
   </ItemGroup>
   <Choose>
@@ -51,8 +54,13 @@
   </Choose>
   <ItemGroup>
     <Compile Include="AStar.cs" />
+    <Compile Include="LineSegment.cs" />
+    <Compile Include="Path.cs" />
     <Compile Include="PriorityQueue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestVertexData.cs" />
+    <Compile Include="Triangle.cs" />
+    <Compile Include="TriangleVertex.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\StarFinder\StarFinder.csproj">
