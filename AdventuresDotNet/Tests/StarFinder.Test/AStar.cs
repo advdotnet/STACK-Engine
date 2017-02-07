@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Collections;
 using StarFinder;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Diagnostics;
 
-namespace STACK.Test
+namespace StarFinder.Test
 {
 
     struct MapPosition : IMapPosition
@@ -53,6 +52,8 @@ namespace STACK.Test
             PathFinder.Search(Start, End, ref Result, MapPosition.Heuristic);
 
             PrintGrid(Result);
+
+            Assert.IsTrue(Result.Count > 0);
         }
 
         static private void PrintGrid(List<MapPosition> solution = null)

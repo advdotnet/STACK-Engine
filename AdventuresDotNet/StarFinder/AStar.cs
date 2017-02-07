@@ -17,11 +17,14 @@ namespace StarFinder
             GetNeighbors = getNeighbours;                       
             Open = new PriorityQueue<AStarNode<T>>(this);
         }
-
+        
         /// <summary>
         /// Searches a path between the given 'start' and 'end' nodes.
         /// </summary>
-        /// <returns>null, if no path was found or a list of nodes</returns>
+        /// <param name="start">Start node</param>
+        /// <param name="end">End node</param>
+        /// <param name="results">The list is populated with the results</param>
+        /// <param name="heuristic">Heuristic function</param>
         public void Search(T start, T end, ref List<T> results, Func<T, T, float> heuristic = null)
         {
             results.Clear();

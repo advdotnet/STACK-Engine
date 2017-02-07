@@ -1,7 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using StarFinder;
 
-namespace STACK.Test
+namespace StarFinder.Test
 {
     [TestClass]
     public class PrioQueueTest
