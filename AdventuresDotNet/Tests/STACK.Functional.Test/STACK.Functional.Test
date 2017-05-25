@@ -1,14 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{9DBF20E7-65F4-405E-B7C6-C51B4AC55C74}</ProjectGuid>
+    <ProjectGuid>{3A51DC2A-F6E9-446C-909E-3B914EAABF9F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>StarFinder.Test</RootNamespace>
-    <AssemblyName>StarFinder.Test</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <RootNamespace>STACK.Functional.Test</RootNamespace>
+    <AssemblyName>STACK.Functional.Test</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
@@ -25,6 +25,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -35,10 +36,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FNA">
-      <HintPath>..\..\..\lib\FNA.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <Choose>
     <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
@@ -53,19 +52,48 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="AStar.cs" />
-    <Compile Include="LineSegment.cs" />
-    <Compile Include="Path.cs" />
-    <Compile Include="PriorityQueue.cs" />
+    <Compile Include="Input.cs" />
+    <Compile Include="SaveGame.cs" />
+    <Compile Include="Console.cs" />
+    <Compile Include="ContentLoader.cs" />
+    <Compile Include="Testing\GraphicsDeviceServiceMock.cs" />
+    <Compile Include="Testing\TestEngine.cs" />
+    <Compile Include="Testing\TestInputProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TestVertexData.cs" />
-    <Compile Include="Triangle.cs" />
-    <Compile Include="TriangleVertex.cs" />
+    <Compile Include="Testing\Mock.cs" />
+    <Content Include="..\..\STACK\Content\bin\**\*.*">
+      <Link>Content\%(RecursiveDir)%(FileName)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\Dependencies\FNA\lib\bin\win32\**\*.*">
+      <Link>%(FileName)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>    
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Dependencies\Neoforce\NeoForce.csproj">
+      <Project>{ac5f1cd8-aa8e-4db5-814f-86c214175841}</Project>
+      <Name>NeoForce</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Dependencies\Spine\spine-csharp\spine-csharp.csproj">
+      <Project>{94144e22-2431-4a8f-ac04-dec22f7edd8f}</Project>
+      <Name>spine-csharp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Dependencies\Spine\spine-xna\spine-xna.csproj">
+      <Project>{7f8f2327-c016-49c8-bb4d-f3f77971961e}</Project>
+      <Name>spine-xna</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Dependencies\StarFinder\StarFinder.csproj">
-      <Project>{3785df4d-65ef-40e4-9177-2a8b396afb0c}</Project>
+      <Project>{66e50737-d77f-460c-899e-1fe812eaec48}</Project>
       <Name>StarFinder</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\STACK\STACK.csproj">
+      <Project>{bdd5e5df-a2f6-44fc-a44b-33488ba054bb}</Project>
+      <Name>STACK</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Dependencies\FNA\FNA.csproj">
+      <Project>{35253ce1-c864-4cd3-8249-4d1319748e8f}</Project>
+      <Name>FNA</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>

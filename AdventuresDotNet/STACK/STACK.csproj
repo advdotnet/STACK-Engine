@@ -1,0 +1,169 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{BDD5E5DF-A2F6-44FC-A44B-33488BA054BB}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>STACK</RootNamespace>
+    <AssemblyName>STACK</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <MonoGamePlatform>WindowsGL</MonoGamePlatform>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="FNA, Version=17.2.0.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\FNA.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Components\Audio\AudioManager.cs" />
+    <Compile Include="Components\SkipContent.cs" />
+    <Compile Include="Components\ServiceProvider.cs" />
+    <Compile Include="Components\Graphics\BloomSettings.cs" />
+    <Compile Include="Components\Random.cs" />
+    <Compile Include="Components\Input\Mouse.cs" />
+    <Compile Include="Components\Graphics\SpriteActorAnimation.cs" />
+    <Compile Include="Components\Graphics\SpriteAnimation.cs" />
+    <Compile Include="Graphics\DisplaySettings.cs" />
+    <Compile Include="State\SerializationWriter.cs" />
+    <Compile Include="Utils\FastForward.cs" />
+    <Compile Include="World\Base\BaseEntityCollection.cs" />
+    <Compile Include="World\Base\BaseEntity.cs" />
+    <Compile Include="Components\Interaction\HotspotMesh.cs" />
+    <Compile Include="Components\CameraLocked.cs" />
+    <Compile Include="World\ContentLoader.cs" />
+    <Compile Include="Components\Interaction\Interactions.cs" />
+    <Compile Include="Components\Navigation\ScenePath.cs" />
+    <Compile Include="World\Scene\Location.cs" />
+    <Compile Include="Components\Interaction\Hotspot.cs" />
+    <Compile Include="Components\Navigation\Exit.cs" />
+    <Compile Include="Components\Interaction\HotspotPersistent.cs" />
+    <Compile Include="Components\Interaction\HotspotSprite.cs" />
+    <Compile Include="Components\Interaction\HotspotSpineSprite.cs" />
+    <Compile Include="Components\Interaction\InteractiveVisibility.cs" />
+    <Compile Include="Components\Navigation\Entrance.cs" />
+    <Compile Include="Components\Graphics\Text.cs" />
+    <Compile Include="Components\Graphics\TextDuration.cs" />
+    <Compile Include="World\Scene\VisibleObjectList.cs" />
+    <Compile Include="World\Scene\SceneCollection.cs" />
+    <Compile Include="Datatypes\Extensions.cs" />
+    <Compile Include="Datatypes\GameSpeed.cs" />
+    <Compile Include="Datatypes\TriangleVertexData.cs" />
+    <Compile Include="Debug.cs" />
+    <Compile Include="Components\Base\Component.cs" />
+    <Compile Include="Components\Scripting\ActorScripts.cs" />
+    <Compile Include="Components\Base\Messages.cs" />
+    <Compile Include="Components\Graphics\Lightning.cs" />
+    <Compile Include="Components\Input\MouseFollower.cs" />
+    <Compile Include="Components\Input\InputDispatcher.cs" />
+    <Compile Include="Components\Interaction\HotspotRectangle.cs" />
+    <Compile Include="Components\Navigation\Passage.cs" />
+    <Compile Include="Components\Graphics\SpineSprite.cs" />
+    <Compile Include="Components\Graphics\Sprite.cs" />
+    <Compile Include="Components\Scripting\Scripts.cs" />
+    <Compile Include="Components\Navigation\Navigation.cs" />
+    <Compile Include="Components\Interaction\Interaction.cs" />
+    <Compile Include="Components\Transform.cs" />
+    <Compile Include="World\Entities\Entity.cs" />
+    <Compile Include="Graphics\Effects\Normalmap.cs" />
+    <Compile Include="Components\Graphics\SpriteData.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Input\InputEventType.cs" />
+    <Compile Include="Input\InputEvent.cs" />
+    <Compile Include="Input\InputProvider.cs" />
+    <Compile Include="Input\InputQueue.cs" />
+    <Compile Include="Scripting\Script.cs" />
+    <Compile Include="EngineVariables.cs" />
+    <Compile Include="StackEngine.cs" />
+    <Compile Include="World\StackGame.cs" />
+    <Compile Include="Components\Camera.cs" />
+    <Compile Include="Scripting\Delay.cs" />
+    <Compile Include="World\Scene\Scene.cs" />
+    <Compile Include="World\World.cs" />
+    <Compile Include="Components\Graphics\TextLine.cs" />
+    <Compile Include="Datatypes\Enums.cs" />
+    <Compile Include="Graphics\Primitives.cs" />
+    <Compile Include="Graphics\Renderer.cs" />
+    <Compile Include="Log\Log.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Components\Projection.cs" />
+    <Compile Include="Window.cs" />
+    <Compile Include="State\SaveGame.cs" />
+    <Compile Include="State\State.cs" />
+    <Compile Include="State\Surrogates.cs" />
+    <Compile Include="Graphics\Effects\Bloom.cs" />
+    <Compile Include="Utils\FrameRateCounter.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Dependencies\Spine\spine-csharp\spine-csharp.csproj">
+      <Project>{94144e22-2431-4a8f-ac04-dec22f7edd8f}</Project>
+      <Name>spine-csharp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Dependencies\Spine\spine-xna\spine-xna.csproj">
+      <Project>{7f8f2327-c016-49c8-bb4d-f3f77971961e}</Project>
+      <Name>spine-xna</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Dependencies\StarFinder\StarFinder.csproj">
+      <Project>{3785df4d-65ef-40e4-9177-2a8b396afb0c}</Project>
+      <Name>StarFinder</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <None Include="Content\build.bat" />
+    <None Include="Content\fonts\fps.spritefont" />
+    <None Include="Content\fonts\stack.spritefont" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\fxc.exe" />
+    <Content Include="Content\shaders\BloomCombine.fx" />
+    <Content Include="Content\shaders\BloomExtract.fx" />
+    <Content Include="Content\shaders\GaussianBlur.fx" />
+    <Content Include="Content\shaders\Normalmap.fx" />
+    <Content Include="Content\stacklogo.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!--<Import Project="$(MSBuildExtensionsPath)\MonoGame\v3.0\MonoGame.Content.Builder.targets" />-->
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -1,0 +1,118 @@
+
+ego.png
+size: 512,256
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+Hand
+  rotate: false
+  xy: 66, 41
+  size: 20, 47
+  orig: 20, 47
+  offset: 0, 0
+  index: -1
+Head
+  rotate: false
+  xy: 2, 2
+  size: 62, 86
+  orig: 62, 86
+  offset: 0, 0
+  index: -1
+Head_A
+  rotate: false
+  xy: 271, 168
+  size: 62, 86
+  orig: 62, 86
+  offset: 0, 0
+  index: -1
+Head_Blink
+  rotate: false
+  xy: 335, 168
+  size: 62, 86
+  orig: 62, 86
+  offset: 0, 0
+  index: -1
+Head_E
+  rotate: false
+  xy: 399, 168
+  size: 62, 86
+  orig: 62, 86
+  offset: 0, 0
+  index: -1
+Head_O
+  rotate: false
+  xy: 271, 80
+  size: 62, 86
+  orig: 62, 86
+  offset: 0, 0
+  index: -1
+LowerLeg_Back
+  rotate: false
+  xy: 194, 84
+  size: 34, 170
+  orig: 34, 170
+  offset: 0, 0
+  index: -1
+LowerLeg_Front
+  rotate: false
+  xy: 153, 80
+  size: 39, 174
+  orig: 40, 174
+  offset: 0, 0
+  index: -1
+Lower_Arm
+  rotate: false
+  xy: 385, 51
+  size: 32, 115
+  orig: 36, 115
+  offset: 0, 0
+  index: -1
+Neck
+  rotate: false
+  xy: 463, 187
+  size: 39, 67
+  orig: 39, 67
+  offset: 0, 0
+  index: -1
+Shoe_Back
+  rotate: false
+  xy: 419, 102
+  size: 62, 27
+  orig: 62, 27
+  offset: 0, 0
+  index: -1
+Shoe_Front
+  rotate: false
+  xy: 419, 131
+  size: 51, 35
+  orig: 51, 35
+  offset: 0, 0
+  index: -1
+Torso
+  rotate: false
+  xy: 2, 90
+  size: 90, 164
+  orig: 90, 164
+  offset: 0, 0
+  index: -1
+UpperLeg_Back
+  rotate: false
+  xy: 230, 89
+  size: 39, 165
+  orig: 39, 165
+  offset: 0, 0
+  index: -1
+UpperLeg_Front
+  rotate: false
+  xy: 94, 80
+  size: 57, 174
+  orig: 57, 174
+  offset: 0, 0
+  index: -1
+Upper_Arm
+  rotate: false
+  xy: 335, 68
+  size: 48, 98
+  orig: 48, 98
+  offset: 0, 0
+  index: -1
