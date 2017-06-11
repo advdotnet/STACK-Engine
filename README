@@ -1,5 +1,9 @@
-License
--------
-StarFinder is released under the Microsoft Public License. See LICENSE for details.
+Adventures Dot Net 
+==================
 
+Adventures Dot Net is a set of .NET projects which can be used to create graphic adventure games.
+
+##License
+
+Adventures Dot Net is released under the Microsoft Public License. See LICENSE for details.
 StarFinder uses FNA, released under the Microsoft Public License. See LICENSE for details.
