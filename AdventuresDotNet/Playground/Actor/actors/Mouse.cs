@@ -1,6 +1,6 @@
-﻿using System;
-using STACK;
+﻿using STACK;
 using STACK.Components;
+using System;
 
 namespace Actor
 {
@@ -27,16 +27,6 @@ namespace Actor
 
             InteractiveVisibility
                 .Create(this);
-        }
-
-        public void ShowNormal()
-        {
-            Get<Sprite>().CurrentFrame = 1;
-        }
-
-        public void ShowInvert()
-        {
-            Get<Sprite>().CurrentFrame = 2;
         }
     }
 }

@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using STACK;
 using STACK.Components;
-using Microsoft.Xna.Framework.Graphics;
+using System;
+using System.Collections;
 
 namespace Actor
 {
@@ -107,9 +106,9 @@ namespace Actor
         }
 
         public override void OnUpdate()
-        {            
+        {
             var Position = World.Get<STACK.Components.Mouse>().Position;
-            Get<Lightning>().LightPosition = new Vector3(Position, 5);            
+            Get<Lightning>().LightPosition = new Vector3(Position, 5);
 
             base.OnUpdate();
         }

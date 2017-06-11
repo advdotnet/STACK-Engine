@@ -1,9 +1,8 @@
-﻿using System;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using STACK;
 using STACK.Components;
-using Microsoft.Xna.Framework.Input;
-using STACK.Graphics;
+using System;
 
 namespace Actor
 {
@@ -44,16 +43,6 @@ namespace Actor
                 ActorGame.ShadowEgo.Get<Scripts>().Remove(ActorScripts.GOTOSCRIPTID);
                 ActorGame.ShadowEgo.GoTo(Vector2.Transform(new Vector2(position.X - 50, position.Y), ActorGame.ShadowEgo.DrawScene.Get<Camera>().TransformationInverse));
             }
-        }
-
-        public override void OnDraw(Renderer renderer)
-        {
-            base.OnDraw(renderer);
-        }
-
-        public override void OnUpdate()
-        {
-            base.OnUpdate();
         }
     }
 }
