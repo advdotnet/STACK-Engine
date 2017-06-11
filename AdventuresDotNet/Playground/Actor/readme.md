@@ -7,7 +7,7 @@ as regular sprite animations. The mouse serves as a light source which
 is used for character lightning. Clicking on the screen makes both actors 
 walk to the target location.
 
-[sample game](https://raw.githubusercontent.com/advdotnet/AdventuresDotNet/master/AdventuresDotNet/Playground/Actor/actor.gif)
+![sample game](https://raw.githubusercontent.com/advdotnet/AdventuresDotNet/master/AdventuresDotNet/Playground/Actor/actor.gif)
 
 
 
