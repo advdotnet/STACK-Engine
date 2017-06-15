@@ -49,7 +49,7 @@ namespace STACK.Functional.Test
             }
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("GPU")]
         public void GraphicsDeviceMockAvaiable()
         {
             using (var GraphicsDevice = CreateGraphicsDevice())

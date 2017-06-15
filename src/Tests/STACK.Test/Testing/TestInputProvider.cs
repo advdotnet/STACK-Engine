@@ -1,18 +1,16 @@
-﻿using STACK.Input;
-using Microsoft.Xna.Framework;
-using System.Collections.Generic;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-using System;
-using STACK.Graphics;
+using STACK.Input;
+using System.Collections.Generic;
 
 namespace STACK.Test
-{    
+{
     public class TestInputProvider : InputProvider
     {
         Queue<InputEvent> EventsToAdd = new Queue<InputEvent>();
         List<Keys> PressedKeys = new List<Keys>();
         int MouseX, MouseY;
-        ButtonState Left, Right;        
+        ButtonState Left = ButtonState.Released, Right = ButtonState.Released;
 
         public override KeyboardState KeyboardState
         {
@@ -40,8 +38,8 @@ namespace STACK.Test
             }
         }
 
-        public void KeyDown(Microsoft.Xna.Framework.Input.Keys key)
-        {            
+        public void KeyDown(Keys key)
+        {
             EventsToAdd.Enqueue(InputEvent.KeyPress(KeyState.Down, 0, key));
             if (!PressedKeys.Contains(key))
             {
@@ -49,7 +47,7 @@ namespace STACK.Test
             }
         }
 
-        public void KeyUp(Microsoft.Xna.Framework.Input.Keys key)
+        public void KeyUp(Keys key)
         {
             EventsToAdd.Enqueue(InputEvent.KeyPress(KeyState.Up, 0, key));
             if (PressedKeys.Contains(key))
@@ -60,13 +58,13 @@ namespace STACK.Test
 
         public void MouseDown()
         {
-            EventsToAdd.Enqueue(InputEvent.MouseClick(Microsoft.Xna.Framework.Input.ButtonState.Pressed, 0, MouseButton.Left));
+            EventsToAdd.Enqueue(InputEvent.MouseClick(ButtonState.Pressed, 0, MouseButton.Left));
             Left = ButtonState.Pressed;
         }
 
         public void MouseUp()
         {
-            EventsToAdd.Enqueue(InputEvent.MouseClick(Microsoft.Xna.Framework.Input.ButtonState.Released, 0, MouseButton.Left));
+            EventsToAdd.Enqueue(InputEvent.MouseClick(ButtonState.Released, 0, MouseButton.Left));
             Left = ButtonState.Released;
         }
 
@@ -93,5 +91,5 @@ namespace STACK.Test
             MouseMove(x, y);
             MouseClick();
         }
-    }               
+    }
 }
