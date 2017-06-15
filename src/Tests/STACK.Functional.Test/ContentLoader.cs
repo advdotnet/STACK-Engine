@@ -7,7 +7,7 @@ namespace STACK.Functional.Test
     public class ContentManagement
     {
 
-        [TestMethod]
+        [TestMethod, TestCategory("GPU")]
         public void SceneContentDisposed()
         {
             Texture2D SharedTexture;

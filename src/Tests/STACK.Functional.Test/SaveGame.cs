@@ -21,7 +21,7 @@ namespace STACK.Functional.Test
             }
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("GPU")]
         public void ScreenshotGreen()
         {
             using (var GraphicsDevice = Mock.CreateGraphicsDevice())
@@ -57,7 +57,7 @@ namespace STACK.Functional.Test
             return eventDelegate.GetInvocationList().Count();
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("GPU")]
         public void RestartGameOneInput()
         {
             using (var GraphicsDevice = Mock.CreateGraphicsDevice())
@@ -75,7 +75,7 @@ namespace STACK.Functional.Test
             }
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("GPU")]
         public void LoadSaveGameAfterWorldStart()
         {
             STACK.SaveGame State;
@@ -100,7 +100,7 @@ namespace STACK.Functional.Test
             }
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("GPU")]
         public void LoadSaveGameBeforeWorldStart()
         {
             STACK.SaveGame State;
