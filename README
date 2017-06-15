@@ -1,9 +1,8 @@
-Adventures Dot Net 
-==================
+# STACK Engine
 
-Adventures Dot Net is a set of .NET projects which can be used to create graphic adventure games.
+The STACK Engine is a set of .NET projects which are used to create an oldschool graphic adventure game which is currently in development.
 
-##License
+## License
 
-Adventures Dot Net is released under the Microsoft Public License. See LICENSE for details.
+STACK Engine is released under the Microsoft Public License. See LICENSE for details.
 StarFinder uses FNA, released under the Microsoft Public License. See LICENSE for details.
