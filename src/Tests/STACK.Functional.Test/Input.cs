@@ -38,7 +38,7 @@ namespace STACK.Functional.Test
             }
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("GPU")]
         public void InputNotSendToWorldWhenPaused()
         {
             using (var GraphicsDevice = Mock.CreateGraphicsDevice())
