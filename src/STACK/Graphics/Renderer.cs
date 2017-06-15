@@ -27,6 +27,7 @@ namespace STACK.Graphics
         public Effect NormalmapEffect;
         public BloomComponent BloomEffect;
         public Texture2D WhitePixelTexture;
+        public SpriteFont DefaultFont;
 
         RenderTarget2D CurrentRenderTarget;
         RenderTarget2D DrawBuffer;
@@ -80,8 +81,6 @@ namespace STACK.Graphics
                 return Matrix.Multiply(Projection, projection);
             }
         }
-
-        public SpriteFont DefaultFont;
 
         void LoadContent(ContentManager content)
         {
@@ -245,7 +244,7 @@ namespace STACK.Graphics
 
         private byte[] GetTexturePNGData(Texture2D screenshot)
         {
-            using (MemoryStream Writer = new MemoryStream())
+            using (var Writer = new MemoryStream())
             {
                 screenshot.SaveAsPng(Writer, screenshot.Width, screenshot.Height);
 
@@ -255,7 +254,7 @@ namespace STACK.Graphics
 
         public byte[] GetScreenshotPNGData(World world)
         {
-            using (Texture2D ScreenShot = GetScreenshot(world))
+            using (var ScreenShot = GetScreenshot(world))
             {
                 return GetTexturePNGData(ScreenShot);
             }
@@ -273,11 +272,11 @@ namespace STACK.Graphics
                 name = "Screenshot" + index + ".png";
             }
 
-            using (Texture2D ScreenShot = GetScreenshot(world))
+            using (var ScreenShot = GetScreenshot(world))
             {
-                using (FileStream stream = new FileStream(name, FileMode.Create))
+                using (var Stream = new FileStream(name, FileMode.Create))
                 {
-                    ScreenShot.SaveAsPng(stream, ScreenShot.Width, ScreenShot.Height);
+                    ScreenShot.SaveAsPng(Stream, ScreenShot.Width, ScreenShot.Height);
                 }
             }
 

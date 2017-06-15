@@ -1,19 +1,14 @@
-﻿using Microsoft.Xna.Framework;
-using STACK.Graphics;
-using StarFinder;
+﻿using STACK.Graphics;
 using System;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Text;
 
 namespace STACK.Components
 {
     [Serializable]
     public class ScenePath : Component
     {
-        public string PathFile = string.Empty;        
+        public string PathFile = string.Empty;
 
-        Path _Path;                
+        Path _Path;
 
         public Path Path
         {
@@ -27,9 +22,9 @@ namespace STACK.Components
                 {
                     return;
                 }
-                
+
                 _Path = value;
-                NotifyParent(Messages.ScenePathChanged, value);                
+                NotifyParent(Messages.ScenePathChanged, value);
             }
         }
 
@@ -47,8 +42,8 @@ namespace STACK.Components
         {
             if (!string.IsNullOrEmpty(PathFile))
             {
-                Path = content.Load<Path>(PathFile);				
-            }            
+                Path = content.Load<Path>(PathFile);
+            }
         }
 
         void LoadPath(string file)
@@ -67,5 +62,5 @@ namespace STACK.Components
 
         public ScenePath SetPathFile(string value) { LoadPath(value); return this; }
         public ScenePath SetPath(Path value) { Path = value; return this; }
-    }  
+    }
 }
