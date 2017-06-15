@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Xna.Framework;
 using System.Runtime.Serialization;
 
 namespace StarFinder
-{    
+{
     /// <summary>
     /// Contains a triangle collection that can be searched on.
     /// </summary>
@@ -13,11 +13,11 @@ namespace StarFinder
     [Serializable]
     public class Path<T> where T : IScalable<T>
     {
-        public Mesh<T> Mesh;        
+        public Mesh<T> Mesh;
         public float MaxScale, MinScale;
         [NonSerialized]
-        NodeCollection Nodes;        
-        
+        NodeCollection Nodes;
+
         [NonSerialized]
         AStar<Vertex> _PathFinder;
 
@@ -33,7 +33,7 @@ namespace StarFinder
         public Path()
         {
             MaxScale = 1.0f;
-            MinScale = 1.0f;      
+            MinScale = 1.0f;
         }
 
         public Path(DataVertex<T>[] points, int[] indices)
@@ -67,7 +67,7 @@ namespace StarFinder
             Initialize();
         }
 
-        public Path(params Triangle<T>[] triangles): this(triangles.ToList()) { }
+        public Path(params Triangle<T>[] triangles) : this(triangles.ToList()) { }
 
         [OnDeserialized]
         public void OnDeserialized(StreamingContext context)
@@ -90,7 +90,7 @@ namespace StarFinder
                 return false;
             }
 
-            for (int i = 0; i < ObstructingEdges.Count; i++)                
+            for (int i = 0; i < ObstructingEdges.Count; i++)
             {
                 if (ObstructingEdges[i].Equals(a, b))
                 {
@@ -110,7 +110,7 @@ namespace StarFinder
         /// Returns if the line a-b is not obstructed by the mesh.
         /// </summary>
         private bool InLineOfSight(Vector2 a, Vector2 b)
-        {            
+        {
             if (!LineOfSightCheck(a, b))
             {
                 return false;
@@ -126,14 +126,14 @@ namespace StarFinder
                         return false;
                     }
                 }
-            }            
+            }
 
             return true;
-        }        
+        }
 
         protected void Initialize()
         {
-            ObstructingEdges = new List<LineSegment>();            
+            ObstructingEdges = new List<LineSegment>();
             var SharedEdges = new List<LineSegment>();
 
             foreach (var OuterTriangle in Mesh.Triangles)
@@ -162,7 +162,7 @@ namespace StarFinder
 
             ObstructingEdges.RemoveAll(e => SharedEdges.Any(s => s == e));
 
-            Nodes = new NodeCollection();                        
+            Nodes = new NodeCollection();
 
             foreach (var Point in Mesh.Vertices)
             {
@@ -175,7 +175,7 @@ namespace StarFinder
                 }
             }
 
-            Nodes.CalculateStaticLinks(InLineOfSight);            
+            Nodes.CalculateStaticLinks(InLineOfSight);
         }
 
         /// <summary>
@@ -216,7 +216,7 @@ namespace StarFinder
 
             var Triangle = Mesh.GetClosestTriangle(position);
 
-            if (Triangle == null) 
+            if (Triangle == null)
             {
                 return default(T);
             }
@@ -278,7 +278,7 @@ namespace StarFinder
         /// the collections are used.
         /// </summary>
         public void FindPath(Vector2 from, Vector2 to, ref List<Vector2> result)
-        {                        
+        {
             result.Clear();
 
             if (Mesh == null)
@@ -297,7 +297,7 @@ namespace StarFinder
             if (First == Last)
             {
                 result.Add(First);
-                return;                
+                return;
             }
 
             // line of sight check
@@ -328,12 +328,12 @@ namespace StarFinder
 
         public bool Contains(Vector2 position)
         {
-            if (Mesh == null) 
+            if (Mesh == null)
             {
-                return false; 
+                return false;
             }
 
-            return Mesh.Contains(position);            
+            return Mesh.Contains(position);
         }
 
         public Triangle<T> GetClosestTriangle(Vector2 position)
@@ -361,7 +361,6 @@ namespace StarFinder
         /// </summary>        
         public void Draw(Action<Vector2, Vector2, Vector2, Color> drawTriangle, Action<Vector2, Vector2, Color> drawLine, Vector2 mouse)
         {
-
             if (Mesh == null || Mesh.Triangles == null)
             {
                 return;
@@ -369,11 +368,11 @@ namespace StarFinder
 
             for (int i = 0; i < Mesh.Triangles.Length; i++)
             {
-                Color Colo = (Mesh.Triangles[i] == GetClosestTriangle(mouse)) ? new Color(255, 100, 100, 50) : new Color(255, 255, 255, 50);
+                var Color = (Mesh.Triangles[i] == GetClosestTriangle(mouse)) ? new Color(255, 100, 100, 50) : new Color(255, 255, 255, 50);
 
                 drawTriangle(new Vector2(Mesh.Triangles[i].A.Point.X, Mesh.Triangles[i].A.Point.Y),
                     new Vector2(Mesh.Triangles[i].B.Point.X, Mesh.Triangles[i].B.Point.Y),
-                    new Vector2(Mesh.Triangles[i].C.Point.X, Mesh.Triangles[i].C.Point.Y), Colo);
+                    new Vector2(Mesh.Triangles[i].C.Point.X, Mesh.Triangles[i].C.Point.Y), Color);
 
                 drawLine(new Vector2(Mesh.Triangles[i].A.Point.X, Mesh.Triangles[i].A.Point.Y),
                     new Vector2(Mesh.Triangles[i].B.Point.X, Mesh.Triangles[i].B.Point.Y), new Color(0, 0, 0, 100));
@@ -385,7 +384,6 @@ namespace StarFinder
                     new Vector2(Mesh.Triangles[i].C.Point.X, Mesh.Triangles[i].C.Point.Y), new Color(0, 0, 0, 100));
 
             }
-
         }
     }
 }

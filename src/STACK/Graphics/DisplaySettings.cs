@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
 
 namespace STACK.Graphics
 {
@@ -20,7 +19,7 @@ namespace STACK.Graphics
             VirtualResolution = virtualResolution;
             AspectRatio = (float)VirtualResolution.X / VirtualResolution.Y;
             Viewport = new Viewport(0, 0, VirtualResolution.X, VirtualResolution.Y);
-            OnClientSizeChanged(realResolution.X, realResolution.Y);            
+            OnClientSizeChanged(realResolution.X, realResolution.Y);
         }
 
         private void CacheValues(float width, float height)
@@ -30,7 +29,7 @@ namespace STACK.Graphics
             var ViewportScaleX = (float)width / VirtualResolution.X;
             var ViewportScaleY = (float)height / VirtualResolution.Y;
 
-            Matrix.CreateScale(ViewportScaleX, ViewportScaleY, 1.0f, out _ScaleMatrix);            
+            Matrix.CreateScale(ViewportScaleX, ViewportScaleY, 1.0f, out _ScaleMatrix);
         }
 
         public Vector2 TransformPoint(float x, float y)
@@ -41,16 +40,16 @@ namespace STACK.Graphics
             var scaleX = (float)Viewport.Width / VirtualResolution.X;
             var scaleY = (float)Viewport.Height / VirtualResolution.Y;
 
-            return new Vector2(x / WindowScaleX, y / WindowScaleY);                        
+            return new Vector2(x / WindowScaleX, y / WindowScaleY);
         }
 
         public void OnClientSizeChanged(int width, int height)
-        {                        
+        {
             var Width = width;
             var Height = (int)(Width / AspectRatio + 0.5f);
 
             if (Height > height)
-            {                
+            {
                 Height = height;
                 Width = (int)(Height * AspectRatio + 0.5f);
             }
@@ -60,7 +59,7 @@ namespace STACK.Graphics
 
             Viewport = new Viewport(X, Y, Width, Height);
 
-            CacheValues(width, height);            
+            CacheValues(width, height);
         }
-    }    
+    }
 }
