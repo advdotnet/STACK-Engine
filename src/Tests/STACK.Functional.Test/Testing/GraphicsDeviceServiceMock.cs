@@ -33,10 +33,10 @@ namespace STACK.Functional.Test
             get { return _GraphicsDevice; }
         }
 
-        public event EventHandler<EventArgs> DeviceCreated;
-        public event EventHandler<EventArgs> DeviceDisposing;
-        public event EventHandler<EventArgs> DeviceReset;
-        public event EventHandler<EventArgs> DeviceResetting;
+        public event EventHandler<EventArgs> DeviceCreated { add { } remove { } }
+        public event EventHandler<EventArgs> DeviceDisposing { add { } remove { } }
+        public event EventHandler<EventArgs> DeviceReset { add { } remove { } }
+        public event EventHandler<EventArgs> DeviceResetting { add { } remove { } }
 
         public void Dispose()
         {
