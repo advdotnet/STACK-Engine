@@ -13,9 +13,9 @@ namespace STACK
             if (duration == Auto)
             {
                 int TextLength = (text ?? string.Empty).Length;
-                duration = 1 + TextLength * 0.175f;
+                duration = 1 + TextLength * 0.1f;
             }
             return duration;
         }
-    }    
+    }
 }

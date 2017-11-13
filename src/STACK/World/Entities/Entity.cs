@@ -1,11 +1,13 @@
 ﻿using STACK.Components;
 using System;
+using System.Diagnostics;
 
 namespace STACK
-{   
+{
     [Serializable]
+    [DebuggerDisplay("ID = {ID}")]
     public class Entity : BaseEntityCollection
-    {        
+    {
         public Scene DrawScene;
 
         [NonSerialized]
@@ -14,7 +16,7 @@ namespace STACK
         public World World
         {
             get
-            {                
+            {
                 return UpdateScene.World;
             }
         }
@@ -29,11 +31,11 @@ namespace STACK
             {
                 Parent = value;
             }
-        }        
+        }
 
-        public Entity() 
+        public Entity()
         {
-            
+
         }
 
         public Entity(string id) : this()
@@ -42,7 +44,7 @@ namespace STACK
             {
                 ID = id;
             }
-        }        
+        }
 
         public void EnterScene(string name)
         {
@@ -50,12 +52,12 @@ namespace STACK
         }
 
         public virtual void EnterScene(Scene scene)
-        {                        
+        {
             DrawScene.Notify(Messages.EntityLeavesScene, this);
             Notify(Messages.SceneEnter, scene);
             DrawScene = scene;
             Notify(Messages.SceneEntered, scene);
-            DrawScene.Notify(Messages.EntityEntersScene, this);            
+            DrawScene.Notify(Messages.EntityEntersScene, this);
         }
     }
 }

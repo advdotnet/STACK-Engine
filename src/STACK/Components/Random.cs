@@ -26,6 +26,11 @@ namespace STACK.Components
             return Random.Next();
         }
 
+        /// <summary>
+        /// Returns a nonnegative random number less than the specified maximum.
+        /// </summary>
+        /// <param name="maxValue"></param>
+        /// <returns></returns>
         public int CreateInt(int maxValue)
         {
             return Random.Next(maxValue);

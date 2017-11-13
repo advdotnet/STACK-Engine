@@ -9,8 +9,7 @@ namespace STACK.Components
         Idle = 0,
         Walking = 1,
         Talking = 2,
-        Using = 4,
-        Custom = 8
+        Custom = 4
     }
 
     /// <summary>
@@ -34,10 +33,10 @@ namespace STACK.Components
         public static Vector2 ToVector2(this Directions4 direction)
         {
             switch (direction)
-            {                
-                case Directions4.Up: return new Vector2(0, -1);            
-                case Directions4.Right: return new Vector2(1, 0);            
-                case Directions4.Down: return new Vector2(0, 1);            
+            {
+                case Directions4.Up: return new Vector2(0, -1);
+                case Directions4.Right: return new Vector2(1, 0);
+                case Directions4.Down: return new Vector2(0, 1);
                 case Directions4.Left: return new Vector2(-1, 0);
             }
             return Vector2.Zero;
@@ -46,7 +45,7 @@ namespace STACK.Components
         public static Vector2 ToVector2(this Directions8 direction)
         {
             switch (direction)
-            {             
+            {
                 case Directions8.LeftUp: return new Vector2(-1, -1);
                 case Directions8.Up: return new Vector2(0, -1);
                 case Directions8.RightUp: return new Vector2(1, -1);
@@ -81,13 +80,13 @@ namespace STACK.Components
             {
                 if (value.Y > 0)
                 {
-                    return Directions4.Up;
+                    return Directions4.Down;
                 }
                 else
                 {
-                    return Directions4.Down;
+                    return Directions4.Up;
                 }
-            }            
+            }
         }
 
         public static Directions8 ToDirection8(this Vector2 value)
@@ -99,7 +98,7 @@ namespace STACK.Components
             {
                 return Directions8.None;
             }
-            
+
             if (AbsX > AbsY)
             {
                 // vertical side
@@ -142,7 +141,7 @@ namespace STACK.Components
     }
 
     public static class StateExtensions
-    {        
+    {
         public static string ToAnimationName(this State state)
         {
             switch (state)
@@ -150,8 +149,8 @@ namespace STACK.Components
                 case State.Idle: return "idle";
                 case State.Talking: return "talk";
                 case State.Walking: return "walk";
-                case State.Using: return "use";
-                case State.Talking | State.Walking: return "walk";
+                case State.Custom: return "custom";
+                case State.Talking | State.Walking: return "walktalk";
             }
 
             return string.Empty;
@@ -247,7 +246,7 @@ namespace STACK.Components
 
         public float Scale = 1f;
         public float Speed = 150.0f;
-        private Func<float> CalculateEffectiveSpeedFn;     
+        private Func<float> CalculateEffectiveSpeedFn;
 
         private float CalculateEffectiveSpeedDefault()
         {
@@ -266,7 +265,7 @@ namespace STACK.Components
         {
             get
             {
-                return CalculateEffectiveSpeedFn();                
+                return CalculateEffectiveSpeedFn();
             }
         }
 
@@ -345,6 +344,8 @@ namespace STACK.Components
         public Transform SetSpeed(float value) { Speed = value; return this; }
         public Transform SetOrientation(float x, float y) { Orientation = new Vector2(x, y); return this; }
         public Transform SetOrientation(Vector2 value) { Orientation = value; return this; }
+        public Transform SetDirection(Directions4 value) { Orientation = value.ToVector2(); return this; }
+        public Transform SetDirection(Directions8 value) { Orientation = value.ToVector2(); return this; }
         public Transform SetUpdateZWithPosition(bool value) { UpdateZWithPosition = value; return this; }
         public Transform SetAbsolute(bool value) { Absolute = value; return this; }
         public Transform AddState(State state) { State = State.Add(state); return this; }

@@ -23,7 +23,7 @@ namespace STACK.Test
         {
             const float half = 0.5f;
 
-            var Transformation = new Projection2D().SetRectangle(new Vector2(346, 517), new Vector2(1180, 515), new Vector2(1280, 720), new Vector2(0, 720));
+            var Transformation = new Projection2D().SetQuadliteral(new Vector2(346, 517), new Vector2(1180, 515), new Vector2(1280, 720), new Vector2(0, 720));
 
             var Transformed = Transformation.Transform(new Vector2(half, half));
             var Inverse = Transformation.TransformInverse(Transformed);
@@ -40,7 +40,7 @@ namespace STACK.Test
             var C = new Vector2(1, 1);
             var D = new Vector2(0, 1);
 
-            var Transformation = new Projection2D().SetRectangle(A, B, C, D);
+            var Transformation = new Projection2D().SetQuadliteral(A, B, C, D);
 
             foreach (var Vector in new Vector2[] { Vector2.Zero, Vector2.UnitY, Vector2.UnitX, new Vector2(1, 1) })
             {
@@ -60,7 +60,7 @@ namespace STACK.Test
             var D = new Vector2(1, 1);
 
             Vector2[] Expected = new Vector2[4] { A, D, B, C };
-            var Transformation = new Projection2D().SetRectangle(A, B, C, D);
+            var Transformation = new Projection2D().SetQuadliteral(A, B, C, D);
             var i = 0;
 
             foreach (var Vector in new Vector2[] { Vector2.Zero, Vector2.UnitY, Vector2.UnitX, new Vector2(1, 1) })

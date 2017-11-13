@@ -7,8 +7,8 @@
     <ProjectGuid>{0111F7BB-9C01-41E8-8279-777C6FD51709}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Actor</RootNamespace>
-    <AssemblyName>Actor</AssemblyName>
+    <RootNamespace>PathFinding</RootNamespace>
+    <AssemblyName>PathFinding</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -36,7 +36,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>Actor.Program</StartupObject>
+    <StartupObject>PathFinding.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -25,6 +25,7 @@ namespace STACK
             Log.WriteLine("Initializing GraphicsDeviceManager");
 
             Graphics = new GraphicsDeviceManager(this);
+            Graphics.PreparingDeviceSettings += new EventHandler<PreparingDeviceSettingsEventArgs>(SetToReference);
             Window.ClientSizeChanged += OnClientSizeChanged;
             Window.AllowUserResizing = false;
             Window.Title = game.Title;
@@ -39,14 +40,20 @@ namespace STACK
             SkipCutscene = new SkipCutscene(SetSpeed);
         }
 
+        void SetToReference(object sender, PreparingDeviceSettingsEventArgs eventargs)
+        {
+            eventargs.GraphicsDeviceInformation.PresentationParameters.PresentationInterval = PresentInterval.One;
+            eventargs.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage = RenderTargetUsage.DiscardContents;
+        }
+
         protected override void Initialize()
         {
-            Graphics.PreferMultiSampling = true;
+            Graphics.PreferMultiSampling = false;
             Graphics.SynchronizeWithVerticalRetrace = true;
             Graphics.IsFullScreen = EngineVariables.Fullscreen;
 
-            Graphics.PreferredBackBufferWidth = Game.VirtualResolution.X;
-            Graphics.PreferredBackBufferHeight = Game.VirtualResolution.Y;
+            Graphics.PreferredBackBufferWidth = Game.VirtualResolution.X * Game.ResolutionScaleFactor.X;
+            Graphics.PreferredBackBufferHeight = Game.VirtualResolution.Y * Game.ResolutionScaleFactor.Y;
 
             IsFixedTimeStep = true;
             IsMouseVisible = false;

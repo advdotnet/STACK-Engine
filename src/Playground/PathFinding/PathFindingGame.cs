@@ -3,7 +3,7 @@ using STACK;
 using STACK.Components;
 using System.Collections.Generic;
 
-namespace Actor
+namespace PathFinding
 {
     /// <summary>
     /// The game class
@@ -16,6 +16,7 @@ namespace Actor
         public PathFindingGame()
         {
             VirtualResolution = new Point(VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
+            ResolutionScaleFactor = new Point(1, 1);
             Title = "Playground: PathFinding";
             STACK.EngineVariables.Fullscreen = false;
             EngineVariables.DebugPath = true;

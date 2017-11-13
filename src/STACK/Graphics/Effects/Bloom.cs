@@ -8,15 +8,15 @@
 #endregion
 
 #region Using Statements
-using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 #endregion
 
 namespace STACK
 {
-    public class BloomComponent 
+    public class BloomComponent
     {
         #region Fields
 
@@ -70,10 +70,10 @@ namespace STACK
         #region Initialization
 
         public ContentManager Content;
-        public BloomComponent(GraphicsDevice device)            
+        public BloomComponent(GraphicsDevice device)
         {
             GraphicsDevice = device;
-            
+
         }
 
 
@@ -86,13 +86,13 @@ namespace STACK
 
             bloomExtractEffect = content.Load<Effect>("shaders/BloomExtract");
             bloomCombineEffect = content.Load<Effect>("shaders/BloomCombine");
-            gaussianBlurEffect = content.Load<Effect>("shaders/GaussianBlur");            
+            gaussianBlurEffect = content.Load<Effect>("shaders/GaussianBlur");
 
             // Look up the resolution and format of our main backbuffer.
             PresentationParameters pp = GraphicsDevice.PresentationParameters;
 
             int width = pp.BackBufferWidth;
-            int height = pp.BackBufferHeight;            
+            int height = pp.BackBufferHeight;
 
             SurfaceFormat format = pp.BackBufferFormat;
 
@@ -143,7 +143,7 @@ namespace STACK
         {
             if (Visible)
             {
-                GraphicsDevice.SetRenderTarget(sceneRenderTarget);                
+                GraphicsDevice.SetRenderTarget(sceneRenderTarget);
             }
         }
 
@@ -159,7 +159,7 @@ namespace STACK
                 return;
             }
 
-            GraphicsDevice.SamplerStates[1] = SamplerState.LinearClamp;
+            GraphicsDevice.SamplerStates[1] = SamplerState.AnisotropicClamp;
 
             // Pass 1: draw the scene into rendertarget 1, using a
             // shader that extracts only the brightest parts of the image.
@@ -199,7 +199,7 @@ namespace STACK
             parameters["BaseIntensity"].SetValue(settings.BaseIntensity);
             parameters["BloomSaturation"].SetValue(settings.BloomSaturation);
             parameters["BaseSaturation"].SetValue(settings.BaseSaturation);
-            
+
             // FNA
             GraphicsDevice.Textures[1] = sceneRenderTarget;
             //parameters["BaseSampler"].SetValue(sceneRenderTarget);
@@ -221,7 +221,7 @@ namespace STACK
                 return;
             }
 
-            spriteBatch.Begin(0, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.Default, RasterizerState.CullNone);
+            spriteBatch.Begin(0, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.None, RasterizerState.CullNone);
             spriteBatch.Draw(finalRenderTarget, Vector2.Zero, Color.White);
             spriteBatch.End();
         }
@@ -402,6 +402,7 @@ namespace STACK
             new BloomSettings("Blurry",      0,      2,   1,     0.1f, 1,       1),
             new BloomSettings("Subtle",      0.5f,   2,   1,     1,    1,       1),
             new BloomSettings("Custom",      0.35f,  3,   1,     1,    1,       1),
+            new BloomSettings("SessionSeven",0.75f,  1.5f,   0.8f,     1,    1,       1),
         };
     }
 }

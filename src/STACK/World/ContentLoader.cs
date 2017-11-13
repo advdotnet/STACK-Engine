@@ -29,8 +29,8 @@ namespace STACK
 
             if (typeof(T) == typeof(Skeleton))
             {
-                Atlas Atlas = new Atlas(RootDirectory + "/" + assetName + ".atlas", this);
-                SkeletonJson json = new SkeletonJson(Atlas);
+                var Atlas = new Atlas(RootDirectory + "/" + assetName + ".atlas", this);
+                var json = new SkeletonJson(Atlas);
                 var Skeleton = new Skeleton(json.ReadSkeletonData(RootDirectory + "/" + assetName + ".json"));
 
                 return (T)(object)Skeleton;

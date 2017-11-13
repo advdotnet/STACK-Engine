@@ -6,9 +6,13 @@ namespace STACK.Components
     [Serializable]
     public class ScenePath : Component
     {
-        public string PathFile = string.Empty;
-
+        public string PathFile { get; private set; }
         Path _Path;
+
+        public ScenePath()
+        {
+            PathFile = string.Empty;
+        }
 
         public Path Path
         {

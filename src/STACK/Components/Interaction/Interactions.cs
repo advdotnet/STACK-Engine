@@ -1,5 +1,6 @@
 ﻿using STACK.Components;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Text;
@@ -8,7 +9,7 @@ namespace STACK
 {
     [Serializable]
     public class Verb
-    {        
+    {
         public string Text { get; protected set; }
         public string Preposition { get; protected set; }
         public bool Ditransitive { get; protected set; }
@@ -35,15 +36,15 @@ namespace STACK
 
         public override int GetHashCode()
         {
-            return Text.GetHashCode() ^ Preposition.GetHashCode() ^ Ditransitive.GetHashCode();            
+            return Text.GetHashCode() ^ Preposition.GetHashCode() ^ Ditransitive.GetHashCode();
         }
 
         protected Verb(string text, string preposition, bool ditransitive)
-        {            
+        {
             Text = text;
             Preposition = preposition;
             Ditransitive = ditransitive;
-        }        
+        }
 
         public override string ToString()
         {
@@ -53,7 +54,7 @@ namespace STACK
         const string SPACE = " ";
 
         public string CreateActionString(Entity primary = null, bool primarySelected = false, Entity secondary = null)
-        {            
+        {
             var pri = string.Empty;
             pri = primary?.Get<Hotspot>()?.Caption;
             var sec = string.Empty;
@@ -64,10 +65,9 @@ namespace STACK
                 return Text;
             }
             else
-            {                
-                StringBuilder = new StringBuilder();                   
+            {
                 StringBuilder.Clear();
-                                
+
                 StringBuilder.Append(Text);
                 StringBuilder.Append(SPACE);
                 StringBuilder.Append(pri);
@@ -75,8 +75,8 @@ namespace STACK
                 if (!Ditransitive || !primarySelected)
                 {
                     return StringBuilder.ToString();
-                }      
-                                
+                }
+
                 StringBuilder.Append(SPACE);
                 StringBuilder.Append(Preposition);
 
@@ -124,7 +124,9 @@ namespace STACK
     /// </summary>
     [Serializable]
     public class Interactions : Dictionary<object, Dictionary<Verb, InteractionFn>>
-    {        
+    {
+        public const string DEFAULTSCRIPTNAME = "DefaultInteractionScript";
+
         public Interactions() : base() { }
 
         public Interactions(SerializationInfo info, StreamingContext context) : base(info, context) { }
@@ -140,6 +142,41 @@ namespace STACK
         public Interactions Add(Verb key)
         {
             return Add(key, (a) => { return null; });
+        }
+
+        /// <summary>
+        /// Executes the given script on the given actor entity.
+        /// </summary>
+        /// <param name="key">verb</param>
+        /// <param name="val">script</param>
+        /// <param name="actor">entity</param>
+        /// <param name="pred">predicate</param>
+        /// <returns></returns>
+        public Interactions Add(Verb key, IEnumerator val, Entity actor, Func<bool> pred = null)
+        {
+            if (pred == null || pred())
+            {
+                return Add(key, GetDefaultInteractionFn(val, actor), true);
+            }
+
+            return this;
+        }
+
+        /// <summary>
+        /// Executes the given script on the current "for" object.
+        /// </summary>
+        /// <param name="key">verb</param>
+        /// <param name="val">script</param>
+        /// <param name="pred">predicate</param>
+        /// <returns></returns>
+        public Interactions Add(Verb key, IEnumerator val, Func<bool> pred = null)
+        {
+            if (pred == null || pred())
+            {
+                return Add(key, GetDefaultInteractionFn(val, (Entity)CurrentSender), true);
+            }
+
+            return this;
         }
 
         public Interactions Add(Verb key, InteractionFn val, Func<bool> pred = null)
@@ -165,7 +202,18 @@ namespace STACK
             }
 
             return this;
-        } 
+        }
+
+        /// <summary>
+        /// Default interaction function: start a script for the given object
+        /// </summary>
+        /// <param name="script"></param>
+        /// <param name="actor"></param>
+        /// <returns></returns>
+        private InteractionFn GetDefaultInteractionFn(IEnumerator script, Entity actor)
+        {
+            return (ctx) => { return actor.Get<Scripts>().Start(script, DEFAULTSCRIPTNAME); };
+        }
 
         public static Interactions Create()
         {
@@ -185,5 +233,5 @@ namespace STACK
         }
 
         public static Interactions None = new Interactions();
-    }       
+    }
 }

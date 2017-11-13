@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Xna.Framework;
 using STACK;
-using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 
 namespace Actor
 {
@@ -16,6 +16,7 @@ namespace Actor
         {
             VirtualResolution = new Point(VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
             Title = "Playground: Actor";
+            ResolutionScaleFactor = new Point(1, 1);
             STACK.EngineVariables.Fullscreen = false;
         }
 
@@ -41,7 +42,7 @@ namespace Actor
             {
                 new Scene(),
             };
-        }        
+        }
 
         protected override void OnStart()
         {
@@ -56,7 +57,7 @@ namespace Actor
 
         protected override void OnWorldStart()
         {
-            
+
         }
     }
 }

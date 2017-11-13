@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 
 namespace STACK
-{   
+{
 
     [Serializable]
     public abstract class BaseEntityCollection : BaseEntity
@@ -38,7 +38,7 @@ namespace STACK
             component.Parent = this;
 
             return component;
-        }        
+        }
 
         public T Get<T>() where T : Component
         {
@@ -69,7 +69,7 @@ namespace STACK
                     ComponentCache.Add(typeof(T), (Component)Item);
                     return (T)Item;
                 }
-            }            
+            }
 
             return null;
         }
@@ -77,7 +77,8 @@ namespace STACK
         public BaseEntityCollection Remove<T>() where T : Component
         {
             Component Component;
-            if (ComponentCache.TryGetValue(typeof(T), out Component))            
+
+            if (ComponentCache.TryGetValue(typeof(T), out Component))
             {
                 ComponentCache.Remove(typeof(T));
                 Items.Remove(Component);
@@ -89,9 +90,9 @@ namespace STACK
         public BaseEntityCollection()
         {
             Items = new List<BaseEntity>(10);
-        } 
+        }
 
-        public static int PrioritySorter(BaseEntity a, BaseEntity b) 
+        public static int PrioritySorter(BaseEntity a, BaseEntity b)
         {
             return b.Priority.CompareTo(a.Priority);
         }
@@ -101,7 +102,7 @@ namespace STACK
             return a.Priority.CompareTo(b.Priority);
         }
 
-        public override void OnUpdate() 
+        public override void OnUpdate()
         {
             for (int i = 0; i < Items.Count; i++)
             {
@@ -109,7 +110,7 @@ namespace STACK
             }
         }
 
-        public override void OnDraw(Renderer renderer) 
+        public override void OnDraw(Renderer renderer)
         {
             for (int i = 0; i < Items.Count; i++)
             {
@@ -117,23 +118,23 @@ namespace STACK
             }
         }
 
-        public override void OnNotify<T>(string message, T data) 
+        public override void OnNotify<T>(string message, T data)
         {
             for (int i = 0; i < Items.Count; i++)
             {
                 Items[i].Notify(message, data);
-            }            
+            }
         }
 
-        public override void OnLoadContent(ContentLoader content) 
+        public override void OnLoadContent(ContentLoader content)
         {
             for (int i = 0; i < Items.Count; i++)
             {
                 Items[i].LoadContent(content);
-            }            
+            }
         }
 
-        public override void OnUnloadContent() 
+        public override void OnUnloadContent()
         {
             for (int i = 0; i < Items.Count; i++)
             {
@@ -146,7 +147,7 @@ namespace STACK
             for (int i = 0; i < Items.Count; i++)
             {
                 Items[i].HandleInputEvent(mouse, inputEvent);
-            }            
+            }
         }
 
         public override void OnInitialize()

@@ -21,8 +21,8 @@ namespace STACK.Components
 
         public CameraLocked()
         {
-            Acceleration = 7f;
-            Damping = 1f;
+            Acceleration = 8f;
+            Damping = 3.0f;
             Scroll = true;
             CenterCharacter = true;
         }
@@ -86,8 +86,8 @@ namespace STACK.Components
                 NewSceneEntered = false;
             }
 
-            var ShouldScrollLeft = Camera.Position.X > 0 && TransformedPosition.X < Resolution.X / 2f;
-            var ShouldScrollRight = Camera.Position.X < BackgroundWidth - Resolution.X && TransformedPosition.X > Resolution.X - Resolution.X / 2f;
+            var ShouldScrollLeft = Camera.Position.X > 0 && TransformedPosition.X < Resolution.X / 2f - (Resolution.X / 15f);
+            var ShouldScrollRight = Camera.Position.X < BackgroundWidth - Resolution.X && TransformedPosition.X > Resolution.X - Resolution.X / 2f + (Resolution.X / 15f);
 
             if (ShouldScrollLeft || ShouldScrollRight)
             {

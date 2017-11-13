@@ -52,20 +52,20 @@ namespace Actor
             return 150;
         }
 
-        private int SetFrame(State state, Vector2 orientation, int step)
+        private int SetFrame(Transform transform, int step, int lastFrame)
         {
             var scaledStep = step / 7;
             var Row = 0;
 
-            switch (orientation.ToDirection4())
+            switch (transform.Direction4)
             {
-                case Directions4.Down: Row = 4; break;
+                case Directions4.Down: Row = 1; break;
                 case Directions4.Right: Row = 3; break;
-                case Directions4.Up: Row = 1; break;
+                case Directions4.Up: Row = 4; break;
                 case Directions4.Left: Row = 2; break;
             }
 
-            if (state == State.Idle)
+            if (transform.State == State.Idle)
             {
                 return 1 + (Row - 1) * 9;
             }

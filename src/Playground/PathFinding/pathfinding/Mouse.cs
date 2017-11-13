@@ -2,7 +2,7 @@
 using STACK.Components;
 using System;
 
-namespace Actor
+namespace PathFinding
 {
     [Serializable]
     public class Mouse : Entity

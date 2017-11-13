@@ -1,5 +1,5 @@
-﻿using System;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
+using System;
 
 namespace STACK.Components
 {
@@ -9,7 +9,7 @@ namespace STACK.Components
     [Serializable]
     public class Camera : Component
     {
-        float _Zoom;        
+        float _Zoom;
         Vector2 _Position;
         float _Rotation;
 
@@ -21,7 +21,7 @@ namespace STACK.Components
         /// <summary>
         /// The inverse of the transformation matrix.
         /// </summary>
-        public Matrix TransformationInverse { get; private set; }       
+        public Matrix TransformationInverse { get; private set; }
 
         public Camera() : this(Vector2.Zero, 1f) { }
 
@@ -32,13 +32,13 @@ namespace STACK.Components
             _Position = position;
             Visible = false;
             UpdateTransformation();
-        }        
+        }
 
         public float Zoom
         {
-            get 
-            { 
-                return _Zoom; 
+            get
+            {
+                return _Zoom;
             }
 
             set
@@ -50,13 +50,13 @@ namespace STACK.Components
 
         public float Rotation
         {
-            get 
-            { 
-                return _Rotation; 
+            get
+            {
+                return _Rotation;
             }
 
-            set 
-            { 
+            set
+            {
                 _Rotation = value;
                 UpdateTransformation();
             }
@@ -64,18 +64,18 @@ namespace STACK.Components
 
         public void Move(Vector2 delta)
         {
-            Position += delta;            
+            Position += delta;
         }
 
         public Vector2 Position
         {
-            get 
-            { 
-                return _Position; 
+            get
+            {
+                return _Position;
             }
 
-            set 
-            { 
+            set
+            {
                 _Position = value;
                 UpdateTransformation();
             }
@@ -91,11 +91,11 @@ namespace STACK.Components
             return Vector2.Transform(position, TransformationInverse);
         }
 
-        void UpdateTransformation() 
+        void UpdateTransformation()
         {
-            Transformation = Matrix.CreateRotationZ(Rotation) 
-                * Matrix.CreateScale(new Vector3(Zoom, Zoom, 1)) 
-                * Matrix.CreateTranslation(new Vector3(-_Position.X, -_Position.Y, 0)) ;
+            Transformation = Matrix.CreateRotationZ(Rotation)
+                * Matrix.CreateScale(new Vector3(Zoom, Zoom, 1))
+                * Matrix.CreateTranslation(new Vector3(-_Position.X, -_Position.Y, 0).ToInt());
 
             TransformationInverse = Matrix.Invert(Transformation);
         }
