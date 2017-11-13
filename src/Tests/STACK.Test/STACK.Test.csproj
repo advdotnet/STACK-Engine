@@ -62,6 +62,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Components\Interaction.cs" />
     <Compile Include="Components\Text.cs" />
     <Compile Include="Components\Passages.cs" />
     <Compile Include="Components\Navigation.cs" />

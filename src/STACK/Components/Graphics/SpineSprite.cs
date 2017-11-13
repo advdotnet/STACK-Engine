@@ -10,7 +10,7 @@ namespace STACK.Components
     /// Renders a spine animation.
     /// </summary>
     [Serializable]
-    public class SpineSprite : Component
+    public class SpineSprite : Component, IPlayAnimation
     {
         [NonSerialized]
         public Texture2D NormalMap;
@@ -22,7 +22,7 @@ namespace STACK.Components
         public AnimationState AnimationState;
         [NonSerialized]
         public AnimationStateData AnimationStateData;
-        
+
         string AnimationName = "";
         public float AnimationTime = 0;
         public bool AnimationLooped = false;
@@ -34,7 +34,7 @@ namespace STACK.Components
         public Action<Event> OnSpineEvent;
 
         public SpineSprite()
-        {         
+        {
             RenderStage = RenderStage.Bloom;
         }
 
@@ -91,17 +91,17 @@ namespace STACK.Components
                 AnimationState.Apply(Skeleton);
             }
             AnimationState.End += AnimationState_End;
-        }               
+        }
 
         void AnimationState_End(AnimationState state, int trackIndex)
         {
             OnSpineAnimationEnd?.Invoke(state);
-        }        
+        }
 
         void AnimationState_Event(AnimationState state, int trackIndex, Event e)
         {
             OnSpineEvent?.Invoke(e);
-        }        
+        }
 
         public void SetSkin(string skin)
         {
@@ -148,12 +148,12 @@ namespace STACK.Components
 
             Skeleton.RootBone.ScaleX = Data.Scale.X;
             Skeleton.RootBone.ScaleY = Data.Scale.Y;
-            
+
             if (Transform != null)
             {
                 Skeleton.RootBone.ScaleX *= Transform.Scale;
-                Skeleton.RootBone.ScaleY *= Transform.Scale;                
-            }            
+                Skeleton.RootBone.ScaleY *= Transform.Scale;
+            }
 
             Skeleton.UpdateWorldTransform();
 
@@ -165,12 +165,12 @@ namespace STACK.Components
             renderer.SkeletonRenderer.Draw(Skeleton);
 
             if (NormalMap != null && Lightning != null)
-            {                                
+            {
                 renderer.ApplyNormalmapEffectParameter(Lightning, NormalMap);
-                renderer.SkeletonRenderer.End(renderer.NormalmapEffect);             
+                renderer.SkeletonRenderer.End(renderer.NormalmapEffect);
             }
             else
-            {                
+            {
                 renderer.SkeletonRenderer.End(null);
             }
 
@@ -185,7 +185,7 @@ namespace STACK.Components
                 return;
             }
             AnimationState.Update(GameSpeed.TickDuration);
-            
+
             AnimationState.Apply(Skeleton);
             AnimationTime += GameSpeed.TickDuration;
         }
@@ -205,14 +205,14 @@ namespace STACK.Components
             }
         }
 
-        public void SetAnimation(string animation, bool looped)
+        public void PlayAnimation(string animation, bool looped)
         {
             if (!string.IsNullOrEmpty(animation) && AnimationExists(animation))
             {
                 if (Animation != animation || !Playing)
                 {
                     Playing = true;
-                    Skeleton.SetSlotsToSetupPose();                    
+                    Skeleton.SetSlotsToSetupPose();
                     AnimationState.SetAnimation(0, animation, looped);
                     AnimationName = animation;
                     Data.Animation = animation;
@@ -227,7 +227,7 @@ namespace STACK.Components
 
         private bool AnimationExists(string name)
         {
-            foreach(var Animation in AnimationStateData.SkeletonData.Animations)            
+            foreach (var Animation in AnimationStateData.SkeletonData.Animations)
             {
                 if (Animation.Name == name)
                 {
@@ -256,16 +256,16 @@ namespace STACK.Components
         }
 
         public override void OnNotify<T>(string message, T data)
-        {            
+        {
             if (message == Messages.AnimationStateChanged)
-            {                
+            {
                 var NewState = (State)(object)data;
-                
-                SetAnimation(NewState.ToAnimationName(), true);
-            }         
+
+                PlayAnimation(NewState.ToAnimationName(), true);
+            }
         }
 
-        public void LoadSprite(string image) 
+        public void LoadSprite(string image)
         {
             Image = image;
             OnLoadContent(Entity.UpdateScene.Content);
@@ -280,6 +280,6 @@ namespace STACK.Components
         public SpineSprite SetAnimationMixFn(Action<AnimationStateData> value) { AnimationMixFn = value; return this; }
         public SpineSprite SetOnSpineEvent(Action<Event> value) { OnSpineEvent = value; return this; }
         public SpineSprite SetOnSpineAnimationEnd(Action<AnimationState> value) { OnSpineAnimationEnd = value; return this; }
-        public SpineSprite SetRenderStage(RenderStage value) { RenderStage = value; return this; }        
-    }  
+        public SpineSprite SetRenderStage(RenderStage value) { RenderStage = value; return this; }
+    }
 }

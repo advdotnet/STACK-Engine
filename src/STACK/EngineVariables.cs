@@ -8,5 +8,5 @@
         public static bool EnableGUI = true;
         public static bool DrawNormals = false;
         public const string ContentPath = "Content";
-    }      
+    }
 }

@@ -9,6 +9,7 @@ namespace STACK
     public abstract class StackGame
     {
         public Point VirtualResolution { get; protected set; }
+        public Point ResolutionScaleFactor { get; protected set; }
         public string Title { get; protected set; }
         public string SaveGameFolder { get; protected set; }
         public World World;
@@ -21,10 +22,11 @@ namespace STACK
 
         public StackGame()
         {
-            VirtualResolution = new Point(1280, 720);
+            VirtualResolution = new Point(640, 400);
+            ResolutionScaleFactor = new Point(2, 2);
             SaveGameFolder = "STACK";
             Title = "STACK Game";
-        }                               
+        }
 
         public void Start(StackEngine engine)
         {
@@ -64,7 +66,7 @@ namespace STACK
 
             OnWorldInitialized();
 
-            World.LoadContent(Engine.Content);            
+            World.LoadContent(Engine.Content);
 
             OnWorldStart();
         }
@@ -75,7 +77,7 @@ namespace STACK
             {
                 return new EmptyGame();
             }
-        }        
+        }
     }
 
     public class EmptyGame : StackGame
@@ -88,6 +90,6 @@ namespace STACK
         protected override void OnStart()
         {
             StartWorld();
-        } 
+        }
     }
 }

@@ -13,8 +13,8 @@ namespace STACK.Components
     {
         public const string GOTOSCRIPTID = "goto";
 
-        public static Script GoTo(this Scripts scripts, float x, float y, Directions8 direction = Directions8.None, Action cb = null) 
-        {            
+        public static Script GoTo(this Scripts scripts, float x, float y, Directions8 direction = Directions8.None, Action cb = null)
+        {
             return GoTo(scripts, new Vector2(x, y), direction, cb);
         }
 
@@ -22,7 +22,7 @@ namespace STACK.Components
         {
             if (scripts.HasScript(GOTOSCRIPTID))
             {
-				scripts.Remove(GOTOSCRIPTID);
+                scripts.Remove(GOTOSCRIPTID);
                 //throw new Exception();
             }
             return scripts.Enqueue(GoToScript(scripts, target, direction, cb), GOTOSCRIPTID);
@@ -33,9 +33,9 @@ namespace STACK.Components
             return scripts.Start(SayScript(scripts, text, duration), "say");
         }
 
-        public static Script PlayAnimation(this Scripts scripts, string animation)
+        public static Script PlayAnimation(this Scripts scripts, string animation, bool looped = false)
         {
-            return scripts.Start(PlayAnimationScript(scripts, animation), "animation");
+            return scripts.Start(PlayAnimationScript(scripts, animation, looped), "animation");
         }
 
         private static IEnumerator GoToScript(Scripts scripts, Vector2 target, Directions8 direction = Directions8.None, Action cb = null)
@@ -59,20 +59,20 @@ namespace STACK.Components
                 Navigation.FindPath(target);
                 Waypoints = Navigation.WayPoints;
             }
-            
+
             foreach (var WayPoint in Waypoints)
             {
-                Vector2 Target; 
+                Vector2 Target;
                 while ((Target = WayPoint - Transform.Position).Length() > 1)
                 {
-                    Transform.AddState(State.Walking);                    
+                    Transform.AddState(State.Walking);
                     Transform.Orientation = Target;
 
                     // prevents loops for high walking speeds
-                    var Increment = Transform.Orientation * GameSpeed.TickDuration * Transform.EffectiveSpeed;					
-                    var Speeding = Increment.LengthSquared() > Target.LengthSquared();                    
+                    var Increment = Transform.Orientation * GameSpeed.TickDuration * Transform.EffectiveSpeed;
+                    var Speeding = Increment.LengthSquared() > Target.LengthSquared();
 
-                    Transform.Position = (Transform.Position + (Speeding ? Target : Increment));                    
+                    Transform.Position = (Transform.Position + (Speeding ? Target : Increment));
 
                     yield return 0;
                 }
@@ -88,25 +88,37 @@ namespace STACK.Components
             cb?.Invoke();
         }
 
-        private static IEnumerator PlayAnimationScript(Scripts scripts, string animation)
+        private static IEnumerator PlayAnimationScript(Scripts scripts, string animation, bool looped = false)
         {
-            var Spine = scripts.Get<SpineSprite>();
+            var PlayAnimation = scripts.Get<SpineSprite>() ?? (IPlayAnimation)scripts.Get<SpriteCustomAnimation>();
 
-            if (Spine == null)
+            if (PlayAnimation != null)
             {
+                PlayAnimation.PlayAnimation(animation, looped);
+
+                var Transform = scripts.Get<Transform>();
+
+                if (null != Transform)
+                {
+                    Transform.State = State.Custom;
+                }
+
+                while (PlayAnimation.Playing)
+                {
+                    yield return 1;
+                }
+
+                if (null != Transform)
+                {
+                    Transform.State = State.Idle;
+                }
+
                 yield break;
-            }
-
-            Spine.SetAnimation(animation, false);
-
-            while (Spine.Playing)
-            {
-                yield return 1;
             }
         }
 
         private static IEnumerator SayScript(Scripts scripts, string text, float duration = TextDuration.Auto)
-        {            
+        {
             var Speaker = scripts.Get<Text>();
             var SkipText = ((Entity)scripts.Parent).World.Get<SkipContent>().SkipText;
 
@@ -121,20 +133,20 @@ namespace STACK.Components
                 SkipText.Stop();
             }
 
-            var Transform = scripts.Get<Transform>();            
+            var Transform = scripts.Get<Transform>();
             Vector2 Position;
 
             if (Transform != null && !Transform.State.Has(State.Talking))
             {
                 Transform.AddState(State.Talking);
                 Position = Transform.Position - Speaker.Offset;
-            } 
-            else 
+            }
+            else
             {
                 Position = -Speaker.Offset;
-            }            
+            }
 
-            Speaker.Set(text, duration, Position);            
+            Speaker.Set(text, duration, Position);
 
             float Elapsed = 0;
             float Duration = TextDuration.Default(text, duration);
@@ -144,12 +156,12 @@ namespace STACK.Components
                 Elapsed += GameSpeed.TickDuration;
                 yield return 1;
             }
-            
-            Transform?.RemoveState(State.Talking);            
+
+            Transform?.RemoveState(State.Talking);
 
             // needed for skipping
             Speaker.Clear();
             SkipText?.Stop();
-        }        
+        }
     }
 }

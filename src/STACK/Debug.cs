@@ -63,10 +63,6 @@ namespace STACK
             if (input.IsKeyPress(Keys.F3)) SetSpeed(GameSpeed.Half);
             if (input.IsKeyPress(Keys.F4)) SetSpeed(GameSpeed.Infinity);
 
-            if (input.IsKeyPress(Keys.R))
-            {
-                //ToggleFullScreen();
-            }
 
             if (input.IsKeyPress(Keys.Add))
             {
@@ -112,12 +108,6 @@ namespace STACK
             {
                 StackEngine.Game.World.Get<Camera>().Rotation = 0.00f;
             }
-
-            //if (Input.Instance.IsMouseRightDown() && Input.Instance.IsMouseMoved())
-            //{
-            //    Point Delta = Input.Instance.MouseState.Position - Input.Instance.OldMouseState.Position;
-            //    World.Camera.Move(-new Vector2(Delta.X, Delta.Y));
-            //}
         }
     }
 }

@@ -6,6 +6,11 @@ namespace STACK
 {
     public static class ExtensionMethods
     {
+        public static Vector3 ToInt(this Vector3 value)
+        {
+            return new Vector3((int)value.X, (int)value.Y, (int)value.Z);
+        }
+
         public static Vector2 ToInt(this Vector2 value)
         {
             return new Vector2((int)value.X, (int)value.Y);
@@ -29,10 +34,10 @@ namespace STACK
             return rect.Contains(new Point((int)point.X, (int)point.Y));
         }
 
-        public static MouseState UpdatePosition(this MouseState state, int x, int y) 
+        public static MouseState UpdatePosition(this MouseState state, int x, int y)
         {
-            return new MouseState(x, y, state.ScrollWheelValue, state.LeftButton, 
-                state.MiddleButton, state.RightButton, state.XButton1, state.XButton2);            
+            return new MouseState(x, y, state.ScrollWheelValue, state.LeftButton,
+                state.MiddleButton, state.RightButton, state.XButton1, state.XButton2);
         }
 
         public static bool IsPlaying(this SoundEffectInstance sound)

@@ -270,8 +270,6 @@ namespace STACK
                 return;
             }
 
-            renderer.End();
-            renderer.Begin(renderer.Projection, null, SamplerState.PointWrap);
 
             for (int i = 0; i < Lines.Count; i++)
             {
@@ -294,8 +292,6 @@ namespace STACK
                 renderer.SpriteBatch.DrawString(_SpriteFont, Line.Text, LinePositon, CurrentColor, 0, LineOrigin, 1, SpriteEffects.None, 0);
             }
 
-            renderer.End();
-            renderer.Begin(renderer.Projection);
         }
 
         public static Text Create(Entity addTo)

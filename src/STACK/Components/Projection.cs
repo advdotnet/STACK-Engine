@@ -8,7 +8,7 @@ namespace STACK.Components
     /// Used for perspective projections.
     /// </summary>
     [Serializable]
-    public class Projection2D : Component
+    public class Projection2D
     {
         const double EPSILON = 1e-13;
 
@@ -105,7 +105,7 @@ namespace STACK.Components
         /// <param name="c"></param>
         /// <param name="d"></param>
         /// <returns></returns>
-        public Projection2D SetRectangle(Vector2 a, Vector2 b, Vector2 c, Vector2 d)
+        public Projection2D SetQuadliteral(Vector2 a, Vector2 b, Vector2 c, Vector2 d)
         {
             float dx0 = a.X;
             float dx1 = b.X;
@@ -178,10 +178,10 @@ namespace STACK.Components
                 return false;
             }
 
-            // Return true if the fields match:
+            // Return true if the fields match
             return a.M11 == b.M11 && a.M12 == b.M12 && a.M13 == b.M13 &&
-                    a.M21 == b.M21 && a.M22 == b.M22 && a.M23 == b.M23 &&
-                    a.M31 == b.M31 && a.M32 == b.M32 && a.M33 == b.M33;
+                   a.M21 == b.M21 && a.M22 == b.M22 && a.M23 == b.M23 &&
+                   a.M31 == b.M31 && a.M32 == b.M32 && a.M33 == b.M33;
         }
 
         public static bool operator !=(Projection2D a, Projection2D b)
@@ -192,6 +192,7 @@ namespace STACK.Components
         public override bool Equals(object other)
         {
             Projection2D Projection = (Projection2D)other;
+
             if (Projection == null)
             {
                 return false;
@@ -213,26 +214,15 @@ namespace STACK.Components
                     M31, M32, M33
                 };
 
-                foreach (var Element in Elements)
+                for (int i = 0; i < Elements.Length; i++)
                 {
-                    Result = Result * 23 + Element.GetHashCode();
+                    Result = Result * 23 + Elements[i].GetHashCode();
                 }
 
                 return Result;
             }
         }
 
-        public static Projection2D Zero
-        {
-            get
-            {
-                return new Projection2D(0, 0, 0, 0, 0, 0, 0, 0, 0);
-            }
-        }
-
-        public static Projection2D Create(Entity addTo)
-        {
-            return addTo.Add<Projection2D>();
-        }
+        public static Projection2D Zero = new Projection2D();
     }
 }

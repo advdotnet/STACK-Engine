@@ -27,7 +27,6 @@ namespace STACK.Graphics
         public Effect NormalmapEffect;
         public BloomComponent BloomEffect;
         public Texture2D WhitePixelTexture;
-        public SpriteFont DefaultFont;
 
         RenderTarget2D CurrentRenderTarget;
         RenderTarget2D DrawBuffer;
@@ -81,6 +80,8 @@ namespace STACK.Graphics
                 return Matrix.Multiply(Projection, projection);
             }
         }
+
+        public SpriteFont DefaultFont;
 
         void LoadContent(ContentManager content)
         {
@@ -201,9 +202,9 @@ namespace STACK.Graphics
             GraphicsDevice.SetRenderTarget(null);
             GraphicsDevice.Clear(Color.Black);
 
-            SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, DisplaySettings.ScaleMatrix);
+            SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Opaque, SamplerState.PointClamp, null, null, null, DisplaySettings.ScaleMatrix);
             GraphicsDevice.Viewport = DisplaySettings.Viewport;
-            SpriteBatch.Draw(DrawBuffer, new Vector2(0, 0), Color.White);
+            SpriteBatch.Draw(DrawBuffer, Vector2.Zero, Color.White);
             SpriteBatch.End();
         }
 
@@ -213,7 +214,7 @@ namespace STACK.Graphics
         public void Begin(Matrix projection, BlendState blendState = null, SamplerState samplerState = null, Effect effect = null)
         {
             SpriteBatch.Begin(SpriteSortMode.Immediate, blendState ?? BlendState.NonPremultiplied, samplerState ?? SamplerState.PointClamp, null, null, effect, projection * TransformationMatrix);
-            PrimitivesRenderer.SetTransformation(projection);
+            PrimitivesRenderer.SetTransformation(projection * DisplaySettings.ScaleMatrix);
             Projection = projection;
         }
 

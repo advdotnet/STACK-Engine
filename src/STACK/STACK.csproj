@@ -51,13 +51,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Components\Audio\AudioManager.cs" />
+    <Compile Include="Components\Graphics\IPlayAnimation.cs" />
+    <Compile Include="Components\Graphics\SpriteCustomAnimation.cs" />
+    <Compile Include="Components\Graphics\SpriteDelayAnimation.cs" />
+    <Compile Include="Components\Graphics\SpriteTransformAnimation.cs" />
     <Compile Include="Components\SkipContent.cs" />
     <Compile Include="Components\ServiceProvider.cs" />
     <Compile Include="Components\Graphics\BloomSettings.cs" />
     <Compile Include="Components\Random.cs" />
     <Compile Include="Components\Input\Mouse.cs" />
-    <Compile Include="Components\Graphics\SpriteActorAnimation.cs" />
-    <Compile Include="Components\Graphics\SpriteAnimation.cs" />
     <Compile Include="Graphics\DisplaySettings.cs" />
     <Compile Include="State\SerializationWriter.cs" />
     <Compile Include="Utils\FastForward.cs" />
