@@ -5,7 +5,7 @@ namespace ContentAnalyzer.Test
     [TestClass]
     public class ContentEnumeration
     {
-        [TestMethod]
+        [TestMethod, TestCategory("FileSystem")]
         public void ContentAnalyzerTests()
         {
             var Result = BuildContent.CreateScript("content", "content\\bin");
@@ -16,7 +16,7 @@ namespace ContentAnalyzer.Test
             Assert.IsTrue(Result.Contains("ContentCompiler.exe fonts\\stack.spritefont bin\\fonts\\stack FontDescriptionImporter FontDescriptionProcessor true"));
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("FileSystem")]
         public void CreateContentTreeTest()
         {
             var Result = ContentTree.Create("content", "content\\bin", "MyNamespace", "content");

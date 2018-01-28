@@ -8,7 +8,7 @@ namespace STACK.Test
     [TestClass]
     public class GraphicsSettingsTests
     {
-        [TestMethod]
+        [TestMethod, TestCategory("FileSystem")]
         public void ResolutionSettingsTest()
         {
             const string FILENAME = GraphicSettings.CONFIGFILENAME;
