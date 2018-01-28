@@ -1,21 +1,51 @@
 ﻿using System;
+using System.Runtime.Serialization;
 
 namespace STACK
 {
     [Serializable]
     public abstract class Component : BaseEntity
     {
-        public BaseEntityCollection Parent { get; internal set; }
+        private BaseEntityCollection _Parent;
+
+        public BaseEntityCollection Parent
+        {
+            get
+            {
+                return _Parent;
+            }
+            internal set
+            {
+                _Parent = value;
+                CacheTransients();
+            }
+        }
+
         [NonSerialized]
         Entity CastedEntity = null;
         [NonSerialized]
         Scene CastedScene = null;
+        [NonSerialized]
+        World ParentWorld = null;
+
+        [OnDeserialized]
+        void OnDeserialized(StreamingContext c)
+        {
+            CacheTransients();
+        }
+
+        private void CacheTransients()
+        {
+            CastedEntity = Parent as Entity;
+            CastedScene = Parent as Scene;
+            ParentWorld = _Parent as World;
+        }
 
         public Entity Entity
         {
             get
             {
-                return CastedEntity ?? (CastedEntity = (Entity)Parent);
+                return CastedEntity;
             }
         }
 
@@ -23,21 +53,29 @@ namespace STACK
         {
             get
             {
-                return CastedScene ?? (CastedScene = (Scene)Parent);
+                return CastedScene;
+            }
+        }
+
+        public World World
+        {
+            get
+            {
+                return ParentWorld;
             }
         }
 
         public T Get<T>() where T : Component
         {
             return Entity.Get<T>();
-        }    
-    
-        public void NotifyParent<T>(string message, T data) 
+        }
+
+        public void NotifyParent<T>(string message, T data)
         {
             if (Parent != null)
             {
                 Parent.Notify(message, data);
             }
         }
-    }    
+    }
 }

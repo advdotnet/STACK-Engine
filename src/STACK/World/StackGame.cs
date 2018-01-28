@@ -9,7 +9,6 @@ namespace STACK
     public abstract class StackGame
     {
         public Point VirtualResolution { get; protected set; }
-        public Point ResolutionScaleFactor { get; protected set; }
         public string Title { get; protected set; }
         public string SaveGameFolder { get; protected set; }
         public World World;
@@ -23,7 +22,6 @@ namespace STACK
         public StackGame()
         {
             VirtualResolution = new Point(640, 400);
-            ResolutionScaleFactor = new Point(2, 2);
             SaveGameFolder = "STACK";
             Title = "STACK Game";
         }
@@ -42,13 +40,23 @@ namespace STACK
 
         public void RestoreState(SaveGame state)
         {
-            if (World == null)
+            var DeserializedWorld = State.State.LoadState<World>(state.World);
+
+            if (World != null)
             {
-                World = new World(Engine.Services, Engine.InputProvider, VirtualResolution);
-                World.Initialize();
+                if (World.Loaded)
+                {
+                    World.UnloadContent();
+                }
+
+                World.Unsubscribe(Engine.InputProvider);
             }
 
-            World.RestoreState(State.State.LoadState<World>(state.World), Engine.Services, Engine.Content);
+            World = new World(Engine.Services, Engine.InputProvider, VirtualResolution, GetScenes());
+            World.Initialize();
+            World._Scenes = null;
+            World.RestoreState(DeserializedWorld, Engine.Services, Engine.GetWorldContent());
+
             OnRestore();
         }
 
@@ -56,7 +64,11 @@ namespace STACK
         {
             if (World != null)
             {
-                World.UnloadContent();
+                if (World.Loaded)
+                {
+                    World.UnloadContent();
+                }
+
                 World.Unsubscribe(Engine.InputProvider);
             }
 
@@ -66,7 +78,7 @@ namespace STACK
 
             OnWorldInitialized();
 
-            World.LoadContent(Engine.Content);
+            World.LoadContent(Engine.GetWorldContent());
 
             OnWorldStart();
         }

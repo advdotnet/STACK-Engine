@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.Xna.Framework;
 using STACK.Components;
 using STACK.Graphics;
 using STACK.Input;
-using Microsoft.Xna.Framework;
+using System;
+using System.Collections.Generic;
 
 namespace STACK
 {
@@ -13,9 +13,9 @@ namespace STACK
     /// </summary>
     [Serializable]
     public class World : SceneCollection
-    {       
-        public World(InputProvider input, Point? resolution = null) 
-        {                        
+    {
+        public World(InputProvider input, Point? resolution = null)
+        {
             Mouse
                 .Create(this);
 
@@ -31,16 +31,16 @@ namespace STACK
 
             AudioManager
                 .Create(this);
-            
+
             if (input != null)
             {
-                input.Handler += HandleInputEvent;                
+                input.Handler += HandleInputEvent;
             }
         }
 
         public World(IServiceProvider services, InputProvider input = null, Point? resolution = null)
             : this(input, resolution)
-        {            
+        {
             ServiceProvider
                 .Create(this)
                 .SetProvider(services);
@@ -50,21 +50,21 @@ namespace STACK
                 .SetInterfaceFromServiceProvider(services);
         }
 
-        public World(IServiceProvider services, InputProvider input, Point resolution, List<Scene> scenes) 
-            : this(services, input, resolution) 
+        public World(IServiceProvider services, InputProvider input, Point resolution, List<Scene> scenes)
+            : this(services, input, resolution)
         {
             Push(scenes.ToArray());
-        }        
+        }
 
         public void Unsubscribe(InputProvider input)
         {
             input.Handler -= HandleInputEvent;
-        }                           
+        }
 
         public override void OnDraw(Renderer renderer)
         {
             // Draw the scenes in reverse order
-           
+
             for (int i = Items.Count - 1; i >= 0; i--)
             {
                 Items[i].Draw(renderer);
@@ -72,9 +72,9 @@ namespace STACK
         }
 
         public override bool Push(BaseEntity scene)
-        {            
+        {
             if (base.Push(scene))
-            {                
+            {
                 if (scene is Scene)
                 {
                     ((Scene)scene).World = this;
@@ -89,23 +89,26 @@ namespace STACK
         /// Handles input events.
         /// </summary>
         public void HandleInputEvent(InputEvent inputEvent)
-        {            
-            var SkipInputEvent = ((!Interactive && inputEvent.Type != InputEventType.MouseMove) || inputEvent.Handled || inputEvent.Paused);
+        {
+            var SkipInputEvent = ((!Interactive && inputEvent.Type != InputEventType.MouseMove) ||
+                inputEvent.Handled ||
+                inputEvent.Paused);
+
             if (SkipInputEvent)
             {
                 return;
             }
 
             base.OnHandleInputEvent(Get<Mouse>().Position, inputEvent);
-        }        
+        }
 
         /// <summary>
         /// Restores a snapshot of a list of scenes from the given file.
         /// </summary>        
         public void RestoreState(World state, IServiceProvider provider, ContentLoader content)
         {
-            RestoreState(state.Items, provider, content);                        
-            Interactive = state.Interactive;            
+            RestoreState(state.Items, provider, content);
+            Interactive = state.Interactive;
             state = null;
         }
     }

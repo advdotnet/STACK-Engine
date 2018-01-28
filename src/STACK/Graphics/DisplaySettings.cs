@@ -8,15 +8,17 @@ namespace STACK.Graphics
     {
         public Viewport Viewport { get; private set; }
         public Point VirtualResolution { get; private set; }
+        public Point? TargetResolution { get; private set; }
         public Matrix ScaleMatrix { get { return _ScaleMatrix; } }
         public float AspectRatio { get; private set; }
 
         Matrix _ScaleMatrix = Matrix.Identity;
         float WindowScaleX, WindowScaleY;
 
-        public DisplaySettings(Point virtualResolution, Point realResolution)
+        public DisplaySettings(Point virtualResolution, Point realResolution, Point? targetResolution)
         {
             VirtualResolution = virtualResolution;
+            TargetResolution = targetResolution;
             AspectRatio = (float)VirtualResolution.X / VirtualResolution.Y;
             Viewport = new Viewport(0, 0, VirtualResolution.X, VirtualResolution.Y);
             OnClientSizeChanged(realResolution.X, realResolution.Y);
@@ -45,13 +47,23 @@ namespace STACK.Graphics
 
         public void OnClientSizeChanged(int width, int height)
         {
-            var Width = width;
-            var Height = (int)(Width / AspectRatio + 0.5f);
+            int Width, Height;
 
-            if (Height > height)
+            if (TargetResolution.HasValue)
             {
-                Height = height;
-                Width = (int)(Height * AspectRatio + 0.5f);
+                Width = TargetResolution.Value.X;
+                Height = TargetResolution.Value.Y;
+            }
+            else
+            {
+                Width = width;
+                Height = (int)(Width / AspectRatio + 0.5f);
+
+                if (Height > height)
+                {
+                    Height = height;
+                    Width = (int)(Height * AspectRatio + 0.5f);
+                }
             }
 
             var X = (width / 2) - (Width / 2);

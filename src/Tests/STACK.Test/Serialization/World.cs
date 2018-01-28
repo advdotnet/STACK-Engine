@@ -1,11 +1,9 @@
-﻿using System;
-using System.Linq;
-using System.Collections.Generic;
-using System.Collections;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Xna.Framework;
 using STACK.Components;
-using StarFinder;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace STACK.Test
 {
@@ -68,20 +66,20 @@ namespace STACK.Test
             World.Push(Scene);
             byte[] Check = STACK.State.State.SaveState<World>(World);
             World World2 = (World)STACK.State.State.LoadState<World>(Check);
-            Assert.AreSame(World2.Scenes[1], World2.Scenes[1].Entities[0].UpdateScene);
-            Assert.AreSame(World2.Scenes[1], World2.Scenes[1].Entities[1].UpdateScene);
+            Assert.AreSame(World2.Scenes[1], World2.Scenes[1].GameObjectCache.Entities[0].UpdateScene);
+            Assert.AreSame(World2.Scenes[1], World2.Scenes[1].GameObjectCache.Entities[1].UpdateScene);
         }
 
         [TestMethod]
         public void WorldComponentCacheAfterDeserializing()
         {
-            World World = WorldTest.GetTestWorld();            
+            World World = WorldTest.GetTestWorld();
             var State = STACK.State.State.SaveState<World>(World);
             World Temp = (World)STACK.State.State.LoadState<World>(State);
 
             World.RestoreState(Temp, null, null);
 
             Assert.AreSame(World.Get<Mouse>(), World.Items.Where(i => i is Mouse).FirstOrDefault());
-        } 
+        }
     }
 }

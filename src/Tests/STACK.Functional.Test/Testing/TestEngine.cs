@@ -9,8 +9,6 @@ namespace STACK.Functional.Test
     {
         protected TestInputProvider Input;
         protected GraphicsDeviceServiceMock GraphicsDevice;
-        public SkipText SkipText { get; }
-        public SkipCutscene SkipCutscene { get; }
 
         public TestEngine(StackGame game, IServiceProvider services, TestInputProvider input)
             : base(game, services, input)
@@ -22,7 +20,7 @@ namespace STACK.Functional.Test
         {
             get
             {
-                return this.Game.World.Interactive;
+                return Game.World.Interactive;
             }
         }
 
@@ -65,6 +63,11 @@ namespace STACK.Functional.Test
         public void MouseClick(Point p)
         {
             MouseClick(p.X, p.Y);
+        }
+
+        public void MouseClick(Vector2 v)
+        {
+            MouseClick(v.ToPoint());
         }
 
         public void MouseMove(int x, int y)

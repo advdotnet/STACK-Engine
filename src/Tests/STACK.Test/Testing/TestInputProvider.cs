@@ -10,7 +10,7 @@ namespace STACK.Test
         Queue<InputEvent> EventsToAdd = new Queue<InputEvent>();
         List<Keys> PressedKeys = new List<Keys>();
         int MouseX, MouseY;
-        ButtonState Left = ButtonState.Released, Right = ButtonState.Released;
+        ButtonState Left, Right;
 
         public override KeyboardState KeyboardState
         {

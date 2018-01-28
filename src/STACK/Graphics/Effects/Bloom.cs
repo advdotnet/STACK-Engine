@@ -84,9 +84,9 @@ namespace STACK
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            bloomExtractEffect = content.Load<Effect>("shaders/BloomExtract");
-            bloomCombineEffect = content.Load<Effect>("shaders/BloomCombine");
-            gaussianBlurEffect = content.Load<Effect>("shaders/GaussianBlur");
+            bloomExtractEffect = content.Load<Effect>(STACK.content.shaders.BloomExtract);
+            bloomCombineEffect = content.Load<Effect>(STACK.content.shaders.BloomCombine);
+            gaussianBlurEffect = content.Load<Effect>(STACK.content.shaders.GaussianBlur);
 
             // Look up the resolution and format of our main backbuffer.
             PresentationParameters pp = GraphicsDevice.PresentationParameters;
@@ -262,6 +262,15 @@ namespace STACK
             spriteBatch.End();
         }
 
+        struct WeightingsCache
+        {
+            public float[] SampleWeights;
+            public Vector2[] SampleOffsets;
+            public float BlurAmount;
+        }
+
+        WeightingsCache WeightingsCacheX;
+        WeightingsCache WeightingsCacheY;
 
         /// <summary>
         /// Computes sample weightings and texture coordinate offsets
@@ -275,53 +284,92 @@ namespace STACK
             weightsParameter = gaussianBlurEffect.Parameters["SampleWeights"];
             offsetsParameter = gaussianBlurEffect.Parameters["SampleOffsets"];
 
-            // Look up how many samples our gaussian blur effect supports.
-            int sampleCount = weightsParameter.Elements.Count;
+            float[] sampleWeights;
+            Vector2[] sampleOffsets;
 
-            // Create temporary arrays for computing our filter settings.
-            float[] sampleWeights = new float[sampleCount];
-            Vector2[] sampleOffsets = new Vector2[sampleCount];
-
-            // The first sample always has a zero offset.
-            sampleWeights[0] = ComputeGaussian(0, settings);
-            sampleOffsets[0] = new Vector2(0);
-
-            // Maintain a sum of all the weighting values.
-            float totalWeights = sampleWeights[0];
-
-            // Add pairs of additional sample taps, positioned
-            // along a line in both directions from the center.
-            for (int i = 0; i < sampleCount / 2; i++)
+            if ((dy == 0 && (WeightingsCacheX.Equals(default(WeightingsCache)) || settings.BlurAmount != WeightingsCacheX.BlurAmount)) ||
+                (dx == 0 && (WeightingsCacheY.Equals(default(WeightingsCache)) || settings.BlurAmount != WeightingsCacheY.BlurAmount)))
             {
-                // Store weights for the positive and negative taps.
-                float weight = ComputeGaussian(i + 1, settings);
+                // Look up how many samples our gaussian blur effect supports.
+                int sampleCount = weightsParameter.Elements.Count;
 
-                sampleWeights[i * 2 + 1] = weight;
-                sampleWeights[i * 2 + 2] = weight;
+                // Create temporary arrays for computing our filter settings.
+                sampleWeights = new float[sampleCount];
+                sampleOffsets = new Vector2[sampleCount];
 
-                totalWeights += weight * 2;
+                // The first sample always has a zero offset.
+                sampleWeights[0] = ComputeGaussian(0, settings);
+                sampleOffsets[0] = new Vector2(0);
 
-                // To get the maximum amount of blurring from a limited number of
-                // pixel shader samples, we take advantage of the bilinear filtering
-                // hardware inside the texture fetch unit. If we position our texture
-                // coordinates exactly halfway between two texels, the filtering unit
-                // will average them for us, giving two samples for the price of one.
-                // This allows us to step in units of two texels per sample, rather
-                // than just one at a time. The 1.5 offset kicks things off by
-                // positioning us nicely in between two texels.
-                float sampleOffset = i * 2 + 1.5f;
+                // Maintain a sum of all the weighting values.
+                float totalWeights = sampleWeights[0];
 
-                Vector2 delta = new Vector2(dx, dy) * sampleOffset;
+                // Add pairs of additional sample taps, positioned
+                // along a line in both directions from the center.
+                for (int i = 0; i < sampleCount / 2; i++)
+                {
+                    // Store weights for the positive and negative taps.
+                    float weight = ComputeGaussian(i + 1, settings);
 
-                // Store texture coordinate offsets for the positive and negative taps.
-                sampleOffsets[i * 2 + 1] = delta;
-                sampleOffsets[i * 2 + 2] = -delta;
+                    sampleWeights[i * 2 + 1] = weight;
+                    sampleWeights[i * 2 + 2] = weight;
+
+                    totalWeights += weight * 2;
+
+                    // To get the maximum amount of blurring from a limited number of
+                    // pixel shader samples, we take advantage of the bilinear filtering
+                    // hardware inside the texture fetch unit. If we position our texture
+                    // coordinates exactly halfway between two texels, the filtering unit
+                    // will average them for us, giving two samples for the price of one.
+                    // This allows us to step in units of two texels per sample, rather
+                    // than just one at a time. The 1.5 offset kicks things off by
+                    // positioning us nicely in between two texels.
+                    float sampleOffset = i * 2 + 1.5f;
+
+                    Vector2 delta = new Vector2(dx, dy) * sampleOffset;
+
+                    // Store texture coordinate offsets for the positive and negative taps.
+                    sampleOffsets[i * 2 + 1] = delta;
+                    sampleOffsets[i * 2 + 2] = -delta;
+                }
+
+                // Normalize the list of sample weightings, so they will always sum to one.
+                for (int i = 0; i < sampleWeights.Length; i++)
+                {
+                    sampleWeights[i] /= totalWeights;
+                }
+
+                if (dx == 0)
+                {
+                    WeightingsCacheY = new WeightingsCache()
+                    {
+                        SampleOffsets = sampleOffsets,
+                        SampleWeights = sampleWeights,
+                        BlurAmount = settings.BlurAmount
+                    };
+                }
+                else
+                {
+                    WeightingsCacheX = new WeightingsCache()
+                    {
+                        SampleOffsets = sampleOffsets,
+                        SampleWeights = sampleWeights,
+                        BlurAmount = settings.BlurAmount
+                    };
+                }
             }
-
-            // Normalize the list of sample weightings, so they will always sum to one.
-            for (int i = 0; i < sampleWeights.Length; i++)
+            else
             {
-                sampleWeights[i] /= totalWeights;
+                if (dx == 0)
+                {
+                    sampleWeights = WeightingsCacheY.SampleWeights;
+                    sampleOffsets = WeightingsCacheY.SampleOffsets;
+                }
+                else
+                {
+                    sampleWeights = WeightingsCacheX.SampleWeights;
+                    sampleOffsets = WeightingsCacheX.SampleOffsets;
+                }
             }
 
             // Tell the effect about our new filter settings.
@@ -394,15 +442,15 @@ namespace STACK
         /// </summary>
         public static BloomSettings[] PresetSettings =
         {
-            //                Name           Thresh  Blur Bloom  Base  BloomSat BaseSat
-            new BloomSettings("Default",     0.25f,  4,   1.25f, 1,    1,       1),
-            new BloomSettings("Soft",        0,      3,   1,     1,    1,       1),
-            new BloomSettings("Desaturated", 0.5f,   8,   2,     1,    0,       1),
-            new BloomSettings("Saturated",   0.25f,  4,   2,     1,    2,       0),
-            new BloomSettings("Blurry",      0,      2,   1,     0.1f, 1,       1),
-            new BloomSettings("Subtle",      0.5f,   2,   1,     1,    1,       1),
-            new BloomSettings("Custom",      0.35f,  3,   1,     1,    1,       1),
-            new BloomSettings("SessionSeven",0.75f,  1.5f,   0.8f,     1,    1,       1),
+            //                Name            Thresh  Blur  Bloom  Base  BloomSat BaseSat
+            new BloomSettings("Default",      0.25f,  4,    1.25f, 1,    1,       1),
+            new BloomSettings("Soft",         0,      3,    1,     1,    1,       1),
+            new BloomSettings("Desaturated",  0.5f,   8,    2,     1,    0,       1),
+            new BloomSettings("Saturated",    0.25f,  4,    2,     1,    2,       0),
+            new BloomSettings("Blurry",       0,      2,    1,     0.1f, 1,       1),
+            new BloomSettings("Subtle",       0.5f,   2,    1,     1,    1,       1),
+            new BloomSettings("Custom",       0.35f,  3,    1,     1,    1,       1),
+            new BloomSettings("SessionSeven", 0.75f,  1.5f, 0.8f,  1,    1,       1),
         };
     }
 }

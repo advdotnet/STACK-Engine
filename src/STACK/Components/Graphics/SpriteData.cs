@@ -1,6 +1,6 @@
-﻿using System;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 
 namespace STACK.Components
 {
@@ -20,7 +20,7 @@ namespace STACK.Components
         public SpriteEffects Effects = SpriteEffects.None;
         public string Skin = "";
         public string Animation = "";
-        public bool OrientationFlip = true;
+        public bool OrientationFlip { get; set; }
 
         public static SpriteData Create(Entity addTo)
         {
@@ -40,7 +40,7 @@ namespace STACK.Components
                 {
                     Effects = SpriteEffects.None;
                 }
-            }            
+            }
             else if (message == Messages.ColorChanged)
             {
                 Color NewColor = (Color)(object)data;
@@ -55,6 +55,6 @@ namespace STACK.Components
         public SpriteData SetRotation(float value) { Rotation = value; return this; }
         public SpriteData SetOrigin(float valueX, float valueY) { Origin = new Vector2(valueX, valueY); return this; }
         public SpriteData SetOrigin(Vector2 value) { Origin = value; return this; }
-        public SpriteData SetOrientationFlip(bool value) { OrientationFlip = value;  return this; }
-    }    
+        public SpriteData SetOrientationFlip(bool value) { OrientationFlip = value; return this; }
+    }
 }

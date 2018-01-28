@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using STACK.Utils;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Xna.Framework;
 using STACK.Components;
+using System;
 
 namespace STACK.Test
 {
@@ -29,7 +27,7 @@ namespace STACK.Test
             var Inverse = Transformation.TransformInverse(Transformed);
 
             Assert.IsTrue(Math.Abs(Inverse.X - half) < 0.001f);
-            Assert.IsTrue(Math.Abs(Inverse.Y - half) < 0.001f);            
+            Assert.IsTrue(Math.Abs(Inverse.Y - half) < 0.001f);
         }
 
         [TestMethod]
@@ -46,7 +44,7 @@ namespace STACK.Test
             {
                 var Transformed = Transformation.Transform(Vector);
                 Assert.AreEqual(Vector, Transformed);
-            }            
+            }
         }
 
         [TestMethod]
@@ -65,11 +63,11 @@ namespace STACK.Test
 
             foreach (var Vector in new Vector2[] { Vector2.Zero, Vector2.UnitY, Vector2.UnitX, new Vector2(1, 1) })
             {
-                Transformed = Transformation.Transform(Vector);              
+                Transformed = Transformation.Transform(Vector);
                 Assert.AreEqual(Expected[i++], Transformed);
                 Inverse = Transformation.TransformInverse(Transformed);
                 Assert.AreEqual(Vector, Inverse);
             }
         }
-    }        
+    }
 }

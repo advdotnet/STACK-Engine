@@ -1,4 +1,5 @@
-﻿using System;
+﻿using STACK.Logging;
+using System;
 
 namespace STACK.Components
 {
@@ -8,14 +9,14 @@ namespace STACK.Components
     [Serializable]
     public class SpriteCustomAnimation : Component, IPlayAnimation
     {
-        public Func<Transform, string, Frames> GetFramesFn { get; private set; }
+        public Action<Transform, string, Frames> GetFramesAction { get; private set; }
         string AnimationName = "";
         int Step = 0;
         [NonSerialized]
         Sprite _Sprite = null;
         [NonSerialized]
         Transform _Transform = null;
-        Frames Frames = null;
+        Frames Frames = Frames.Empty;
         public bool Playing { get; private set; }
         public bool Looped { get; private set; }
         public string Animation { get { return AnimationName; } }
@@ -63,7 +64,9 @@ namespace STACK.Components
         public void PlayAnimation(string animation, bool looped)
         {
             CacheComponents();
-            Frames = GetFramesFn(_Transform, animation);
+            // avoid memory allocation
+            Frames.Clear();
+            GetFramesAction(_Transform, animation, Frames);
             if (Frames.Count > 0)
             {
                 Looped = looped;
@@ -83,6 +86,6 @@ namespace STACK.Components
             return addTo.Add<SpriteCustomAnimation>();
         }
 
-        public SpriteCustomAnimation SetGetFramesFn(Func<Transform, string, Frames> data) { GetFramesFn = data; return this; }
+        public SpriteCustomAnimation SetGetFramesAction(Action<Transform, string, Frames> data) { GetFramesAction = data; return this; }
     }
 }

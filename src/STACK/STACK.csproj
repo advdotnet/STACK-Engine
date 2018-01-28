@@ -55,12 +55,28 @@
     <Compile Include="Components\Graphics\SpriteCustomAnimation.cs" />
     <Compile Include="Components\Graphics\SpriteDelayAnimation.cs" />
     <Compile Include="Components\Graphics\SpriteTransformAnimation.cs" />
+    <Compile Include="Components\Interaction\Base\InteractionContext.cs" />
+    <Compile Include="Components\Interaction\Base\Interactions.cs" />
+    <Compile Include="Components\Interaction\Base\Verb.cs" />
     <Compile Include="Components\SkipContent.cs" />
     <Compile Include="Components\ServiceProvider.cs" />
     <Compile Include="Components\Graphics\BloomSettings.cs" />
     <Compile Include="Components\Random.cs" />
     <Compile Include="Components\Input\Mouse.cs" />
+    <Compile Include="Content\tree.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>tree.tt</DependentUpon>
+    </Compile>
     <Compile Include="Graphics\DisplaySettings.cs" />
+    <Compile Include="Graphics\GraphicSettings.cs" />
+    <Compile Include="Input\Provider\InputProvider.cs" />
+    <Compile Include="Input\Provider\PlaybackInputProvider.cs" />
+    <Compile Include="Input\Provider\UserInputProvider.cs" />
+    <Compile Include="Log\Handler\DebugLogHandler.cs" />
+    <Compile Include="Log\Handler\SystemConsoleLogHandler.cs" />
+    <Compile Include="Log\ILogHandler.cs" />
+    <Compile Include="Log\LogLevel.cs" />
     <Compile Include="State\SerializationWriter.cs" />
     <Compile Include="Utils\FastForward.cs" />
     <Compile Include="World\Base\BaseEntityCollection.cs" />
@@ -68,8 +84,8 @@
     <Compile Include="Components\Interaction\HotspotMesh.cs" />
     <Compile Include="Components\CameraLocked.cs" />
     <Compile Include="World\ContentLoader.cs" />
-    <Compile Include="Components\Interaction\Interactions.cs" />
     <Compile Include="Components\Navigation\ScenePath.cs" />
+    <Compile Include="World\Scene\GameObjectCache.cs" />
     <Compile Include="World\Scene\Location.cs" />
     <Compile Include="Components\Interaction\Hotspot.cs" />
     <Compile Include="Components\Navigation\Exit.cs" />
@@ -80,7 +96,6 @@
     <Compile Include="Components\Navigation\Entrance.cs" />
     <Compile Include="Components\Graphics\Text.cs" />
     <Compile Include="Components\Graphics\TextDuration.cs" />
-    <Compile Include="World\Scene\VisibleObjectList.cs" />
     <Compile Include="World\Scene\SceneCollection.cs" />
     <Compile Include="Datatypes\Extensions.cs" />
     <Compile Include="Datatypes\GameSpeed.cs" />
@@ -101,13 +116,11 @@
     <Compile Include="Components\Interaction\Interaction.cs" />
     <Compile Include="Components\Transform.cs" />
     <Compile Include="World\Entities\Entity.cs" />
-    <Compile Include="Graphics\Effects\Normalmap.cs" />
     <Compile Include="Components\Graphics\SpriteData.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Input\InputEventType.cs" />
     <Compile Include="Input\InputEvent.cs" />
-    <Compile Include="Input\InputProvider.cs" />
     <Compile Include="Input\InputQueue.cs" />
     <Compile Include="Scripting\Script.cs" />
     <Compile Include="EngineVariables.cs" />
@@ -144,20 +157,38 @@
       <Project>{3785df4d-65ef-40e4-9177-2a8b396afb0c}</Project>
       <Name>StarFinder</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Tools\ContentAnalyzer\ContentAnalyzer.csproj">
+      <Project>{a72ae2e9-8318-4ddc-ae53-d868c1b77be6}</Project>
+      <Name>ContentAnalyzer</Name>
+    </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
-    <None Include="Content\build.bat" />
-    <None Include="Content\fonts\fps.spritefont" />
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Content\build.bat">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>build.tt</DependentUpon>
+    </None>
     <None Include="Content\fonts\stack.spritefont" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\build.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>build.bat</LastGenOutput>
+    </Content>
     <Content Include="Content\fxc.exe" />
     <Content Include="Content\shaders\BloomCombine.fx" />
     <Content Include="Content\shaders\BloomExtract.fx" />
     <Content Include="Content\shaders\GaussianBlur.fx" />
     <Content Include="Content\shaders\Normalmap.fx" />
     <Content Include="Content\stacklogo.png" />
+    <Content Include="Content\tree.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>tree.cs</LastGenOutput>
+    </Content>
+    <Content Include="graphicsettings.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!--<Import Project="$(MSBuildExtensionsPath)\MonoGame\v3.0\MonoGame.Content.Builder.targets" />-->

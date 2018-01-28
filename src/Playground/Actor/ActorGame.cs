@@ -16,8 +16,6 @@ namespace Actor
         {
             VirtualResolution = new Point(VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
             Title = "Playground: Actor";
-            ResolutionScaleFactor = new Point(1, 1);
-            STACK.EngineVariables.Fullscreen = false;
         }
 
         public static Ego Ego

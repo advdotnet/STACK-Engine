@@ -81,6 +81,7 @@ namespace STACK.Components
             if (direction != Directions8.None)
             {
                 Transform.Direction8 = direction;
+                yield return 0;
             }
 
             Transform.RemoveState(State.Walking);

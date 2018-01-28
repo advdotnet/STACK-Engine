@@ -16,8 +16,8 @@ namespace STACK
             public const string Priority = "Priority";
         }
 
-        protected bool Initialized { get; private set; }
-        protected bool Loaded { get; private set; }
+        public bool Initialized { get; private set; }
+        public bool Loaded { get; private set; }
         public string ID { get; protected set; }
         float _Priority = 0;
         bool _Interactive = true;
@@ -50,8 +50,11 @@ namespace STACK
             set
             {
                 bool Changed = _Interactive != value;
-                _Interactive = value;
-                OnPropertyChanged(Properties.Interactive);
+                if (Changed)
+                {
+                    _Interactive = value;
+                    OnPropertyChanged(Properties.Interactive);
+                }
             }
         }
 
@@ -64,8 +67,11 @@ namespace STACK
             set
             {
                 bool Changed = _Enabled != value;
-                _Enabled = value;
-                OnPropertyChanged(Properties.Enabled);
+                if (Changed)
+                {
+                    _Enabled = value;
+                    OnPropertyChanged(Properties.Enabled);
+                }
             }
         }
 
@@ -78,8 +84,11 @@ namespace STACK
             set
             {
                 bool Changed = _Visible != value;
-                _Visible = value;
-                OnPropertyChanged(Properties.Visible);
+                if (Changed)
+                {
+                    _Visible = value;
+                    OnPropertyChanged(Properties.Visible);
+                }
             }
         }
 
@@ -92,9 +101,9 @@ namespace STACK
             set
             {
                 bool Changed = _Priority != value;
-                _Priority = value;
                 if (Changed)
                 {
+                    _Priority = value;
                     OnPropertyChanged(Properties.Priority);
                 }
             }

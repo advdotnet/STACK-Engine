@@ -56,7 +56,7 @@ namespace STACK.Components
             }
 
             var Position = Get<Transform>().Position;
-            var BackgroundObject = Entity.DrawScene.GetObject("background");
+            var BackgroundObject = Entity.DrawScene.GetObject(Location.BACKGROUND_ENTITY_ID);
 
             if (null == BackgroundObject)
             {

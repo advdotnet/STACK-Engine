@@ -1,30 +1,44 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
+using STACK.Components;
 using STACK.Graphics;
 using STACK.Input;
-using STACK.Components;
 using StarFinder;
+using System;
+using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace STACK
-{    
+{
     /// <summary>
     /// A scene represents a base node in the game hierarchy containing game objects.
     /// </summary>   
     [Serializable]
     public class Scene : BaseEntityCollection, IMapPosition
-    {                     
+    {
         [NonSerialized]
         ContentLoader _Content;
-        public ContentLoader Content { get { return _Content; } }		
+        public ContentLoader Content { get { return _Content; } }
+
+        [NonSerialized]
+        GameObjectCache _GameObjectCache;
+
+        public GameObjectCache GameObjectCache
+        {
+            get
+            {
+                return _GameObjectCache;
+            }
+        }
 
         public Scene()
         {
+            _GameObjectCache = new GameObjectCache(this);
+
             Enabled = false;
             Visible = false;
 
             Camera
-                .Create(this);			
+                .Create(this);
         }
 
         public Scene(string id) : this()
@@ -33,6 +47,13 @@ namespace STACK
             {
                 ID = id;
             }
+        }
+
+        [OnDeserialized]
+        void OnDeserialized(StreamingContext c)
+        {
+            _GameObjectCache = new GameObjectCache(this);
+            _World = (World)Parent;
         }
 
         /// <summary>
@@ -59,15 +80,15 @@ namespace STACK
         {
             exits.Clear();
 
-            for (int i = 0; i < Exits.Count; i++)
+            for (int i = 0; i < GameObjectCache.Exits.Count; i++)
             {
-                var GameObject = World.GetGameObject(Exits[i].TargetEntrance);
+                var GameObject = World.GetGameObject(GameObjectCache.Exits[i].TargetEntrance);
                 if (GameObject != null && GameObject.DrawScene == scene)
                 {
-                    exits.Add(Exits[i]);
+                    exits.Add(GameObjectCache.Exits[i]);
                 }
-            }               
-        }        
+            }
+        }
 
         [NonSerialized]
         World _World = null;
@@ -75,18 +96,19 @@ namespace STACK
         /// <summary>
         /// The World which this scene is assigned to.
         /// </summary>
-        public World World 
-        { 
-            get 
-            { 
-                return _World ?? (_World = (World)Parent); 
+        public World World
+        {
+            get
+            {
+                return _World;
             }
 
             set
             {
                 Parent = value;
+                _World = value;
             }
-        }                    
+        }
 
         public override void OnLoadContent(ContentLoader content)
         {
@@ -105,13 +127,10 @@ namespace STACK
 
         public override void OnInitialize()
         {
-            if (World != null)
-            {
-                World.UpdatePriority();
-            }
-
             base.OnInitialize();
-        }        
+
+            GameObjectCache.CacheAll();
+        }
 
         /// <summary>
         /// Draws all GameObjects if the Scene is visible.
@@ -121,48 +140,17 @@ namespace STACK
             renderer.Begin(Get<Camera>().Transformation * World.Get<Camera>().Transformation);
         }
 
-        [NonSerialized] 
-        List<BaseEntity> ObjectsToDraw = null;
-        
         public override void OnDraw(Renderer renderer)
         {
-            if (ObjectsToDraw == null)
+            for (int i = 0; i < GameObjectCache.ObjectsToDraw.Count; i++)
             {
-                ObjectsToDraw = new List<BaseEntity>(15);
+                GameObjectCache.ObjectsToDraw[i].Draw(renderer);
             }
-
-            ObjectsToDraw.Clear();
-
-			VisibleObjects.Cache();            
-
-            for (int i = 0; i < VisibleObjects.Count; i++)
-            {
-                ObjectsToDraw.Add(VisibleObjects[i]);
-            }
-
-            for (int i = 0; i < Items.Count; i++)
-            {
-                if (Items[i].Visible)
-                {
-                    var Component = Items[i] as Component;
-                    if (Component != null)
-                    {
-                        ObjectsToDraw.Add(Component);
-                    }
-                }
-            }            
-
-            ObjectsToDraw.Sort(BaseEntityCollection.ReversePrioritySorter);
-
-            for (int i = 0; i < ObjectsToDraw.Count; i++)
-            {
-                ObjectsToDraw[i].Draw(renderer);
-            }                
         }
 
         public override void OnEndDraw(Renderer renderer)
-        { 	            
-            renderer.End();            
+        {
+            renderer.End();
         }
 
         public override void OnNotify<T>(string message, T data)
@@ -174,15 +162,15 @@ namespace STACK
                 for (int i = 0; i < World.Scenes.Count; i++)
                 {
                     var CurrentScene = World.Scenes[i];
-                    for (int j = 0; j < CurrentScene.Entities.Count; j++)
+                    for (int j = 0; j < CurrentScene.GameObjectCache.Entities.Count; j++)
                     {
-                        var CurrentEntity = CurrentScene.Entities[j];
+                        var CurrentEntity = CurrentScene.GameObjectCache.Entities[j];
                         if (CurrentEntity.DrawScene == this || (CurrentEntity.DrawScene == null && CurrentEntity.UpdateScene == this))
                         {
                             CurrentEntity.Notify(message, data);
                         }
                     }
-                }                    
+                }
             }
             else
             {
@@ -197,19 +185,19 @@ namespace STACK
         {
             var TransformedPosition = Get<Camera>().TransformInverse(position);
 
-            for (int i = 0; i < VisibleObjects.Count; i++)
+            for (int i = 0; i < GameObjectCache.VisibleObjects.Count; i++)
             {
-                var Entity = VisibleObjects[i];
+                var Entity = GameObjectCache.VisibleObjects[i];
 
                 if (Entity.Enabled)
                 {
                     var Hotspot = Entity.Get<Hotspot>();
                     if (Hotspot != null)
-                    {						
-						var Transform = Entity.Get<Transform>();
-						var UseOriginalPosition = (Transform != null && Transform.Absolute);
+                    {
+                        var Transform = Entity.Get<Transform>();
+                        var UseOriginalPosition = (Transform != null && Transform.Absolute);
 
-						if (Hotspot.Enabled && Hotspot.IsHit(UseOriginalPosition ? position : TransformedPosition) && Entity.DrawScene == this)
+                        if (Hotspot.Enabled && Hotspot.IsHit(UseOriginalPosition ? position : TransformedPosition) && Entity.DrawScene == this)
                         {
                             return Entity;
                         }
@@ -219,7 +207,7 @@ namespace STACK
 
             return null;
         }
-       
+
 
         public override void OnUnloadContent()
         {
@@ -228,7 +216,7 @@ namespace STACK
             if (Content != null)
             {
                 Content.Unload();
-            }                                    
+            }
         }
 
         public override void OnPropertyChanged(string property)
@@ -242,20 +230,22 @@ namespace STACK
         /// <summary>
         /// Pushes an Entity onto this scene.
         /// </summary>        
-        public void Push(Entity entity) 
+        public void Push(Entity entity)
         {
             Items.Add(entity);
-            
+
             entity.UpdateScene = this;
-            entity.DrawScene = this;            
+            entity.DrawScene = entity.DrawScene ?? this;
 
             if (Loaded)
-            {                
+            {
                 entity.OnLoadContent(this.Content);
             }
 
-            CacheEntities();
-			VisibleObjects.Cache();            
+            if (Initialized)
+            {
+                GameObjectCache.CacheAll();
+            }
         }
 
         /// <summary>
@@ -266,85 +256,15 @@ namespace STACK
             return (b == this);
         }
 
-        public float Cost(StarFinder.IMapPosition parent) 
+        public float Cost(StarFinder.IMapPosition parent)
         {
-            return (parent == null) ? 0 : 1;            
+            return (parent == null) ? 0 : 1;
         }
 
-        [NonSerialized]
-        List<Entity> _Entities = null;
-
-        /// <summary>
-        /// List of GameObjects.
-        /// </summary>
-        public List<Entity> Entities
+        public override void OnChangeComponents()
         {
-            get
-            {
-                if (_Entities == null)
-                {
-                    CacheEntities();
-                }
-
-                return _Entities;
-            }
-        }
-
-        private void CacheEntities()
-        {
-            if (_Entities == null)
-            {
-                _Entities = new List<Entity>(15);
-            }
-
-            _Entities.Clear();
-
-            for (int i = 0; i < Items.Count; i++)
-            {
-                var Entity = Items[i] as Entity;
-                if (Entity != null)
-                {
-                    _Entities.Add(Entity);
-                }
-            }
-        }
-
-        [NonSerialized]
-        List<Exit> _Exits = null;
-
-        /// <summary>
-        /// Gets a list of Exits.
-        /// </summary>
-        public List<Exit> Exits
-        {
-            get
-            {
-				if (_Exits == null)
-				{
-					CacheExits();
-				}
-
-                return _Exits;
-            }
-        }
-
-        private void CacheExits()
-        {
-            if (_Exits == null)
-            {
-                _Exits = new List<Exit>(3);
-            }
-
-            _Exits.Clear();
-
-            for (int i = 0; i < Entities.Count; i++)
-            {
-                var Exit = Entities[i].Get<Exit>();
-                if (Exit != null)
-                {
-                    _Exits.Add(Exit);
-                }
-            }
+            GameObjectCache.CacheComponents();
+            GameObjectCache.CacheObjectsToDraw();
         }
 
         /// <summary>
@@ -352,15 +272,7 @@ namespace STACK
         /// </summary>
         public Entity GetObject(string id)
         {
-            for (int i = 0; i < Entities.Count; i++)
-            {
-                if (Entities[i].ID.Equals(id))
-                {
-                    return Entities[i];
-                }
-            }
-
-            return null;                
+            return GameObjectCache.GetEntityById(id);
         }
 
         public Entity this[string id]
@@ -370,22 +282,6 @@ namespace STACK
                 return GetObject(id);
             }
         }
-
-        [NonSerialized]
-        VisibleObjectList _VisibleObjects = null;
-
-		internal VisibleObjectList VisibleObjects
-        {
-            get
-            {
-                if (_VisibleObjects == null)
-                {
-					_VisibleObjects = new VisibleObjectList(this); 				
-                }
-
-                return _VisibleObjects;
-            }
-        }            
 
         /// <summary>
         /// Pushes an array of GameObjects onto this scene.
@@ -405,8 +301,11 @@ namespace STACK
         {
             gameObject.OnUnloadContent();
             Items.Remove(gameObject);
-            CacheEntities();
-        }
 
+            if (Initialized)
+            {
+                GameObjectCache.CacheAll();
+            }
+        }
     }
 }

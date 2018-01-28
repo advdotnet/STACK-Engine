@@ -1,6 +1,6 @@
-﻿using System;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using System;
 
 namespace STACK.Input
 {
@@ -25,9 +25,9 @@ namespace STACK.Input
             Paused = false;
         }
 
-        public void Dispatch(Vector2 mouse, Action<Vector2> mouseMove = null, 
-            Action<Vector2, MouseButton> mouseDown = null, 
-            Action<Vector2, MouseButton> mouseUp = null, 
+        public void Dispatch(Vector2 mouse, Action<Vector2> mouseMove = null,
+            Action<Vector2, MouseButton> mouseDown = null,
+            Action<Vector2, MouseButton> mouseUp = null,
             Action<Keys> keyDown = null,
             Action<Keys> keyUp = null)
         {
@@ -35,40 +35,25 @@ namespace STACK.Input
             switch (Type)
             {
                 case InputEventType.MouseMove:
-                    if (mouseMove != null)
-                    {
-                        mouseMove(IntToVector2(Param));
-                    }
+                    mouseMove?.Invoke(IntToVector2(Param));
                     break;
 
                 case InputEventType.MouseDown:
-                    if (mouseDown != null)
-                    {
-                        mouseDown(mouse, (MouseButton)Param);
-                    }
+                    mouseDown?.Invoke(mouse, (MouseButton)Param);
                     break;
 
                 case InputEventType.MouseUp:
-                    if (mouseUp != null)
-                    {
-                        mouseUp(mouse, (MouseButton)Param);
-                    }
+                    mouseUp?.Invoke(mouse, (MouseButton)Param);
                     break;
 
                 case InputEventType.KeyDown:
-                    if (keyDown != null)
-                    {
-                        keyDown((Keys)Param);
-                    }
+                    keyDown?.Invoke((Keys)Param);
                     break;
 
                 case InputEventType.KeyUp:
-                    if (keyUp != null)
-                    {
-                        keyUp((Keys)Param);
-                    }
+                    keyUp?.Invoke((Keys)Param);
                     break;
-            } 
+            }
         }
 
         /// <summary>

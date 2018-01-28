@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GraphicSettings>
+  <Resolution>
+    <X>1280</X>
+    <Y>800</Y>
+  </Resolution>
+  <Adapter>0</Adapter>
+  <DisplayMode>Window</DisplayMode>
+  <MultiSampling>false</MultiSampling>
+  <VSync>true</VSync>
+</GraphicSettings>

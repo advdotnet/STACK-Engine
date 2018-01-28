@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using STACK;
-using STACK.Components;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Xna.Framework;
+using STACK.Components;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace STACK.Test.Room1
 {
@@ -25,11 +21,11 @@ namespace STACK.Test
         {
             var Scene = new Scene();
             var Entity = new Entity();
-
+            Scene.Initialize();
             Scene.Push(Entity);
-            Assert.AreEqual(1, Scene.Entities.Count);
+            Assert.AreEqual(1, Scene.GameObjectCache.Entities.Count);
             Scene.Pop(Entity);
-            Assert.AreEqual(0, Scene.Entities.Count);
+            Assert.AreEqual(0, Scene.GameObjectCache.Entities.Count);
         }
 
         [TestMethod]
@@ -37,19 +33,71 @@ namespace STACK.Test
         {
             var Scene = new Scene();
             var VisibleEntity = new Entity() { Visible = true };
-			var InvisibleEntity = new Entity() { Visible = false };
+            var InvisibleEntity = new Entity() { Visible = false };
             Scene.Push(VisibleEntity);
-			Scene.Push(InvisibleEntity);
-			Assert.AreEqual(1, Scene.VisibleObjects.Count);
+            Scene.Push(InvisibleEntity);
+            Assert.AreEqual(1, Scene.GameObjectCache.VisibleObjects.Count);
         }
 
         [TestMethod]
-        public void VisibleComponentsCacheTest()
+        public void VisibleObjectsCacheOrderTest()
         {
             var Scene = new Scene();
-            Scene.Push(new Entity());
+            Scene.Initialize();
+            var FirstEntity = new Entity() { Priority = 1 };
+            var SecondEntity = new Entity() { Priority = 2 };
+            Scene.Push(FirstEntity, SecondEntity);
+            Assert.AreEqual(Scene.GameObjectCache.VisibleObjects.First(), SecondEntity);
+            Assert.AreEqual(Scene.GameObjectCache.VisibleObjects[1], FirstEntity);
 
-            
+            // first object to draw is camera
+            Assert.AreEqual(Scene.GameObjectCache.ObjectsToDraw[1], FirstEntity);
+            Assert.AreEqual(Scene.GameObjectCache.ObjectsToDraw[2], SecondEntity);
+
+            FirstEntity.Priority = 3;
+            Assert.AreEqual(Scene.GameObjectCache.VisibleObjects.First(), FirstEntity);
+            Assert.AreEqual(Scene.GameObjectCache.VisibleObjects[1], SecondEntity);
+
+            Assert.AreEqual(Scene.GameObjectCache.ObjectsToDraw[1], SecondEntity);
+            Assert.AreEqual(Scene.GameObjectCache.ObjectsToDraw[2], FirstEntity);
+        }
+
+        [TestMethod]
+        public void VisibleObjectsCacheOrderDifferentScenesTest()
+        {
+            var UpdateScene = new Scene("1");
+            var DrawScene = new Scene("2");
+            var World = new World(new TestServiceProvider());
+            World.Push(UpdateScene, DrawScene);
+            World.Initialize();
+
+            var FirstEntity = new Entity() { Priority = 1 };
+            var SecondEntity = new Entity() { Priority = 2 };
+            UpdateScene.Push(FirstEntity, SecondEntity);
+
+            FirstEntity.DrawScene = DrawScene;
+            SecondEntity.DrawScene = DrawScene;
+
+            Assert.AreEqual(UpdateScene.GameObjectCache.VisibleObjects.Count, 0);
+            Assert.AreEqual(UpdateScene.GameObjectCache.ObjectsToDraw.Count, 1);
+
+            Assert.AreEqual(DrawScene.GameObjectCache.VisibleObjects.First(), SecondEntity);
+            Assert.AreEqual(DrawScene.GameObjectCache.VisibleObjects[1], FirstEntity);
+
+            // first object to draw is camera
+            Assert.AreEqual(DrawScene.GameObjectCache.ObjectsToDraw[1], FirstEntity);
+            Assert.AreEqual(DrawScene.GameObjectCache.ObjectsToDraw[2], SecondEntity);
+
+            FirstEntity.Priority = 3;
+
+            Assert.AreEqual(UpdateScene.GameObjectCache.VisibleObjects.Count, 0);
+            Assert.AreEqual(UpdateScene.GameObjectCache.ObjectsToDraw.Count, 1);
+
+            Assert.AreEqual(DrawScene.GameObjectCache.VisibleObjects.First(), FirstEntity);
+            Assert.AreEqual(DrawScene.GameObjectCache.VisibleObjects[1], SecondEntity);
+
+            Assert.AreEqual(DrawScene.GameObjectCache.ObjectsToDraw[1], SecondEntity);
+            Assert.AreEqual(DrawScene.GameObjectCache.ObjectsToDraw[2], FirstEntity);
         }
 
         [TestMethod]
@@ -64,9 +112,9 @@ namespace STACK.Test
         {
             Scene Scene = new STACK.Scene("myID");
             Assert.AreEqual("myID", Scene.ID);
-        }    
+        }
 
-        [TestMethod]        
+        [TestMethod]
         public void GetsPortalsTo()
         {
             World World = new World(new TestServiceProvider());
@@ -93,7 +141,7 @@ namespace STACK.Test
             Stack1.GetPassagesTo("s3", ref Results);
             CollectionAssert.AreEqual(new List<Exit>() { Stack1["p3"].Get<Exit>() }, Results);
             Stack1.GetPassagesTo("s4", ref Results);
-            CollectionAssert.AreEqual(new List<Exit>(), Results);            
+            CollectionAssert.AreEqual(new List<Exit>(), Results);
         }
 
 
@@ -111,22 +159,22 @@ namespace STACK.Test
 
         [TestMethod]
         public void GetsHitObject()
-        {            
-            Scene Stack1 = new Scene("s1");            
+        {
+            Scene Stack1 = new Scene("s1");
             Entity Object1 = new Entity("o1");
 
             HotspotRectangle
                 .Create(Object1)
-                .SetRectangle(0, 0, 10, 10);            
+                .SetRectangle(0, 0, 10, 10);
 
             Stack1.Push(Object1);
-            
+
             var HitObject = Stack1.GetHitObject(new Vector2(5, 5));
             Assert.AreEqual(Object1, HitObject);
 
             var Test = STACK.State.State.SaveState<Scene>(Stack1);
             Trace.WriteLine(Test.Length); // 2917
-			Trace.WriteLine(System.Text.Encoding.Default.GetString(Test));
+            Trace.WriteLine(System.Text.Encoding.Default.GetString(Test));
         }
 
         [TestMethod]
@@ -137,6 +185,18 @@ namespace STACK.Test
             Scene.Push(Entity);
             Assert.AreEqual(Scene, Entity.DrawScene);
             Assert.AreEqual(Scene, Entity.UpdateScene);
+        }
+
+        [TestMethod]
+        public void UpdateScene()
+        {
+            Entity Entity = new Entity();
+            Scene Scene = new Scene("s1");
+            Scene.Push(Entity);
+            Scene Scene2 = new Scene("s2");
+            Entity.UpdateScene = Scene2;
+            Assert.AreEqual(Scene, Entity.DrawScene);
+            Assert.AreEqual(Scene2, Entity.UpdateScene);
         }
 
         class NotifiedEntity : Entity
@@ -168,6 +228,6 @@ namespace STACK.Test
             Scene1.Notify<object>("notification", null);
             Assert.IsTrue(Entity2.Notified);
         }
-      
+
     }
 }

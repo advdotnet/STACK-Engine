@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 namespace STACK
@@ -9,6 +10,11 @@ namespace STACK
         public static Vector3 ToInt(this Vector3 value)
         {
             return new Vector3((int)value.X, (int)value.Y, (int)value.Z);
+        }
+
+        public static Vector2 XYToVector2(this Vector3 value)
+        {
+            return new Vector2(value.X, value.Y);
         }
 
         public static Vector2 ToInt(this Vector2 value)
@@ -48,6 +54,16 @@ namespace STACK
             }
 
             return (SoundState.Playing == sound.State);
+        }
+
+        public static bool Has(this Alignment alignment, Alignment value)
+        {
+            return (alignment & value) == value;
+        }
+
+        public static bool Has(this SpriteEffects spriteEffects, SpriteEffects value)
+        {
+            return (spriteEffects & value) == value;
         }
     }
 }
