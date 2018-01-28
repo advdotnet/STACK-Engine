@@ -1,8 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.Xna.Framework;
-using StarFinder;
+﻿using Microsoft.Xna.Framework;
 using STACK.Components;
+using STACK.Logging;
+using StarFinder;
+using System;
+using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace STACK
 {
@@ -24,14 +26,14 @@ namespace STACK
                 {
                     CacheScenes();
                 }
-                
+
                 return _Scenes;
             }
         }
 
-        public SceneCollection() 
+        public SceneCollection()
         {
-            _SceneFinder = new AStar<Scene>(GetSceneNeighbors);                      
+            _SceneFinder = new AStar<Scene>(GetSceneNeighbors);
         }
 
         /// <summary>
@@ -41,15 +43,15 @@ namespace STACK
         {
             var Result = new List<Scene>();
 
-            for (int i = 0; i < scene.Exits.Count; i++)
+            for (int i = 0; i < scene.GameObjectCache.Exits.Count; i++)
             {
-                if (!string.IsNullOrEmpty(scene.Exits[i].TargetEntrance))
+                if (!string.IsNullOrEmpty(scene.GameObjectCache.Exits[i].TargetEntrance))
                 {
-                    Result.Add(GetGameObject(scene.Exits[i].TargetEntrance).DrawScene);
+                    Result.Add(GetGameObject(scene.GameObjectCache.Exits[i].TargetEntrance).DrawScene);
                 }
             }
 
-            return Result;                
+            return Result;
         }
 
         /// <summary>
@@ -57,7 +59,7 @@ namespace STACK
         /// If there is no path, null is returned.
         /// </summary>
         public void FindPath(string from, string to, ref List<string> result)
-        {            
+        {
             FindPath(this.GetScene(from), this.GetScene(to), ref result);
         }
 
@@ -69,20 +71,20 @@ namespace STACK
         /// If there is no path, an empty list is returned.
         /// </summary>
         public void FindPath(Scene from, Scene to, ref List<string> result)
-        {   
+        {
             result.Clear();
 
-            _SceneFinder.Search(from, to, ref FindPathResult);            
+            _SceneFinder.Search(from, to, ref FindPathResult);
 
-            if (FindPathResult.Count == 0) 
+            if (FindPathResult.Count == 0)
             {
                 return;
             }
-            
+
             for (int i = 0; i < FindPathResult.Count; i++)
             {
                 result.Add(FindPathResult[i].ID);
-            }            
+            }
         }
 
         /// <summary>
@@ -90,16 +92,34 @@ namespace STACK
         /// </summary>
         public Entity GetGameObject(string id)
         {
+            Entity Result;
+
+            if (EntityIDCache.TryGetValue(id, out Result))
+            {
+                return Result;
+            }
+
             for (int i = 0; i < Scenes.Count; i++)
             {
-                var Result = Scenes[i].GetObject(id);
+                Result = Scenes[i].GetObject(id);
                 if (Result != null)
                 {
+                    EntityIDCache.Add(id, Result);
+
                     return Result;
                 }
             }
 
             return null;
+        }
+
+        [NonSerialized]
+        protected Dictionary<string, Entity> EntityIDCache = new Dictionary<string, Entity>();
+
+        [OnDeserialized]
+        void OnDeserialized(StreamingContext c)
+        {
+            EntityIDCache = new Dictionary<string, Entity>();
         }
 
         /// <summary>
@@ -111,7 +131,7 @@ namespace STACK
             {
                 return GetScene(id);
             }
-        } 
+        }
 
         /// <summary>
         /// Returns the scene with the given ID or null.
@@ -126,7 +146,7 @@ namespace STACK
                 }
             }
 
-            return null;                
+            return null;
         }
 
         public void UpdatePriority()
@@ -135,15 +155,21 @@ namespace STACK
             Scenes.Sort(PrioritySorter);
         }
 
+        public override void OnInitialize()
+        {
+            UpdatePriority();
+            base.OnInitialize();
+        }
+
         /// <summary>
         /// Pushes an array of scenes.
         /// </summary>        
-        public void Push(params BaseEntity[] scenes) 
-        {            
+        public void Push(params BaseEntity[] scenes)
+        {
             foreach (var Scene in scenes)
             {
                 Push(Scene);
-            }            
+            }
         }
 
         /// <summary>
@@ -193,7 +219,7 @@ namespace STACK
         {
             if (_Scenes == null)
             {
-                _Scenes = new List<Scene>(15);
+                _Scenes = new List<Scene>(Items.Count);
             }
 
             _Scenes.Clear();
@@ -208,7 +234,7 @@ namespace STACK
             }
 
             _Scenes.Sort(PrioritySorter);
-        }        
+        }
 
         /// <summary>
         /// Gets the first object at the given position
@@ -216,7 +242,7 @@ namespace STACK
         public Entity GetObjectAtPosition(Vector2 position)
         {
             Entity Pick;
-            
+
             for (int i = 0; i < Scenes.Count; i++)
             {
                 if (Scenes[i].Enabled && Scenes[i].Interactive)
@@ -231,27 +257,26 @@ namespace STACK
             }
 
             return null;
-        }        
+        }
 
         /// <summary>
         /// Restores a snapshot of a list of scenes from the given file.
         /// </summary>        
         protected void RestoreState(List<BaseEntity> scenes, IServiceProvider provider, ContentLoader content)
-        {                        
-            UnloadContent();
-            Items.Clear();                        
-            Scenes.Clear();            
+        {
+            Items.Clear();
+            Scenes.Clear();
             ComponentCache.Clear();
 
-            foreach(var Scene in scenes)            
+            foreach (var Scene in scenes)
             {
-                Push(Scene);                
+                Push(Scene);
             }
 
             Get<ServiceProvider>().SetProvider(provider);
             Get<SkipContent>().SetInterfaceFromServiceProvider(provider);
 
             LoadContent(content);
-        }        
+        }
     }
 }

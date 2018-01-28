@@ -1,14 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Storage;
-
-using STACK.Graphics;
+using System;
 
 namespace STACK.Utils
 {
@@ -53,7 +45,7 @@ namespace STACK.Utils
             Watch.Stop();
             UpdateTime += Watch.Elapsed;
             Watch.Reset();
-        }               
+        }
 
         private string GetDigitText(int number)
         {
@@ -81,7 +73,7 @@ namespace STACK.Utils
 
             if (number == 0)
             {
-                renderer.DrawString(font, "0", new Vector2(x +WIDTH, y), Color.White);
+                renderer.DrawString(font, "0", new Vector2(x + WIDTH, y), Color.White);
                 return;
             }
 
@@ -90,20 +82,20 @@ namespace STACK.Utils
                 renderer.DrawString(font, GetDigitText(number % 10), new Vector2(x - (Offset * WIDTH) + TotalOffset, y), Color.White);
                 number = number / 10;
                 Offset++;
-            }            
+            }
         }
 
         public void Draw(SpriteBatch renderer, SpriteFont font, Vector2 mouse)
         {
-            FrameCounter++;            
+            FrameCounter++;
 
             renderer.Begin();
-            
+
             renderer.DrawString(font, "Updates:", new Vector2(10, 10 + 20), Color.White);
             DrawNumber(FrameRate, 200, 10 + 20, renderer, font);
 
             renderer.DrawString(font, "Update Time:", new Vector2(10, 10 + 40), Color.White);
-            DrawNumber((int)(UpdateAVG*1000000), 200, 10 + 40, renderer, font);
+            DrawNumber((int)(UpdateAVG * 1000000), 200, 10 + 40, renderer, font);
 
             renderer.DrawString(font, "GC0:", new Vector2(10, 10 + 60), Color.White);
             DrawNumber(GC.CollectionCount(0), 200, 10 + 60, renderer, font);
@@ -116,8 +108,8 @@ namespace STACK.Utils
 
             renderer.DrawString(font, "Mouse:", new Vector2(10, 10 + 120), Color.White);
             DrawNumber((int)mouse.X, 200, 10 + 120, renderer, font);
-            DrawNumber((int)mouse.Y, 250, 10 + 120, renderer, font);            
-           
+            DrawNumber((int)mouse.Y, 250, 10 + 120, renderer, font);
+
             renderer.End();
         }
     }

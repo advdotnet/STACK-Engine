@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Xna.Framework;
-using STACK;
-using STACK.Input;
 using STACK.Components;
-using StarFinder;
+using System;
+using System.Collections;
 
 namespace STACK.Test
 {
@@ -66,26 +60,26 @@ namespace STACK.Test
             TestScriptEngine.Start(EnumerableClass.NestedScript(TestScriptEngine), "");
             Assert.AreEqual(1, TestScriptEngine.ScriptCollection.Count);
             TestScriptEngine.Update();
-            Assert.AreEqual(2, TestScriptEngine.ScriptCollection.Count);            
-            TestScriptEngine.Update();            
+            Assert.AreEqual(2, TestScriptEngine.ScriptCollection.Count);
+            TestScriptEngine.Update();
             Assert.IsFalse(EnumerableClass.FinishedNestedScript);
             TestScriptEngine.Update();
             Assert.AreEqual(0, TestScriptEngine.ScriptCollection.Count);
             Assert.IsTrue(EnumerableClass.FinishedNestedScript);
         }
 
-		[TestMethod]
-		public void ClearSetsScriptDone()
-		{
-			var TestScriptEngine = new Scripts();
-			var Enumerable = new EnumerableClass();
-			var Script = TestScriptEngine.Start(Enumerable.Foo(), "ScriptName");			
-			Assert.IsFalse(Script.Done);
-			TestScriptEngine.Update();
-			Assert.IsFalse(Script.Done);
-			TestScriptEngine.Clear();
-			Assert.IsTrue(Script.Done);
-		}
+        [TestMethod]
+        public void ClearSetsScriptDone()
+        {
+            var TestScriptEngine = new Scripts();
+            var Enumerable = new EnumerableClass();
+            var Script = TestScriptEngine.Start(Enumerable.Foo(), "ScriptName");
+            Assert.IsFalse(Script.Done);
+            TestScriptEngine.Update();
+            Assert.IsFalse(Script.Done);
+            TestScriptEngine.Clear();
+            Assert.IsTrue(Script.Done);
+        }
 
         [TestMethod]
         public void NestedIEnumerator()
@@ -137,7 +131,7 @@ namespace STACK.Test
             Points[2] = new PathVertex(size, 0);
             Points[3] = new PathVertex(size, size);
 
-            int[] Indices = new int[6];
+            var Indices = new int[6];
             Indices[0] = 0; Indices[1] = 1; Indices[2] = 3;
             Indices[3] = 1; Indices[4] = 2; Indices[5] = 3;
 
@@ -151,7 +145,7 @@ namespace STACK.Test
     {
         public int TestInt { get; private set; }
         public bool FinishedNestedScript { get; private set; }
-        
+
         public IEnumerator Foo()
         {
             yield return 0;

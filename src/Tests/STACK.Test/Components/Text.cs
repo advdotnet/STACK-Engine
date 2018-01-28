@@ -6,7 +6,7 @@ namespace STACK.Test
     [TestClass]
     public class TextTest
     {
-        public static Vector2 MeasureString(string text)
+        public Vector2 MeasureString(string text)
         {
             var Result = Vector2.Zero;
 

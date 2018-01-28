@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Spine;
 using STACK.Graphics;
+using STACK.Logging;
 using System;
 
 namespace STACK.Components
@@ -123,7 +124,7 @@ namespace STACK.Components
 
         public override void OnDraw(Renderer renderer)
         {
-            if (!RenderStage.HasFlag(renderer.Stage))
+            if (RenderStage != renderer.Stage)
             {
                 return;
             }
@@ -140,8 +141,8 @@ namespace STACK.Components
 
             renderer.End();
 
-            Skeleton.FlipX = Data.Effects.HasFlag(SpriteEffects.FlipHorizontally);
-            Skeleton.FlipY = Data.Effects.HasFlag(SpriteEffects.FlipVertically);
+            Skeleton.FlipX = Data.Effects.Has(SpriteEffects.FlipHorizontally);
+            Skeleton.FlipY = Data.Effects.Has(SpriteEffects.FlipVertically);
 
             Skeleton.X = Position.X;
             Skeleton.Y = Position.Y;

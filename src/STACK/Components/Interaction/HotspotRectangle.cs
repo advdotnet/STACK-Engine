@@ -33,7 +33,7 @@ namespace STACK.Components
             return false;
         }
 
-        public override void OnDraw(Renderer renderer)
+        public override void OnEndDraw(Renderer renderer)
         {
             if (EngineVariables.DebugPath)
             {

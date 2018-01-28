@@ -79,6 +79,7 @@
     <Compile Include="Testing\TestInputProvider.cs" />
     <Compile Include="Utils\DisplaySettings.cs" />
     <Compile Include="Components\Projection.cs" />
+    <Compile Include="Utils\GraphicsSettings.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Dependencies\Spine\spine-csharp\spine-csharp.csproj">

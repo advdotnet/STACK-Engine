@@ -1,9 +1,9 @@
-﻿using System;
+﻿using SDL2;
+using STACK.Logging;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
-using SDL2;
+using System.Linq;
 
 namespace STACK
 {
@@ -15,10 +15,10 @@ namespace STACK
         public string Name = "SaveGame";
 
         public DateTime Date;
-        
+
         public byte[] Screenshot;
 
-		private const string FILE_EXTENSION = ".dat";
+        private const string FILE_EXTENSION = ".dat";
 
         public SaveGame(string name, byte[] world, byte[] screen)
         {
@@ -40,17 +40,17 @@ namespace STACK
             string Filename = "game" + index;
             bool Found = false;
 
-            foreach (var ExistingSaveGame in GetSaveGames(folder)) 
+            foreach (var ExistingSaveGame in GetSaveGames(folder))
             {
-                if (ExistingSaveGame.Value.Name == name) 
+                if (ExistingSaveGame.Value.Name == name)
                 {
                     Filename = ExistingSaveGame.Key;
                     Found = true;
                 }
             }
-            
-            if (!Found) 
-            {                       
+
+            if (!Found)
+            {
                 while (File.Exists(GetFilePath(folder, Filename)))
                 {
                     index++;
@@ -60,13 +60,13 @@ namespace STACK
 
             var SerializedWorld = STACK.State.State.SaveState<World>(world);
 
-			STACK.State.State.SaveToFile<SaveGame>(GetFilePath(folder, Filename), new SaveGame(name, SerializedWorld, screen));
+            STACK.State.State.SaveToFile<SaveGame>(GetFilePath(folder, Filename), new SaveGame(name, SerializedWorld, screen));
         }
 
-		private static string GetFilePath(string folder, string filename) 
-		{
-			return System.IO.Path.Combine(SaveGame.UserStorageFolder(folder), filename + FILE_EXTENSION);
-		}
+        private static string GetFilePath(string folder, string filename)
+        {
+            return System.IO.Path.Combine(SaveGame.UserStorageFolder(folder), filename + FILE_EXTENSION);
+        }
 
         public static SaveGame LoadFromFile(string folder, string name)
         {
@@ -84,62 +84,62 @@ namespace STACK
         }
 
         internal static Dictionary<string, SaveGame> GetSaveGames(string folder)
-        {            
+        {
             EnsureStorageFolderExists(folder);
 
-            var Files =  Directory
-				.EnumerateFiles(SaveGame.UserStorageFolder(folder), "*" + FILE_EXTENSION)
-				.ToArray();  
-              
-			return Files
-                .Select(file => new 
-                { 
+            var Files = Directory
+                .EnumerateFiles(SaveGame.UserStorageFolder(folder), "*" + FILE_EXTENSION)
+                .ToArray();
+
+            return Files
+                .Select(file => new
+                {
                     Filename = System.IO.Path.GetFileNameWithoutExtension(file),
                     Savegame = LoadFromFile(folder, System.IO.Path.GetFileNameWithoutExtension(file))
                 })
                 .Where(t => t.Savegame != null)
-                .ToDictionary(t => t.Filename, t => t.Savegame);            
+                .ToDictionary(t => t.Filename, t => t.Savegame);
         }
 
         internal static string UserStorageFolder(string subdirectory = "STACK")
         {
-			string platform = SDL.SDL_GetPlatform();
-			if (platform.Equals("Windows"))
-			{
-				return System.IO.Path.Combine(
-					Environment.GetFolderPath(
-						Environment.SpecialFolder.MyDocuments
-					),
-					"SavedGames",
-					subdirectory
-				);
-			}
-			else if (platform.Equals("Mac OS X"))
-			{
-				string osConfigDir = Environment.GetEnvironmentVariable("HOME");
-				if (String.IsNullOrEmpty(osConfigDir))
-				{
-					return "."; // Oh well.
-				}
-				osConfigDir += "/Library/Application Support";
-				return System.IO.Path.Combine(osConfigDir, subdirectory);
-			}
-			else if (platform.Equals("Linux"))
-			{
-				string osConfigDir = Environment.GetEnvironmentVariable("XDG_DATA_HOME");
-				if (String.IsNullOrEmpty(osConfigDir))
-				{
-					osConfigDir = Environment.GetEnvironmentVariable("HOME");
-					if (String.IsNullOrEmpty(osConfigDir))
-					{
-						return "."; // Oh well.
-					}
-					osConfigDir += "/.local/share";
-				}
-				return System.IO.Path.Combine(osConfigDir, subdirectory);
-			}
+            string platform = SDL.SDL_GetPlatform();
+            if (platform.Equals("Windows"))
+            {
+                return System.IO.Path.Combine(
+                    Environment.GetFolderPath(
+                        Environment.SpecialFolder.MyDocuments
+                    ),
+                    "SavedGames",
+                    subdirectory
+                );
+            }
+            else if (platform.Equals("Mac OS X"))
+            {
+                string osConfigDir = Environment.GetEnvironmentVariable("HOME");
+                if (String.IsNullOrEmpty(osConfigDir))
+                {
+                    return "."; // Oh well.
+                }
+                osConfigDir += "/Library/Application Support";
+                return System.IO.Path.Combine(osConfigDir, subdirectory);
+            }
+            else if (platform.Equals("Linux"))
+            {
+                string osConfigDir = Environment.GetEnvironmentVariable("XDG_DATA_HOME");
+                if (String.IsNullOrEmpty(osConfigDir))
+                {
+                    osConfigDir = Environment.GetEnvironmentVariable("HOME");
+                    if (String.IsNullOrEmpty(osConfigDir))
+                    {
+                        return "."; // Oh well.
+                    }
+                    osConfigDir += "/.local/share";
+                }
+                return System.IO.Path.Combine(osConfigDir, subdirectory);
+            }
 
-			throw new Exception("SDL platform unhandled: " + platform);
+            throw new Exception("SDL platform unhandled: " + platform);
         }
 
         private static void EnsureStorageFolderExists(string folder)

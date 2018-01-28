@@ -16,9 +16,7 @@ namespace PathFinding
         public PathFindingGame()
         {
             VirtualResolution = new Point(VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
-            ResolutionScaleFactor = new Point(1, 1);
             Title = "Playground: PathFinding";
-            STACK.EngineVariables.Fullscreen = false;
             EngineVariables.DebugPath = true;
         }
 
@@ -35,16 +33,6 @@ namespace PathFinding
             this.StartWorld();
             World.Get<RenderSettings>().BloomEnabled = false;
             Engine.Resume();
-        }
-
-        protected override void OnRestore()
-        {
-
-        }
-
-        protected override void OnWorldStart()
-        {
-
         }
     }
 }

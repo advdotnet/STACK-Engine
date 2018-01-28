@@ -12,6 +12,8 @@ namespace STACK.Components
         public ScenePath()
         {
             PathFile = string.Empty;
+            Visible = true;
+            Enabled = false;
         }
 
         public Path Path

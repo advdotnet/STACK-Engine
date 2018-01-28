@@ -17,7 +17,7 @@ namespace STACK.Functional.Test
         {
             public override void OnDraw(Graphics.Renderer renderer)
             {
-                renderer.PrimitivesRenderer.DrawRectangle(new Microsoft.Xna.Framework.Rectangle(0, 0, 1280, 720), Microsoft.Xna.Framework.Color.Green);
+                renderer.PrimitivesRenderer.DrawRectangle(new Rectangle(0, 0, 1280, 720), Color.Green);
             }
         }
 
@@ -94,8 +94,8 @@ namespace STACK.Functional.Test
             {
                 Runner.StartGame();
                 Runner.LoadState(State);
-                Assert.AreEqual(1, Runner.Game.World.Scenes.FirstOrDefault().Entities.Count);
-                Assert.AreEqual("newobj", Runner.Game.World.Scenes.FirstOrDefault().Entities.First().ID);
+                Assert.AreEqual(1, Runner.Game.World.Scenes.FirstOrDefault().GameObjectCache.Entities.Count);
+                Assert.AreEqual("newobj", Runner.Game.World.Scenes.FirstOrDefault().GameObjectCache.Entities.First().ID);
                 Assert.IsFalse(Runner.Game.World.Interactive);
             }
         }
@@ -118,13 +118,10 @@ namespace STACK.Functional.Test
             using (var Runner = new TestEngine(StackGame.Empty, Mock.Wrap(GraphicsDevice), Mock.Input))
             {
                 Runner.LoadState(State);
-                Assert.AreEqual(1, Runner.Game.World.Scenes.FirstOrDefault().Entities.Count);
-                Assert.AreEqual("newobj", Runner.Game.World.Scenes.FirstOrDefault().Entities.First().ID);
+                Assert.AreEqual(1, Runner.Game.World.Scenes.FirstOrDefault().GameObjectCache.Entities.Count);
+                Assert.AreEqual("newobj", Runner.Game.World.Scenes.FirstOrDefault().GameObjectCache.Entities.First().ID);
                 Assert.IsFalse(Runner.Game.World.Interactive);
             }
         }
-
-
-
     }
 }

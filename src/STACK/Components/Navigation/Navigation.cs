@@ -1,26 +1,37 @@
 ﻿using Microsoft.Xna.Framework;
-using STACK.Graphics;
-using StarFinder;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
-using System.Text;
 
 namespace STACK.Components
 {
     [Serializable]
     public class Navigation : Component
     {
-        public List<Vector2> WayPoints 
-        { 
-            get 
+        public List<Vector2> WayPoints
+        {
+            get
             {
                 return _WayPoints;
-            }    
+            }
         }
 
         private List<Vector2> _WayPoints;
-        public float Scale { get; set; }
+        private float _Scale = 1f;
+        public float Scale
+        {
+            get
+            {
+                return _Scale;
+            }
+            set
+            {
+                if (value != _Scale)
+                {
+                    _Scale = value;
+                    _IsDirty = true;
+                }
+            }
+        }
         public bool ApplyScale { get; set; }
         public bool RestrictPosition { get; set; }
         public bool ApplyColoring { get; set; }
@@ -46,7 +57,7 @@ namespace STACK.Components
                         {
                             Transform.Position = Path.GetClosestPoint(Transform.Position);
                         }
-                    }                                       
+                    }
                 }
 
                 _IsDirty = true;
@@ -62,17 +73,17 @@ namespace STACK.Components
             UseScenePath = true;
             _WayPoints = new List<Vector2>(5);
         }
-        
+
         public override void OnNotify<T>(string message, T data)
         {
             if (message == Messages.ScenePathChanged && UseScenePath)
             {
-                var ScenePath = Entity.DrawScene.Get<ScenePath>();                
+                var ScenePath = Entity.DrawScene.Get<ScenePath>();
                 Path = ScenePath == null ? null : ScenePath.Path;
             }
 
             if (message == Messages.SceneEnter && UseScenePath)
-            {                                
+            {
                 // sanity check
                 var Scripts = Entity.Get<Scripts>();
                 if (Scripts != null)
@@ -84,9 +95,9 @@ namespace STACK.Components
                 if (Scene != null)
                 {
                     var ScenePath = Scene.Get<ScenePath>();
-                    Path = (ScenePath == null) ? null : ScenePath.Path;                    
-                }                                
-            }            
+                    Path = (ScenePath == null) ? null : ScenePath.Path;
+                }
+            }
         }
 
         public List<Vector2> FindPath(Vector2 target)
@@ -96,7 +107,7 @@ namespace STACK.Components
             if (Path == null || Transform == null)
             {
                 WayPoints.Clear();
-                WayPoints.Add(target);                
+                WayPoints.Add(target);
             }
             else
             {
@@ -112,7 +123,7 @@ namespace STACK.Components
 
         public override void OnUpdate()
         {
-            var Transform = Get<Transform>();            
+            var Transform = Get<Transform>();
 
             if (Transform == null || Path == null || Path.Mesh == null || (Transform.Position == LastPosition && !_IsDirty))
             {
@@ -121,14 +132,14 @@ namespace STACK.Components
 
             LastPosition = Transform.Position;
 
-            if (ApplyScale) 
+            if (ApplyScale)
             {
                 Transform.Scale = Path.GetScale(Transform.Position.Y) * Scale;
             }
 
             if (ApplyColoring)
-            {                
-                var Position = Transform.Position;                
+            {
+                var Position = Transform.Position;
                 var WithinPath = Path.Contains(Transform.Position);
 
                 if (!WithinPath)
@@ -136,9 +147,8 @@ namespace STACK.Components
                     var ClosestPoint = Path.GetClosestPoint(Position);
                     WithinPath = (ClosestPoint - Position).LengthSquared() < 3;
                     Position = ClosestPoint;
-                }                
-
-                if (ApplyColoring && WithinPath)
+                }
+                else
                 {
                     var Color = Path.GetVertexData(Position).Color;
 
@@ -164,5 +174,5 @@ namespace STACK.Components
         public Navigation SetRestrictPosition(bool value) { RestrictPosition = value; return this; }
         public Navigation SetApplyColoring(bool value) { ApplyColoring = value; return this; }
         public Navigation SetPath(Path value) { Path = value; return this; }
-    }  
+    }
 }

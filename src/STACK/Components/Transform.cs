@@ -158,7 +158,8 @@ namespace STACK.Components
 
         public static bool Has(this State state, State value)
         {
-            return state.HasFlag(value);
+            // do not use enum.HasFlag
+            return (state & value) == value;
         }
 
         public static bool Is(this State state, State value)
@@ -197,8 +198,8 @@ namespace STACK.Components
                 if (_Z != value)
                 {
                     Entity.Priority = value;
+                    _Z = value;
                 }
-                _Z = value;
             }
         }
 

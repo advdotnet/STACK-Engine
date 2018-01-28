@@ -3,6 +3,7 @@ using STACK.Graphics;
 using STACK.Input;
 using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace STACK
 {
@@ -16,13 +17,19 @@ namespace STACK
         [NonSerialized]
         protected Dictionary<Type, Component> ComponentCache = new Dictionary<Type, Component>();
 
-        public T Add<T>(bool enabled = true, bool visible = true) where T : Component
+        [OnDeserialized]
+        void OnDeserialized(StreamingContext c)
         {
-            var Component = Activator.CreateInstance<T>();
-            return Add(Component, enabled, visible);
+            ComponentCache = new Dictionary<Type, Component>();
         }
 
-        public T Add<T>(T component, bool enabled = true, bool visible = true) where T : Component
+        public T Add<T>() where T : Component
+        {
+            var Component = Activator.CreateInstance<T>();
+            return Add(Component);
+        }
+
+        public T Add<T>(T component) where T : Component
         {
             var ComponentType = component.GetType();
             if (ComponentCache.ContainsKey(ComponentType))
@@ -30,12 +37,13 @@ namespace STACK
                 throw new InvalidOperationException("Component type" + ComponentType.Name + " already added.");
             }
 
-            component.Enabled = enabled;
-            component.Visible = visible;
-
             Items.Add(component);
             ComponentCache.Add(ComponentType, component);
             component.Parent = this;
+            if (Initialized)
+            {
+                OnChangeComponents();
+            }
 
             return component;
         }
@@ -43,30 +51,19 @@ namespace STACK
         public T Get<T>() where T : Component
         {
             Component Result;
+            var Type = typeof(T);
 
-            if (ComponentCache == null)
-            {
-                ComponentCache = new Dictionary<Type, Component>();
-            }
-
-            if (ComponentCache.TryGetValue(typeof(T), out Result))
+            if (ComponentCache.TryGetValue(Type, out Result))
             {
                 return (T)Result;
             }
 
-            foreach (var ComponentType in ComponentCache.Keys)
-            {
-                if (typeof(T).IsAssignableFrom(ComponentType))
-                {
-                    return (T)ComponentCache[ComponentType];
-                }
-            }
 
             foreach (var Item in Items)
             {
-                if (typeof(T).IsAssignableFrom(Item.GetType()))
+                if (Type.IsAssignableFrom(Item.GetType()))
                 {
-                    ComponentCache.Add(typeof(T), (Component)Item);
+                    ComponentCache.Add(Type, (T)Item);
                     return (T)Item;
                 }
             }
@@ -82,6 +79,7 @@ namespace STACK
             {
                 ComponentCache.Remove(typeof(T));
                 Items.Remove(Component);
+                OnChangeComponents();
             }
 
             return this;
@@ -156,6 +154,11 @@ namespace STACK
             {
                 Items[i].Initialize();
             }
+        }
+
+        public virtual void OnChangeComponents()
+        {
+
         }
     }
 }

@@ -14,7 +14,7 @@ namespace STACK.Functional.Test
             using (var GraphicsDevice = Mock.CreateGraphicsDevice())
             using (var Runner = new TestEngine(StackGame.Empty, Mock.Wrap(GraphicsDevice), null))
             {
-                SharedTexture = Runner.Content.Load<Texture2D>("stacklogo");
+                SharedTexture = Runner.EngineContent.Load<Texture2D>("stacklogo");
                 var Scene = Runner.Game.World["1"];
                 var SceneTexture = Scene.Content.Load<Texture2D>("stacklogo");
 

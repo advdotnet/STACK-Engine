@@ -1,17 +1,17 @@
-﻿using System;
-using System.Collections;
-using Microsoft.Xna.Framework;
-using STACK;
-using Spine;
-using STACK.Components;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Spine;
+using STACK;
+using STACK.Components;
+using System;
+using System.Collections;
 
 namespace Actor
 {
 
     [Serializable]
     public class Ego : Entity
-    {        
+    {
         public Ego()
         {
             CameraLocked
@@ -34,7 +34,8 @@ namespace Actor
                 .SetOnSpineAnimationEnd(SpineAnimationEnd);
 
             SpriteData
-                .Create(this);            
+                .Create(this)
+                .SetOrientationFlip(true);
 
             Scripts
                 .Create(this);
@@ -88,12 +89,12 @@ namespace Actor
             animationStateData.SetMix("idle", "talk", 0.2f);
             animationStateData.SetMix("jump", "idle", 0.2f);
             animationStateData.SetMix("idle", "jump", 0.2f);
-        }        
-        
+        }
+
         public Script GoTo(Vector2 position, Directions8 direction = Directions8.None, Action cb = null)
         {
             return Get<Scripts>().GoTo(position, direction, cb);
-        }        
+        }
 
         public void Stop()
         {
@@ -103,9 +104,9 @@ namespace Actor
         }
 
         public override void OnUpdate()
-        {            
+        {
             var Position = World.Get<STACK.Components.Mouse>().Position;
-            Get<Lightning>().LightPosition = new Vector3(Position, 2);            
+            Get<Lightning>().LightPosition = new Vector3(Position, 2);
 
             if (Get<SpineSprite>().Data.Effects.HasFlag(SpriteEffects.FlipHorizontally))
             {

@@ -14,20 +14,9 @@ namespace STACK.Components
         public Vector2 Position { get; set; }
         public Entity ObjectUnderMouse { get; private set; }
 
-        [NonSerialized]
-        World _ParentWorld = null;
-
-        public World ParentWorld
-        {
-            get
-            {
-                return _ParentWorld ?? (_ParentWorld = (World)Parent);
-            }
-        }
-
         public Mouse()
         {
-            Visible = true;
+            Visible = false;
         }
 
         public static Mouse Create(World addTo)
@@ -41,13 +30,13 @@ namespace STACK.Components
             {
                 Position = InputEvent.IntToVector2(inputEvent.Param);
 
-                ObjectUnderMouse = ParentWorld.GetObjectAtPosition(Position);
+                ObjectUnderMouse = World.GetObjectAtPosition(Position);
             }
         }
 
         public override void OnUpdate()
         {
-            ObjectUnderMouse = ParentWorld.GetObjectAtPosition(Position);
+            ObjectUnderMouse = World.GetObjectAtPosition(Position);
         }
 
         public Mouse SetPosition(Vector2 value) { Position = value; return this; }

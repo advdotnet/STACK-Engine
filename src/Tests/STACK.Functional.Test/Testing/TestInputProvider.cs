@@ -1,7 +1,7 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
-using STACK.Input;
+﻿using STACK.Input;
+using Microsoft.Xna.Framework;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework.Input;
 
 namespace STACK.Functional.Test
 {
@@ -10,7 +10,7 @@ namespace STACK.Functional.Test
         Queue<InputEvent> EventsToAdd = new Queue<InputEvent>();
         List<Keys> PressedKeys = new List<Keys>();
         int MouseX, MouseY;
-        ButtonState Left = ButtonState.Released, Right = ButtonState.Released;
+        ButtonState Left, Right;        
 
         public override KeyboardState KeyboardState
         {
@@ -39,7 +39,7 @@ namespace STACK.Functional.Test
         }
 
         public void KeyDown(Keys key)
-        {
+        {            
             EventsToAdd.Enqueue(InputEvent.KeyPress(KeyState.Down, 0, key));
             if (!PressedKeys.Contains(key))
             {
@@ -91,5 +91,5 @@ namespace STACK.Functional.Test
             MouseMove(x, y);
             MouseClick();
         }
-    }
+    }               
 }

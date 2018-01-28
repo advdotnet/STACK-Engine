@@ -1,6 +1,7 @@
 ﻿using STACK.Components;
 using System;
 using System.Diagnostics;
+using System.Runtime.Serialization;
 
 namespace STACK
 {
@@ -8,16 +9,50 @@ namespace STACK
     [DebuggerDisplay("ID = {ID}")]
     public class Entity : BaseEntityCollection
     {
-        public Scene DrawScene;
+        public Scene _DrawScene;
+
+        public Scene DrawScene
+        {
+            get
+            {
+                return _DrawScene;
+            }
+            set
+            {
+                if (value != _DrawScene)
+                {
+                    var previous = _DrawScene;
+                    _DrawScene = value;
+
+                    if (_DrawScene != null && _DrawScene.Initialized)
+                    {
+                        _DrawScene.GameObjectCache.CacheVisibleObjects();
+                        _DrawScene.GameObjectCache.CacheObjectsToDraw();
+                    }
+
+                    if (previous != null && previous.Initialized)
+                    {
+                        previous.GameObjectCache.CacheVisibleObjects();
+                        previous.GameObjectCache.CacheObjectsToDraw();
+                    }
+                }
+            }
+        }
 
         [NonSerialized]
         private Scene _UpdateScene;
+
+        [OnDeserialized]
+        void OnDeserialized(StreamingContext c)
+        {
+            _UpdateScene = (Scene)Parent;
+        }
 
         public World World
         {
             get
             {
-                return UpdateScene.World;
+                return _UpdateScene.World;
             }
         }
 
@@ -25,11 +60,22 @@ namespace STACK
         {
             get
             {
-                return _UpdateScene ?? (_UpdateScene = (Scene)Parent);
+                return _UpdateScene;
             }
             set
             {
-                Parent = value;
+                if (value != _UpdateScene)
+                {
+                    var previous = _UpdateScene;
+                    Parent = value;
+                    _UpdateScene = value;
+
+                    previous?.Pop(this);
+                    if (null != _UpdateScene && !_UpdateScene.Items.Contains(this))
+                    {
+                        _UpdateScene.Push(this);
+                    }
+                }
             }
         }
 
@@ -58,6 +104,29 @@ namespace STACK
             DrawScene = scene;
             Notify(Messages.SceneEntered, scene);
             DrawScene.Notify(Messages.EntityEntersScene, this);
+        }
+
+        public override void OnPropertyChanged(string property)
+        {
+            if (Properties.Priority == property || Properties.Visible == property)
+            {
+                if (UpdateScene != DrawScene)
+                {
+                    if (DrawScene != null && DrawScene.Initialized)
+                    {
+                        DrawScene.GameObjectCache.CacheVisibleObjects();
+                        DrawScene.GameObjectCache.CacheObjectsToDraw(Properties.Priority == property);
+                    }
+                }
+
+                if (UpdateScene != null && UpdateScene.Initialized)
+                {
+                    UpdateScene.GameObjectCache.CacheVisibleObjects();
+                    UpdateScene.GameObjectCache.CacheObjectsToDraw(Properties.Priority == property);
+                }
+            }
+
+            base.OnPropertyChanged(property);
         }
     }
 }

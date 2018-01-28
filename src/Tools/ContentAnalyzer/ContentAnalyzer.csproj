@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{A72AE2E9-8318-4DDC-AE53-D868C1B77BE6}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ContentAnalyzer</RootNamespace>
+    <AssemblyName>ContentAnalyzer</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ContentTree.cs" />
+    <Compile Include="BuildContent.cs" />
+    <Compile Include="BuildActions\ContentCompilerBuildAction.cs" />
+    <Compile Include="BuildActions\ShaderCompilerBuildAction.cs" />
+    <Compile Include="BuildActions\CopyBuildAction.cs" />
+    <Compile Include="BuildActions\IBuildAction.cs" />
+    <Compile Include="ContentProcessorEnum.cs" />
+    <Compile Include="ContentImporterEnum.cs" />
+    <Compile Include="BaseContentAnalyzer.cs" />
+    <Compile Include="ContentTypes\OggSongContentType.cs" />
+    <Compile Include="ContentTypes\WaveSoundContentType.cs" />
+    <Compile Include="ContentTypes\PathContentType.cs" />
+    <Compile Include="ContentTypes\NeoforceSkinContentType.cs" />
+    <Compile Include="ContentTypes\ShaderContentType.cs" />
+    <Compile Include="ContentTypes\TextureContentType.cs" />
+    <Compile Include="ContentTypes\SpriteFontContentType.cs" />
+    <Compile Include="ContentTypes\TextureFontContentType.cs" />
+    <Compile Include="ContentTypes\BaseContentType.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

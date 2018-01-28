@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Spine;
 using STACK.Components;
+using STACK.Logging;
 using System;
 using System.IO;
 
@@ -28,16 +29,17 @@ namespace STACK.Graphics
         public BloomComponent BloomEffect;
         public Texture2D WhitePixelTexture;
 
+
         RenderTarget2D CurrentRenderTarget;
         RenderTarget2D DrawBuffer;
         RenderTarget2D GUIBuffer;
 
-        public Renderer(IServiceProvider services, ContentManager content, Point virtualResolution)
+        public Renderer(IServiceProvider services, ContentManager content, Point virtualResolution, Point? targetResolution = null)
         {
             Log.WriteLine("Constructing renderer");
             GraphicsDevice = ((IGraphicsDeviceService)services.GetService(typeof(IGraphicsDeviceService))).GraphicsDevice;
             var RealResolution = new Point(GraphicsDevice.PresentationParameters.BackBufferWidth, GraphicsDevice.PresentationParameters.BackBufferHeight);
-            DisplaySettings = new DisplaySettings(virtualResolution, RealResolution);
+            DisplaySettings = new DisplaySettings(virtualResolution, RealResolution, targetResolution);
 
             SkeletonRenderer = new SkeletonMeshRenderer(GraphicsDevice)
             {
@@ -59,12 +61,12 @@ namespace STACK.Graphics
             get
             {
                 Matrix projection = new Matrix(
-                    (float)(2.0 / (double)GraphicsDevice.Viewport.Width),
+                    (float)(2.0 / GraphicsDevice.Viewport.Width),
                     0.0f,
                     0.0f,
                     0.0f,
                     0.0f,
-                    (float)(-2.0 / (double)GraphicsDevice.Viewport.Height),
+                    (float)(-2.0 / GraphicsDevice.Viewport.Height),
                     0.0f,
                     0.0f,
                     0.0f,
@@ -86,7 +88,7 @@ namespace STACK.Graphics
         void LoadContent(ContentManager content)
         {
             Log.WriteLine("Loading renderer content");
-            NormalmapEffect = content.Load<Effect>("shaders/normalmap");
+            NormalmapEffect = content.Load<Effect>(STACK.content.shaders.Normalmap);
 
             BloomEffect.LoadContent(content);
 
@@ -107,7 +109,7 @@ namespace STACK.Graphics
             WhitePixelTexture = new Texture2D(GraphicsDevice, 1, 1);
             WhitePixelTexture.SetData<Color>(new[] { Color.White });
 
-            DefaultFont = content.Load<SpriteFont>("fonts/stack");
+            DefaultFont = content.Load<SpriteFont>(STACK.content.fonts.stack);
         }
 
         public void Dispose()

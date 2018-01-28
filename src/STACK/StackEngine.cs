@@ -1,4 +1,5 @@
-﻿using STACK.Input;
+﻿using Microsoft.Xna.Framework;
+using STACK.Input;
 using System;
 using System.Collections.Generic;
 using Renderer = STACK.Graphics.Renderer;
@@ -10,18 +11,19 @@ namespace STACK
     {
         public Renderer Renderer { get; private set; }
         public StackGame Game { get; private set; }
-        public ContentLoader Content { get; private set; }
+        public ContentLoader EngineContent { get; private set; }
         public IServiceProvider Services { get; private set; }
         public InputProvider InputProvider { get; private set; }
         public event Action OnExit;
+        ContentLoader WorldContent { get; set; }
 
-        public StackEngine(StackGame game, IServiceProvider services, InputProvider input)
+        public StackEngine(StackGame game, IServiceProvider services, InputProvider input, Point? targetResolution = null)
         {
             Services = services;
 
-            Content = new ContentLoader(Services);
+            EngineContent = new ContentLoader(Services);
 
-            Renderer = new Renderer(Services, Content, game.VirtualResolution);
+            Renderer = new Renderer(Services, EngineContent, game.VirtualResolution, targetResolution);
 
             Game = game;
 
@@ -38,11 +40,23 @@ namespace STACK
             Game.Start(this);
         }
 
+        public ContentLoader GetWorldContent()
+        {
+            if (null != WorldContent)
+            {
+                WorldContent.Dispose();
+            }
+
+            WorldContent = new ContentLoader(Services);
+
+            return WorldContent;
+        }
+
         protected StackEngine() { }
 
         public void Draw()
         {
-            Renderer.Draw(Game == null ? null : Game.World);
+            Renderer.Draw(Game?.World);
         }
 
         public void Update()
@@ -65,7 +79,8 @@ namespace STACK
             }
 
             Renderer.Dispose();
-            Content.Dispose();
+            WorldContent?.Dispose();
+            EngineContent.Dispose();
         }
 
         public void StartGame()

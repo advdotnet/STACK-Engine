@@ -25,10 +25,10 @@ namespace STACK
             ID = id;
         }
 
-		public void Clear()
-		{
-			Done = true;
-		}
+        public void Clear()
+        {
+            Done = true;
+        }
 
         /// <summary>
         /// Advances the script one iteration.
@@ -36,10 +36,10 @@ namespace STACK
         public bool MoveNext()
         {
             if (Done || Enabled || NestedMoveNext(Enumerator))
-            {                
+            {
                 return !Done;
             }
-                        
+
             Done = !Enumerator.MoveNext();
 
             return !Done;
@@ -51,6 +51,11 @@ namespace STACK
         private bool NestedRunningScript()
         {
             return Enumerator.Current is Script && !((Script)Enumerator.Current).Done;
+        }
+
+        public Script GetNestedScript()
+        {
+            return Enumerator.Current as Script;
         }
 
         private bool NestedMoveNext(IEnumerator enumerator)
@@ -68,7 +73,7 @@ namespace STACK
             return enumerator.MoveNext();
         }
 
-        public static Script None 
+        public static Script None
         {
             get
             {

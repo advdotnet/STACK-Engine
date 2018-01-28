@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Xna.Framework;
+using STACK;
 using STACK.Components;
 using System.Collections;
 
@@ -85,7 +86,7 @@ namespace STACK.Test
             Scripts.Create(Entity);
             Transform.Create(Entity);
             var TextComponent = Text.Create(Entity);
-            TextComponent.MeasureStringFn = TextTest.MeasureString;
+            TextComponent.MeasureStringFn = MeasureString;
 
             var Scene = new Scene("s1");
             Scene.Push(Entity);
@@ -94,6 +95,16 @@ namespace STACK.Test
             World.Push(Scene);
 
             return Entity;
+        }
+
+        public Vector2 MeasureString(string text)
+        {
+            var Result = Vector2.Zero;
+
+            Result.X = text.Length * 10;
+            Result.Y = 20;
+
+            return Result;
         }
 
         [TestMethod]

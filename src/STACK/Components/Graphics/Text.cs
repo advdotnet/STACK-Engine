@@ -57,7 +57,6 @@ namespace STACK
         public Text()
         {
             RenderStage = RenderStage.PostBloom;
-            ConstrainOffset = Vector2.Zero;
         }
 
         public override void OnLoadContent(ContentLoader content)
@@ -175,12 +174,12 @@ namespace STACK
             var TextPosition = position;
             var Origin = TextBounds * 0.5f;
 
-            if (Align.HasFlag(Alignment.Top))
+            if (Align.Has(Alignment.Top))
             {
                 Origin.Y += Bounds.Height / 2f - TextBounds.Y / 2f;
             }
 
-            if (Align.HasFlag(Alignment.Bottom))
+            if (Align.Has(Alignment.Bottom))
             {
                 Origin.Y -= Bounds.Height / 2f - TextBounds.Y / 2f;
             }
@@ -194,12 +193,12 @@ namespace STACK
                 var LineSize = MeasureStringFn(TextLines[i]);
                 var LineOffset = new Vector2((TextBounds.X - LineSize.X) * 0.5f, i * (TextBounds.Y / TextLines.Length + 3));
 
-                if (Align.HasFlag(Alignment.Left))
+                if (Align.Has(Alignment.Left))
                 {
                     LineOffset.X -= Bounds.Width / 2f - LineSize.X / 2f;
                 }
 
-                if (Align.HasFlag(Alignment.Right))
+                if (Align.Has(Alignment.Right))
                 {
                     LineOffset.X += Bounds.Width / 2f - LineSize.X / 2f;
                 }
@@ -265,7 +264,7 @@ namespace STACK
 
         public override void OnDraw(Graphics.Renderer renderer)
         {
-            if (!RenderStage.HasFlag(renderer.Stage) || Lines.Count == 0 || _SpriteFont == null)
+            if (RenderStage != renderer.Stage || Lines.Count == 0 || _SpriteFont == null)
             {
                 return;
             }
@@ -276,7 +275,6 @@ namespace STACK
                 var Line = Lines[i];
                 var CurrentColor = new Color(Line.Color.R, Line.Color.G, Line.Color.B, (byte)(Line.Color.A * AlphaPercentage));
                 var LinePositon = (Line.Position - Offset).ToInt();
-
                 var Transform = Get<Transform>();
 
                 if (Transform != null && Transform.Absolute)
@@ -286,7 +284,6 @@ namespace STACK
                 }
 
                 LinePositon += ConstrainOffset;
-
                 var LineOrigin = Line.Origin.ToInt();
 
                 renderer.SpriteBatch.DrawString(_SpriteFont, Line.Text, LinePositon, CurrentColor, 0, LineOrigin, 1, SpriteEffects.None, 0);

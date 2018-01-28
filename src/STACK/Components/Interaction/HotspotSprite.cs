@@ -9,6 +9,10 @@ namespace STACK.Components
     [Serializable]
     public class HotspotSprite : Hotspot
     {
+        /// <summary>
+        /// If true, the texture is checked whether there is a collision with visible pixel (alpha > 0.4). 
+        /// If false, the texture's rectangle is used for collision detection.
+        /// </summary>
         public bool PixelPerfect { get; set; }
 
         public override bool IsHit(Vector2 mouse)

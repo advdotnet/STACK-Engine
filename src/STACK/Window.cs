@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using STACK.Graphics;
 using STACK.Input;
+using STACK.Logging;
 using STACK.Utils;
 using System;
 
@@ -8,6 +10,7 @@ namespace STACK
 {
     public partial class Window : Game, ISkipContent
     {
+        public GraphicSettings GraphicSettings { get; private set; }
         public StackEngine StackEngine { get; private set; }
         public SkipText SkipText { get; }
         public SkipCutscene SkipCutscene { get; }
@@ -22,50 +25,35 @@ namespace STACK
             Game = game;
 
             Log.AddLogger(new DebugLogHandler());
-            Log.WriteLine("Initializing GraphicsDeviceManager");
+            Log.WriteLine("Loading graphic settings");
 
-            Graphics = new GraphicsDeviceManager(this);
-            Graphics.PreparingDeviceSettings += new EventHandler<PreparingDeviceSettingsEventArgs>(SetToReference);
+            GraphicSettings = GraphicSettings.LoadFromConfigFile();
+
+            Log.WriteLine("Initializing graphics");
+
+            Graphics = GraphicSettings.CreateGraphicsDeviceManager(this);
+
             Window.ClientSizeChanged += OnClientSizeChanged;
-            Window.AllowUserResizing = false;
+            Window.AllowUserResizing = true;
             Window.Title = game.Title;
-
-            if (!Graphics.GraphicsDevice.Adapter.IsProfileSupported(GraphicsProfile.HiDef) ||
-                !Graphics.GraphicsDevice.Adapter.IsProfileSupported(GraphicsProfile.Reach))
-            {
-                throw new Exception("Graphic profile not supported.");
-            }
 
             SkipText = new SkipText();
             SkipCutscene = new SkipCutscene(SetSpeed);
         }
 
-        void SetToReference(object sender, PreparingDeviceSettingsEventArgs eventargs)
-        {
-            eventargs.GraphicsDeviceInformation.PresentationParameters.PresentationInterval = PresentInterval.One;
-            eventargs.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage = RenderTargetUsage.DiscardContents;
-        }
-
         protected override void Initialize()
         {
-            Graphics.PreferMultiSampling = false;
-            Graphics.SynchronizeWithVerticalRetrace = true;
-            Graphics.IsFullScreen = EngineVariables.Fullscreen;
-
-            Graphics.PreferredBackBufferWidth = Game.VirtualResolution.X * Game.ResolutionScaleFactor.X;
-            Graphics.PreferredBackBufferHeight = Game.VirtualResolution.Y * Game.ResolutionScaleFactor.Y;
-
             IsFixedTimeStep = true;
             IsMouseVisible = false;
 
-            Graphics.ApplyChanges();
+            GraphicSettings.Initialize(Graphics);
 
             var Services = new GameServiceContainer();
             Services.AddService(typeof(IGraphicsDeviceService), Graphics);
             Services.AddService(typeof(ISkipContent), this);
 
             InputProvider = new UserInputProvider();
-            StackEngine = new StackEngine(Game, Services, InputProvider);
+            StackEngine = new StackEngine(Game, Services, InputProvider, GraphicSettings.GetTargetResolution());
             InputProvider.Handler += HandleDebugInputEvent;
             StackEngine.OnExit += Exit;
 
@@ -83,16 +71,19 @@ namespace STACK
             }
         }
 
-        protected override void UnloadContent()
-        {
-            StackEngine.Exit();
-        }
-
         protected override void Update(GameTime time)
         {
-            Counter.UpdateStart();
+            if (EngineVariables.ShowFPS)
+            {
+                Counter.UpdateStart();
+            }
+
             StackEngine.Update();
-            Counter.UpdateEnd();
+
+            if (EngineVariables.ShowFPS)
+            {
+                Counter.UpdateEnd();
+            }
 
             if (SkipCutscene.Enabled)
             {
@@ -112,12 +103,12 @@ namespace STACK
 
         public void SetSpeed(GameSpeed speed)
         {
-            Log.WriteLine("Setting game speed to " + speed.Text);
-            GameSpeed = speed;
-
-            TargetElapsedTime = speed.TargetElapsedTime;
-            // FNA
-            //MaxElapsedTime = speed.MaxElapsedTime;            
+            if (!GameSpeed.Equals(speed))
+            {
+                Log.WriteLine("Setting game speed to " + speed.Text);
+                GameSpeed = speed;
+                TargetElapsedTime = speed.TargetElapsedTime;
+            }
         }
     }
 }
