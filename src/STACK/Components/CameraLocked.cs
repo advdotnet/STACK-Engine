@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
+using System.Runtime.Serialization;
 
 namespace STACK.Components
 {
@@ -27,6 +28,17 @@ namespace STACK.Components
             CenterCharacter = true;
         }
 
+        public override void OnLoadContent(ContentLoader content)
+        {
+            CacheTransients();
+        }
+
+        [OnDeserialized]
+        void OnDeserialized(StreamingContext c)
+        {
+            CacheTransients();
+        }
+
         public override void OnNotify<T>(string message, T data)
         {
             if (!Enabled)
@@ -46,38 +58,56 @@ namespace STACK.Components
 
                 NewSceneEntered = true;
             }
+
+            if (Messages.SceneEntered == message)
+            {
+                CacheTransients();
+            }
         }
+
+        private void CacheTransients()
+        {
+            Resolution = Entity.World.Get<RenderSettings>().VirtualResolution;
+            Transform = Get<Transform>();
+            var BackgroundObject = Entity.DrawScene.GetObject(Location.BACKGROUND_ENTITY_ID);
+            HasBackground = (null != BackgroundObject);
+            if (HasBackground)
+            {
+                var BackgroundSprite = BackgroundObject.Get<Sprite>();
+                BackgroundWidth = BackgroundSprite.Texture.Width / BackgroundSprite.Columns;
+                BackgroundHeight = BackgroundSprite.Texture.Height / BackgroundSprite.Rows;
+            }
+            Camera = Entity.DrawScene.Get<Camera>();
+        }
+
+        [NonSerialized]
+        Point Resolution;
+        [NonSerialized]
+        Transform Transform;
+        [NonSerialized]
+        int BackgroundWidth, BackgroundHeight;
+        [NonSerialized]
+        bool HasBackground;
+        [NonSerialized]
+        Camera Camera;
 
         public override void OnUpdate()
         {
-            if (!Scroll)
+            if (!Scroll || !HasBackground)
             {
                 return;
             }
 
-            var Position = Get<Transform>().Position;
-            var BackgroundObject = Entity.DrawScene.GetObject(Location.BACKGROUND_ENTITY_ID);
-
-            if (null == BackgroundObject)
-            {
-                return;
-            }
-
-            var BackgroundSprite = BackgroundObject.Get<Sprite>();
-            var BackgroundWidth = BackgroundSprite.Texture.Width / BackgroundSprite.Columns;
-            var BackgroundHeight = BackgroundSprite.Texture.Height / BackgroundSprite.Rows;
-            var Camera = Entity.DrawScene.Get<Camera>();
-            var TransformedPosition = Camera.Transform(Position);
-            var Resolution = Entity.World.Get<RenderSettings>().VirtualResolution;
+            var TransformedPosition = Camera.Transform(Transform.Position);
             var Delta = Vector2.Zero;
 
             if (NewSceneEntered && CenterCharacter)
             {
-                var NewX = Position.X - Resolution.X / 2;
+                var NewX = Transform.Position.X - Resolution.X / 2;
                 NewX = Math.Max(0, NewX);
                 NewX = Math.Min(BackgroundWidth - Resolution.X, NewX);
 
-                var NewY = Position.Y - Resolution.Y / 2;
+                var NewY = Transform.Position.Y - Resolution.Y / 2;
                 NewY = Math.Max(0, NewY);
                 NewY = Math.Min(BackgroundHeight - Resolution.Y, NewY);
 

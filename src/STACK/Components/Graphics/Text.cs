@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using STACK.Components;
 using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace STACK
 {
@@ -47,6 +48,9 @@ namespace STACK
         public string Font = "fonts/stack";
 
         [NonSerialized]
+        internal Transform Transform = null;
+
+        [NonSerialized]
         SpriteFont _SpriteFont;
         Vector2 Position;
         Color _Color = Color.White;
@@ -57,6 +61,17 @@ namespace STACK
         public Text()
         {
             RenderStage = RenderStage.PostBloom;
+        }
+
+        public override void OnInitialize()
+        {
+            Transform = Get<Transform>();
+        }
+
+        [OnDeserialized]
+        void OnDeserialized(StreamingContext c)
+        {
+            Transform = Get<Transform>();
         }
 
         public override void OnLoadContent(ContentLoader content)
@@ -108,8 +123,8 @@ namespace STACK
             if (Constrain && !ConstrainingRectangle.Contains(Bounds))
             {
                 var ConstrainedBounds = ConstrainRectangle(Bounds, ConstrainingRectangle);
-                var diff = ConstrainedBounds.Center - (Position).ToPoint();
-                return new Vector2(diff.X, 0);
+                var Diff = ConstrainedBounds.Center - (Position).ToPoint();
+                return new Vector2(Diff.X, 0);
             }
 
             return Vector2.Zero;
@@ -269,17 +284,17 @@ namespace STACK
                 return;
             }
 
+            var TransformIsAbsolute = (null != Transform && Transform.Absolute);
+            var Camera = Entity.DrawScene.Get<Camera>();
 
             for (int i = 0; i < Lines.Count; i++)
             {
                 var Line = Lines[i];
                 var CurrentColor = new Color(Line.Color.R, Line.Color.G, Line.Color.B, (byte)(Line.Color.A * AlphaPercentage));
                 var LinePositon = (Line.Position - Offset).ToInt();
-                var Transform = Get<Transform>();
 
-                if (Transform != null && Transform.Absolute)
+                if (TransformIsAbsolute)
                 {
-                    var Camera = Entity.DrawScene.Get<Camera>();
                     LinePositon = Camera.TransformInverse(LinePositon);
                 }
 
@@ -288,7 +303,6 @@ namespace STACK
 
                 renderer.SpriteBatch.DrawString(_SpriteFont, Line.Text, LinePositon, CurrentColor, 0, LineOrigin, 1, SpriteEffects.None, 0);
             }
-
         }
 
         public static Text Create(Entity addTo)
