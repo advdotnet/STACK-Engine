@@ -178,7 +178,6 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>build.bat</LastGenOutput>
     </Content>
-    <Content Include="Content\fxc.exe" />
     <Content Include="Content\shaders\BloomCombine.fx" />
     <Content Include="Content\shaders\BloomExtract.fx" />
     <Content Include="Content\shaders\GaussianBlur.fx" />
