@@ -14,7 +14,7 @@ namespace STACK
     [Serializable]
     public class World : SceneCollection
     {
-        public World(InputProvider input, Point? resolution = null)
+        public World(Point? resolution = null)
         {
             Mouse
                 .Create(this);
@@ -31,15 +31,10 @@ namespace STACK
 
             AudioManager
                 .Create(this);
-
-            if (input != null)
-            {
-                input.Handler += HandleInputEvent;
-            }
         }
 
         public World(IServiceProvider services, InputProvider input = null, Point? resolution = null)
-            : this(input, resolution)
+            : this(resolution)
         {
             ServiceProvider
                 .Create(this)
@@ -48,6 +43,8 @@ namespace STACK
             SkipContent
                 .Create(this)
                 .SetInterfaceFromServiceProvider(services);
+
+            Setup(services, input);
         }
 
         public World(IServiceProvider services, InputProvider input, Point resolution, List<Scene> scenes)
@@ -86,6 +83,23 @@ namespace STACK
         }
 
         /// <summary>
+        /// Sets up an IServiceProvider and InputProvider. These can come from an Engine instance
+        /// or injected from tests.
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="inputProvider"></param>
+        public void Setup(IServiceProvider services, InputProvider inputProvider)
+        {
+            Get<ServiceProvider>().SetProvider(services);
+            Get<SkipContent>().SetInterfaceFromServiceProvider(services);
+
+            if (inputProvider != null)
+            {
+                inputProvider.Handler += HandleInputEvent;
+            }
+        }
+
+        /// <summary>
         /// Handles input events.
         /// </summary>
         public void HandleInputEvent(InputEvent inputEvent)
@@ -100,16 +114,6 @@ namespace STACK
             }
 
             base.OnHandleInputEvent(Get<Mouse>().Position, inputEvent);
-        }
-
-        /// <summary>
-        /// Restores a snapshot of a list of scenes from the given file.
-        /// </summary>        
-        public void RestoreState(World state, IServiceProvider provider, ContentLoader content)
-        {
-            RestoreState(state.Items, provider, content);
-            Interactive = state.Interactive;
-            state = null;
         }
     }
 }

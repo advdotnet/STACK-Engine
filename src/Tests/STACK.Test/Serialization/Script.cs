@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using STACK.Components;
 
 namespace STACK.Test
@@ -15,36 +11,39 @@ namespace STACK.Test
         [TestMethod]
         public void DelayScript()
         {
-
+            var TestScript = new Script(Delay.Updates(2));
+            Assert.IsFalse(TestScript.Done);
+            TestScript.MoveNext();
+            Assert.IsFalse(TestScript.Done);
+            TestScript.MoveNext();
+            Assert.IsTrue(TestScript.Done);
         }
-        
+
         [TestMethod]
         public void SaveScript()
         {
             var TestClass = new EnumerableClass();
-            Script TestScript = new Script(TestClass.Foo());
+            var TestScript = new Script(TestClass.Foo());
             TestScript.MoveNext();
             TestScript.MoveNext();
             Assert.AreEqual(false, TestScript.Done);
-            byte[] Check = STACK.State.State.SaveState<Script>(TestScript);
-
-
-            TestScript = STACK.State.State.LoadState<Script>(Check);
-            Assert.AreEqual(false, TestScript.Done);            
+            var Check = STACK.State.Serialization.SaveState<Script>(TestScript);
+            TestScript = STACK.State.Serialization.LoadState<Script>(Check);
+            Assert.AreEqual(false, TestScript.Done);
         }
 
         [TestMethod]
         public void ScriptEngineSerialize()
         {
-            Scripts TestScriptEngine = new Scripts();
+            var TestScriptEngine = new Scripts();
             TestScriptEngine.Start(new EnumerableClass().Foo());
             TestScriptEngine.Update();
 
-            byte[] Check = STACK.State.State.SaveState<Scripts>(TestScriptEngine);
+            var Check = STACK.State.Serialization.SaveState<Scripts>(TestScriptEngine);
             TestScriptEngine.Update();
 
-            TestScriptEngine = STACK.State.State.LoadState<Scripts>(Check);
+            TestScriptEngine = STACK.State.Serialization.LoadState<Scripts>(Check);
             TestScriptEngine.Update();
-        }               
+        }
     }
 }

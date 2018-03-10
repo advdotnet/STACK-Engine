@@ -7,6 +7,7 @@ using STACK.Components;
 using STACK.Logging;
 using System;
 using System.IO;
+using TomShane.Neoforce.Controls;
 
 namespace STACK.Graphics
 {
@@ -17,6 +18,7 @@ namespace STACK.Graphics
     {
         public Matrix TransformationMatrix = Matrix.Identity;
         public Matrix Projection = Matrix.Identity;
+        public bool BloomEnabled = true;
 
         public DisplaySettings DisplaySettings;
 
@@ -29,17 +31,19 @@ namespace STACK.Graphics
         public BloomComponent BloomEffect;
         public Texture2D WhitePixelTexture;
 
+        Manager _NeoManager;
 
         RenderTarget2D CurrentRenderTarget;
         RenderTarget2D DrawBuffer;
         RenderTarget2D GUIBuffer;
 
-        public Renderer(IServiceProvider services, ContentManager content, Point virtualResolution, Point? targetResolution = null)
+        public Renderer(IServiceProvider services, ContentManager content, Point virtualResolution, Point? targetResolution = null, bool bloom = true)
         {
             Log.WriteLine("Constructing renderer");
             GraphicsDevice = ((IGraphicsDeviceService)services.GetService(typeof(IGraphicsDeviceService))).GraphicsDevice;
             var RealResolution = new Point(GraphicsDevice.PresentationParameters.BackBufferWidth, GraphicsDevice.PresentationParameters.BackBufferHeight);
             DisplaySettings = new DisplaySettings(virtualResolution, RealResolution, targetResolution);
+            BloomEnabled = bloom;
 
             SkeletonRenderer = new SkeletonMeshRenderer(GraphicsDevice)
             {
@@ -50,7 +54,30 @@ namespace STACK.Graphics
             SpriteBatch = new SpriteBatch(GraphicsDevice);
             BloomEffect = new BloomComponent(GraphicsDevice);
 
+            _NeoManager = new Manager(services, GraphicsDevice, "Default")
+            {
+                AutoCreateRenderTarget = true,
+                TargetFrames = 60,
+                LogUnhandledExceptions = false,
+                ShowSoftwareCursor = false
+            };
+
+            GUIManager.KeyboardLayout = new GermanKeyboardLayout();
+
             LoadContent(content);
+        }
+
+        public Manager GUIManager
+        {
+            get
+            {
+                return _NeoManager;
+            }
+
+            set
+            {
+                _NeoManager = value;
+            }
         }
 
         /// <summary>
@@ -110,6 +137,10 @@ namespace STACK.Graphics
             WhitePixelTexture.SetData<Color>(new[] { Color.White });
 
             DefaultFont = content.Load<SpriteFont>(STACK.content.fonts.stack);
+
+            _NeoManager.AutoCreateRenderTarget = false;
+            _NeoManager.RenderTarget = GUIBuffer;
+            _NeoManager.Initialize();
         }
 
         public void Dispose()
@@ -131,6 +162,7 @@ namespace STACK.Graphics
                 CurrentRenderTarget.Dispose();
                 CurrentRenderTarget = null;
             }
+            _NeoManager.Dispose(true);
         }
 
         public void ApplyNormalmapEffectParameter(Lightning settings, Texture2D normalMap)
@@ -158,16 +190,27 @@ namespace STACK.Graphics
 
         public void Update(KeyboardState ks, MouseState ms)
         {
-
+            if (!_NeoManager.Disposing && _NeoManager.ShowSoftwareCursor && EngineVariables.EnableGUI)
+            {
+                // FNA
+                //_NeoManagerGameTime.ElapsedGameTime = TimeSpan.FromSeconds(GameSpeed.TickDuration);
+                _NeoManager.Update(_NeoManagerGameTime, ks, ms);
+            }
         }
 
         private GameTime DefaultGameTime = new GameTime(TimeSpan.Zero, TimeSpan.FromSeconds(GameSpeed.TickDuration));
 
         public void Draw(World world)
         {
+            if ((CurrentRenderTarget == null || CurrentRenderTarget == DrawBuffer) && _NeoManager.ShowSoftwareCursor && EngineVariables.EnableGUI)
+            {
+                _NeoManager.BeginDraw(DefaultGameTime);
+                GraphicsDevice.SetRenderTarget(CurrentRenderTarget);
+            }
+
             if (world != null)
             {
-                BloomEffect.Visible = world.Get<RenderSettings>().BloomEnabled;
+                BloomEffect.Visible = (BloomEnabled && world.Get<RenderSettings>().BloomEnabled);
 
                 if (BloomEffect.Visible)
                 {
@@ -199,6 +242,11 @@ namespace STACK.Graphics
 
                 Stage = RenderStage.PostBloom;
                 world.Draw(this);
+            }
+
+            if ((CurrentRenderTarget == null || CurrentRenderTarget == DrawBuffer) && _NeoManager.ShowSoftwareCursor && EngineVariables.EnableGUI)
+            {
+                _NeoManager.EndDraw();
             }
 
             GraphicsDevice.SetRenderTarget(null);

@@ -11,8 +11,23 @@ namespace STACK.Components
     /// Renders a spine animation.
     /// </summary>
     [Serializable]
-    public class SpineSprite : Component, IPlayAnimation
+    public class SpineSprite : Component, IPlayAnimation, IContent, IDraw, IUpdate, INotify
     {
+        public bool Enabled { get; set; }
+        public float UpdateOrder { get; set; }
+        string AnimationName = "";
+        public string Animation { get { return AnimationName; } }
+        public bool Visible { get; set; }
+        public float DrawOrder { get; set; }
+        public float AnimationTime = 0;
+        public bool AnimationLooped = false;
+        public bool Playing { get; private set; }
+        public string Image { get; private set; }
+        public RenderStage RenderStage { get; private set; }
+        public Action<AnimationStateData> AnimationMixFn;
+        public Action<AnimationState> OnSpineAnimationEnd;
+        public Action<Event> OnSpineEvent;
+
         [NonSerialized]
         public Texture2D NormalMap;
         [NonSerialized]
@@ -24,19 +39,11 @@ namespace STACK.Components
         [NonSerialized]
         public AnimationStateData AnimationStateData;
 
-        string AnimationName = "";
-        public float AnimationTime = 0;
-        public bool AnimationLooped = false;
-        public bool Playing { get; private set; }
-        public string Image { get; private set; }
-        public RenderStage RenderStage { get; private set; }
-        public Action<AnimationStateData> AnimationMixFn;
-        public Action<AnimationState> OnSpineAnimationEnd;
-        public Action<Event> OnSpineEvent;
-
         public SpineSprite()
         {
             RenderStage = RenderStage.Bloom;
+            Enabled = true;
+            Visible = true;
         }
 
         void UpdateSkeletonEffect()
@@ -58,7 +65,7 @@ namespace STACK.Components
             }
         }
 
-        public override void OnLoadContent(ContentLoader content)
+        public void LoadContent(ContentLoader content)
         {
             SkeletonBounds = new SkeletonBounds();
 
@@ -94,6 +101,8 @@ namespace STACK.Components
             AnimationState.End += AnimationState_End;
         }
 
+        public void UnloadContent() { }
+
         void AnimationState_End(AnimationState state, int trackIndex)
         {
             OnSpineAnimationEnd?.Invoke(state);
@@ -122,7 +131,7 @@ namespace STACK.Components
             return SkeletonBounds.ContainsPoint(point.X, point.Y) != null;
         }
 
-        public override void OnDraw(Renderer renderer)
+        public void Draw(Renderer renderer)
         {
             if (RenderStage != renderer.Stage)
             {
@@ -178,7 +187,7 @@ namespace STACK.Components
             renderer.Begin(renderer.Projection);
         }
 
-        public override void OnUpdate()
+        public void Update()
         {
             SkeletonBounds.Update(Skeleton, true);
             if (!Playing)
@@ -249,14 +258,12 @@ namespace STACK.Components
             Playing = false;
         }
 
-        public string Animation { get { return AnimationName; } }
-
         public float GetHeight()
         {
             return SkeletonBounds.Height;
         }
 
-        public override void OnNotify<T>(string message, T data)
+        public void Notify<T>(string message, T data)
         {
             if (message == Messages.AnimationStateChanged)
             {
@@ -269,7 +276,7 @@ namespace STACK.Components
         public void LoadSprite(string image)
         {
             Image = image;
-            OnLoadContent(Entity.UpdateScene.Content);
+            LoadContent(Entity.UpdateScene.Content);
         }
 
         public static SpineSprite Create(Entity addTo)

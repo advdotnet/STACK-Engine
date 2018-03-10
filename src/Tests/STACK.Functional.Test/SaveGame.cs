@@ -86,7 +86,7 @@ namespace STACK.Functional.Test
                 Runner.StartGame();
                 Runner.Game.World.Scenes.FirstOrDefault().Push(new Entity("newobj"));
                 Runner.Game.World.Interactive = false;
-                State = new STACK.SaveGame("utest", STACK.State.State.SaveState<World>(Runner.Game.World), new byte[0] { });
+                State = new STACK.SaveGame("utest", STACK.State.Serialization.SaveState<World>(Runner.Game.World), new byte[0] { });
             }
 
             using (var GraphicsDevice = Mock.CreateGraphicsDevice())
@@ -111,7 +111,7 @@ namespace STACK.Functional.Test
                 Runner.StartGame();
                 Runner.Game.World.Scenes.FirstOrDefault().Push(new Entity("newobj"));
                 Runner.Game.World.Interactive = false;
-                State = new STACK.SaveGame("utest", STACK.State.State.SaveState<World>(Runner.Game.World), new byte[0] { });
+                State = new STACK.SaveGame("utest", STACK.State.Serialization.SaveState<World>(Runner.Game.World), new byte[0] { });
             }
 
             using (var GraphicsDevice = Mock.CreateGraphicsDevice())

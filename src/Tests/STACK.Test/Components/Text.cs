@@ -74,7 +74,7 @@ namespace STACK.Test
             var TransformComponent = Transform.Create(Entity);
             var TextComponent = Text.Create(Entity);
 
-            TextComponent.Initialize();
+            TextComponent.Initialize(false);
 
             Assert.IsNotNull(TextComponent.Transform);
             Assert.AreEqual(TransformComponent, TextComponent.Transform);
@@ -87,9 +87,11 @@ namespace STACK.Test
             var TransformComponent = Transform.Create(Entity);
             var TextComponent = Text.Create(Entity);
 
-            var Serialized = State.State.SaveState(Entity);
+            var Serialized = State.Serialization.SaveState(Entity);
 
-            var DeserializedEntity = State.State.LoadState<Entity>(Serialized);
+            var DeserializedEntity = State.Serialization.LoadState<Entity>(Serialized);
+            DeserializedEntity.Initialize(true);
+
             var DeserializedTextComponent = DeserializedEntity.Get<Text>();
             var DeserializedTransformComponent = DeserializedEntity.Get<Transform>();
 

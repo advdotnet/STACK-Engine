@@ -1,16 +1,17 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
-using STACK.Input;
+﻿using STACK.Input;
+using Microsoft.Xna.Framework;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework.Input;
+
 
 namespace STACK.Test
-{
+{    
     public class TestInputProvider : InputProvider
     {
         Queue<InputEvent> EventsToAdd = new Queue<InputEvent>();
         List<Keys> PressedKeys = new List<Keys>();
         int MouseX, MouseY;
-        ButtonState Left, Right;
+        ButtonState Left, Right;        
 
         public override KeyboardState KeyboardState
         {
@@ -39,7 +40,7 @@ namespace STACK.Test
         }
 
         public void KeyDown(Keys key)
-        {
+        {            
             EventsToAdd.Enqueue(InputEvent.KeyPress(KeyState.Down, 0, key));
             if (!PressedKeys.Contains(key))
             {
@@ -91,5 +92,5 @@ namespace STACK.Test
             MouseMove(x, y);
             MouseClick();
         }
-    }
+    }               
 }

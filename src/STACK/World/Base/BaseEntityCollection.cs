@@ -11,97 +11,111 @@ namespace STACK
     [Serializable]
     public abstract class BaseEntityCollection : BaseEntity
     {
-        internal List<BaseEntity> Items { get; set; }
-        protected BaseEntity Parent;
+        internal BaseEntity Parent;
 
-        [NonSerialized]
-        protected Dictionary<Type, Component> ComponentCache = new Dictionary<Type, Component>();
+        List<BaseEntity> _Items;
+        internal List<BaseEntity> Items { get { return _Items; } }
+
+        ComponentList _Components;
+        internal ComponentList Components { get { return _Components; } }
+
+        public BaseEntityCollection()
+        {
+            _Items = new List<BaseEntity>(5);
+            _Components = new ComponentList();
+        }
+
+        [OnSerializing]
+        public void OnSerializing(StreamingContext context)
+        {
+            if (null != _Items && _Items.Count == 0)
+            {
+                _Items = null;
+            }
+
+            if (null != _Components && _Components.Count == 0)
+            {
+                _Components = null;
+            }
+        }
+
+        [OnSerialized]
+        public void OnSerialized(StreamingContext context)
+        {
+            if (null == _Items)
+            {
+                _Items = new List<BaseEntity>(5);
+            }
+
+            if (null == _Components)
+            {
+                _Components = new ComponentList();
+            }
+        }
 
         [OnDeserialized]
         void OnDeserialized(StreamingContext c)
         {
-            ComponentCache = new Dictionary<Type, Component>();
+            OnSerialized(c);
         }
 
         public T Add<T>() where T : Component
         {
-            var Component = Activator.CreateInstance<T>();
-            return Add(Component);
-        }
+            var Component = Components.Add<T>();
 
-        public T Add<T>(T component) where T : Component
-        {
-            var ComponentType = component.GetType();
-            if (ComponentCache.ContainsKey(ComponentType))
-            {
-                throw new InvalidOperationException("Component type" + ComponentType.Name + " already added.");
-            }
-
-            Items.Add(component);
-            ComponentCache.Add(ComponentType, component);
-            component.Parent = this;
+            Component.Parent = this;
             if (Initialized)
             {
                 OnChangeComponents();
             }
 
-            return component;
+            return Component;
         }
 
         public T Get<T>() where T : Component
         {
-            Component Result;
-            var Type = typeof(T);
-
-            if (ComponentCache.TryGetValue(Type, out Result))
-            {
-                return (T)Result;
-            }
-
-
-            foreach (var Item in Items)
-            {
-                if (Type.IsAssignableFrom(Item.GetType()))
-                {
-                    ComponentCache.Add(Type, (T)Item);
-                    return (T)Item;
-                }
-            }
-
-            return null;
+            return Components.Get<T>();
         }
 
         public BaseEntityCollection Remove<T>() where T : Component
         {
-            Component Component;
+            var Removed = Components.Remove<T>();
 
-            if (ComponentCache.TryGetValue(typeof(T), out Component))
+            if (Removed)
             {
-                ComponentCache.Remove(typeof(T));
-                Items.Remove(Component);
                 OnChangeComponents();
             }
 
             return this;
         }
 
-        public BaseEntityCollection()
-        {
-            Items = new List<BaseEntity>(10);
-        }
-
         public static int PrioritySorter(BaseEntity a, BaseEntity b)
         {
-            return b.Priority.CompareTo(a.Priority);
+            return b.DrawOrder.CompareTo(a.DrawOrder);
         }
 
         public static int ReversePrioritySorter(BaseEntity a, BaseEntity b)
         {
-            return a.Priority.CompareTo(b.Priority);
+            return a.DrawOrder.CompareTo(b.DrawOrder);
+        }
+
+        public static int ReversePrioritySorter(IDraw a, IDraw b)
+        {
+            return a.DrawOrder.CompareTo(b.DrawOrder);
         }
 
         public override void OnUpdate()
         {
+            for (int i = 0; i < Components.UpdateCompontents.Count; i++)
+            {
+                var UpdateComponent = Components.UpdateCompontents[i];
+                if (UpdateComponent.Enabled)
+                {
+                    UpdateComponent.Update();
+                }
+
+            }
+
             for (int i = 0; i < Items.Count; i++)
             {
                 Items[i].Update();
@@ -110,6 +124,15 @@ namespace STACK
 
         public override void OnDraw(Renderer renderer)
         {
+            for (int i = 0; i < Components.DrawCompontents.Count; i++)
+            {
+                var DrawComponent = Components.DrawCompontents[i];
+                if (DrawComponent.Visible)
+                {
+                    DrawComponent.Draw(renderer);
+                }
+            }
+
             for (int i = 0; i < Items.Count; i++)
             {
                 Items[i].Draw(renderer);
@@ -118,6 +141,11 @@ namespace STACK
 
         public override void OnNotify<T>(string message, T data)
         {
+            for (int i = 0; i < Components.NotifyCompontents.Count; i++)
+            {
+                Components.NotifyCompontents[i].Notify(message, data);
+            }
+
             for (int i = 0; i < Items.Count; i++)
             {
                 Items[i].Notify(message, data);
@@ -126,6 +154,11 @@ namespace STACK
 
         public override void OnLoadContent(ContentLoader content)
         {
+            for (int i = 0; i < Components.ContentCompontents.Count; i++)
+            {
+                Components.ContentCompontents[i].LoadContent(content);
+            }
+
             for (int i = 0; i < Items.Count; i++)
             {
                 Items[i].LoadContent(content);
@@ -134,6 +167,11 @@ namespace STACK
 
         public override void OnUnloadContent()
         {
+            for (int i = 0; i < Components.ContentCompontents.Count; i++)
+            {
+                Components.ContentCompontents[i].UnloadContent();
+            }
+
             for (int i = 0; i < Items.Count; i++)
             {
                 Items[i].UnloadContent();
@@ -142,17 +180,27 @@ namespace STACK
 
         public override void OnHandleInputEvent(Vector2 mouse, InputEvent inputEvent)
         {
+            for (int i = 0; i < Components.InteractiveCompontents.Count; i++)
+            {
+                Components.InteractiveCompontents[i].HandleInputEvent(mouse, inputEvent);
+            }
+
             for (int i = 0; i < Items.Count; i++)
             {
                 Items[i].HandleInputEvent(mouse, inputEvent);
             }
         }
 
-        public override void OnInitialize()
+        public override void OnInitialize(bool restore)
         {
+            for (int i = 0; i < Components.InitializeCompontents.Count; i++)
+            {
+                Components.InitializeCompontents[i].Initialize(restore);
+            }
+
             for (int i = 0; i < Items.Count; i++)
             {
-                Items[i].Initialize();
+                Items[i].Initialize(restore);
             }
         }
 

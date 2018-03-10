@@ -21,7 +21,7 @@ namespace STACK.Test
         {
             var Scene = new Scene();
             var Entity = new Entity();
-            Scene.Initialize();
+            Scene.Initialize(false);
             Scene.Push(Entity);
             Assert.AreEqual(1, Scene.GameObjectCache.Entities.Count);
             Scene.Pop(Entity);
@@ -43,23 +43,22 @@ namespace STACK.Test
         public void VisibleObjectsCacheOrderTest()
         {
             var Scene = new Scene();
-            Scene.Initialize();
-            var FirstEntity = new Entity() { Priority = 1 };
-            var SecondEntity = new Entity() { Priority = 2 };
+            Scene.Initialize(false);
+            var FirstEntity = new Entity() { DrawOrder = 1 };
+            var SecondEntity = new Entity() { DrawOrder = 2 };
             Scene.Push(FirstEntity, SecondEntity);
             Assert.AreEqual(Scene.GameObjectCache.VisibleObjects.First(), SecondEntity);
             Assert.AreEqual(Scene.GameObjectCache.VisibleObjects[1], FirstEntity);
 
-            // first object to draw is camera
-            Assert.AreEqual(Scene.GameObjectCache.ObjectsToDraw[1], FirstEntity);
-            Assert.AreEqual(Scene.GameObjectCache.ObjectsToDraw[2], SecondEntity);
+            Assert.AreEqual(Scene.GameObjectCache.ObjectsToDraw[0], FirstEntity);
+            Assert.AreEqual(Scene.GameObjectCache.ObjectsToDraw[1], SecondEntity);
 
-            FirstEntity.Priority = 3;
+            FirstEntity.DrawOrder = 3;
             Assert.AreEqual(Scene.GameObjectCache.VisibleObjects.First(), FirstEntity);
             Assert.AreEqual(Scene.GameObjectCache.VisibleObjects[1], SecondEntity);
 
-            Assert.AreEqual(Scene.GameObjectCache.ObjectsToDraw[1], SecondEntity);
-            Assert.AreEqual(Scene.GameObjectCache.ObjectsToDraw[2], FirstEntity);
+            Assert.AreEqual(Scene.GameObjectCache.ObjectsToDraw[0], SecondEntity);
+            Assert.AreEqual(Scene.GameObjectCache.ObjectsToDraw[1], FirstEntity);
         }
 
         [TestMethod]
@@ -69,35 +68,34 @@ namespace STACK.Test
             var DrawScene = new Scene("2");
             var World = new World(new TestServiceProvider());
             World.Push(UpdateScene, DrawScene);
-            World.Initialize();
+            World.Initialize(false);
 
-            var FirstEntity = new Entity() { Priority = 1 };
-            var SecondEntity = new Entity() { Priority = 2 };
+            var FirstEntity = new Entity() { DrawOrder = 1 };
+            var SecondEntity = new Entity() { DrawOrder = 2 };
             UpdateScene.Push(FirstEntity, SecondEntity);
 
             FirstEntity.DrawScene = DrawScene;
             SecondEntity.DrawScene = DrawScene;
 
             Assert.AreEqual(UpdateScene.GameObjectCache.VisibleObjects.Count, 0);
-            Assert.AreEqual(UpdateScene.GameObjectCache.ObjectsToDraw.Count, 1);
+            Assert.AreEqual(UpdateScene.GameObjectCache.ObjectsToDraw.Count, 0);
 
             Assert.AreEqual(DrawScene.GameObjectCache.VisibleObjects.First(), SecondEntity);
             Assert.AreEqual(DrawScene.GameObjectCache.VisibleObjects[1], FirstEntity);
 
-            // first object to draw is camera
-            Assert.AreEqual(DrawScene.GameObjectCache.ObjectsToDraw[1], FirstEntity);
-            Assert.AreEqual(DrawScene.GameObjectCache.ObjectsToDraw[2], SecondEntity);
+            Assert.AreEqual(DrawScene.GameObjectCache.ObjectsToDraw[0], FirstEntity);
+            Assert.AreEqual(DrawScene.GameObjectCache.ObjectsToDraw[1], SecondEntity);
 
-            FirstEntity.Priority = 3;
+            FirstEntity.DrawOrder = 3;
 
             Assert.AreEqual(UpdateScene.GameObjectCache.VisibleObjects.Count, 0);
-            Assert.AreEqual(UpdateScene.GameObjectCache.ObjectsToDraw.Count, 1);
+            Assert.AreEqual(UpdateScene.GameObjectCache.ObjectsToDraw.Count, 0);
 
             Assert.AreEqual(DrawScene.GameObjectCache.VisibleObjects.First(), FirstEntity);
             Assert.AreEqual(DrawScene.GameObjectCache.VisibleObjects[1], SecondEntity);
 
-            Assert.AreEqual(DrawScene.GameObjectCache.ObjectsToDraw[1], SecondEntity);
-            Assert.AreEqual(DrawScene.GameObjectCache.ObjectsToDraw[2], FirstEntity);
+            Assert.AreEqual(DrawScene.GameObjectCache.ObjectsToDraw[0], SecondEntity);
+            Assert.AreEqual(DrawScene.GameObjectCache.ObjectsToDraw[1], FirstEntity);
         }
 
         [TestMethod]
@@ -172,7 +170,7 @@ namespace STACK.Test
             var HitObject = Stack1.GetHitObject(new Vector2(5, 5));
             Assert.AreEqual(Object1, HitObject);
 
-            var Test = STACK.State.State.SaveState<Scene>(Stack1);
+            var Test = STACK.State.Serialization.SaveState<Scene>(Stack1);
             Trace.WriteLine(Test.Length); // 2917
             Trace.WriteLine(System.Text.Encoding.Default.GetString(Test));
         }
@@ -223,7 +221,7 @@ namespace STACK.Test
             World.Push(Scene1, Scene2);
             Scene1.Push(Entity1);
             Scene2.Push(Entity2);
-            World.Initialize();
+            World.Initialize(false);
             Entity2.EnterScene(Scene1);
             Scene1.Notify<object>("notification", null);
             Assert.IsTrue(Entity2.Notified);

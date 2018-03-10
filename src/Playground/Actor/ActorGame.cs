@@ -47,15 +47,5 @@ namespace Actor
             this.StartWorld();
             Engine.Resume();
         }
-
-        protected override void OnRestore()
-        {
-
-        }
-
-        protected override void OnWorldStart()
-        {
-
-        }
     }
 }

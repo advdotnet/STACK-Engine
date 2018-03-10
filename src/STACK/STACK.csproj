@@ -48,9 +48,20 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="TomShane.Neoforce.Controls">
+      <HintPath>..\..\lib\TomShane.Neoforce.Controls.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Components\Audio\AudioManager.cs" />
+    <Compile Include="Components\DataTypes\DirectionExtensions.cs" />
+    <Compile Include="Components\DataTypes\Directions4.cs" />
+    <Compile Include="Components\DataTypes\Directions8.cs" />
+    <Compile Include="Components\DataTypes\Frames.cs" />
+    <Compile Include="Components\DataTypes\State.cs" />
+    <Compile Include="Components\DataTypes\StateExtensions.cs" />
+    <Compile Include="Components\DataTypes\TextDuration.cs" />
+    <Compile Include="Components\DataTypes\TextLine.cs" />
     <Compile Include="Components\Graphics\IPlayAnimation.cs" />
     <Compile Include="Components\Graphics\SpriteCustomAnimation.cs" />
     <Compile Include="Components\Graphics\SpriteDelayAnimation.cs" />
@@ -63,16 +74,27 @@
     <Compile Include="Components\Graphics\BloomSettings.cs" />
     <Compile Include="Components\Random.cs" />
     <Compile Include="Components\Input\Mouse.cs" />
+    <Compile Include="Console\Commands\ExitCommand.cs" />
+    <Compile Include="Console\Commands\GetCommand.cs" />
+    <Compile Include="Console\Commands\HelpCommand.cs" />
+    <Compile Include="Console\Commands\IConsoleCommand.cs" />
+    <Compile Include="Console\Commands\ResumeCommand.cs" />
+    <Compile Include="Console\Commands\ScreenshotCommand.cs" />
+    <Compile Include="Console\Commands\SetCommand.cs" />
+    <Compile Include="Console\Console.cs" />
+    <Compile Include="Console\ConsoleHistory.cs" />
+    <Compile Include="Console\Control.cs" />
     <Compile Include="Content\tree.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>tree.tt</DependentUpon>
     </Compile>
+    <Compile Include="Datatypes\GameSettings.cs" />
     <Compile Include="Graphics\DisplaySettings.cs" />
-    <Compile Include="Graphics\GraphicSettings.cs" />
     <Compile Include="Input\Provider\InputProvider.cs" />
     <Compile Include="Input\Provider\PlaybackInputProvider.cs" />
     <Compile Include="Input\Provider\UserInputProvider.cs" />
+    <Compile Include="Log\Handler\ConsoleLogHandler.cs" />
     <Compile Include="Log\Handler\DebugLogHandler.cs" />
     <Compile Include="Log\Handler\SystemConsoleLogHandler.cs" />
     <Compile Include="Log\ILogHandler.cs" />
@@ -83,6 +105,13 @@
     <Compile Include="World\Base\BaseEntity.cs" />
     <Compile Include="Components\Interaction\HotspotMesh.cs" />
     <Compile Include="Components\CameraLocked.cs" />
+    <Compile Include="World\Base\ComponentList.cs" />
+    <Compile Include="World\Base\Interfaces\IContent.cs" />
+    <Compile Include="World\Base\Interfaces\IDraw.cs" />
+    <Compile Include="World\Base\Interfaces\IInitialize.cs" />
+    <Compile Include="World\Base\Interfaces\IInteractive.cs" />
+    <Compile Include="World\Base\Interfaces\INotify.cs" />
+    <Compile Include="World\Base\Interfaces\IUpdate.cs" />
     <Compile Include="World\ContentLoader.cs" />
     <Compile Include="Components\Navigation\ScenePath.cs" />
     <Compile Include="World\Scene\GameObjectCache.cs" />
@@ -95,7 +124,6 @@
     <Compile Include="Components\Interaction\InteractiveVisibility.cs" />
     <Compile Include="Components\Navigation\Entrance.cs" />
     <Compile Include="Components\Graphics\Text.cs" />
-    <Compile Include="Components\Graphics\TextDuration.cs" />
     <Compile Include="World\Scene\SceneCollection.cs" />
     <Compile Include="Datatypes\Extensions.cs" />
     <Compile Include="Datatypes\GameSpeed.cs" />
@@ -130,7 +158,6 @@
     <Compile Include="Scripting\Delay.cs" />
     <Compile Include="World\Scene\Scene.cs" />
     <Compile Include="World\World.cs" />
-    <Compile Include="Components\Graphics\TextLine.cs" />
     <Compile Include="Datatypes\Enums.cs" />
     <Compile Include="Graphics\Primitives.cs" />
     <Compile Include="Graphics\Renderer.cs" />
@@ -172,6 +199,7 @@
       <DependentUpon>build.tt</DependentUpon>
     </None>
     <None Include="Content\fonts\stack.spritefont" />
+    <None Include="Content\Skins\Default.skin" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\build.tt">
@@ -187,7 +215,7 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>tree.cs</LastGenOutput>
     </Content>
-    <Content Include="graphicsettings.xml" />
+    <Content Include="settings.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!--<Import Project="$(MSBuildExtensionsPath)\MonoGame\v3.0\MonoGame.Content.Builder.targets" />-->

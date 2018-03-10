@@ -48,12 +48,18 @@ namespace STACK.Test
             }
         }
 
+        class SkipContent : ISkipContent
+        {
+            public SkipCutscene SkipCutscene => null;
+            public SkipText SkipText => null;
+        }
+
         /// <summary>
         /// Asserts the entrance script is executed immediately after changing the scene.        
         /// </summary>
         [TestMethod]
         public void PassingSetsDrawScene()
-        {
+        {            
             var World = new World(WorldTest.ServiceProvider);
             var ExitScene = new Scene("s1") { Enabled = true, Visible = true };
             var EntranceScene = new Scene("s2") { Enabled = true, Visible = true };
@@ -67,12 +73,10 @@ namespace STACK.Test
             World.Push(ExitScene);
             World.Push(EntranceScene);
 
-            ExitEntity.Get<Exit>().Use(Player);
+            World.Initialize(false);
 
-            while (Player.DrawScene == ExitScene)
-            {
-                World.Update();
-            }
+            ExitEntity.Get<Exit>().Use(Player);
+            World.Update();
 
             Assert.AreEqual(EntranceScene, Player.DrawScene);
             Assert.AreEqual(new Vector2(10, 10), Player.Get<Transform>().Position);
@@ -114,9 +118,12 @@ namespace STACK.Test
 
             var Script = Entity.Get<Scripts>().Say("text");
 
-            while (!Script.Done)
+            int i = 0;
+            while (!Script.Done && i <= 1000)
             {
+
                 Entity.Update();
+                i++;
             }
 
             Assert.AreEqual(Components.State.Idle, Entity.Get<Transform>().State);
@@ -139,11 +146,9 @@ namespace STACK.Test
 
             Assert.IsTrue(Transform.State.Has(Components.State.Talking));
 
-            while (!Script.Done)
-            {
-                Entity.Update();
-            }
+            Entity.Update();
 
+            Assert.IsTrue(Script.Done);
             Assert.IsFalse(Transform.State.Has(Components.State.Talking));
             Assert.IsTrue(Transform.State.Has(Components.State.Walking));
         }

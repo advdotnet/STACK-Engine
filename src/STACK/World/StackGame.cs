@@ -33,35 +33,36 @@ namespace STACK
         }
 
         protected virtual void OnStart() { }
-        protected virtual void OnRestore() { }
         protected virtual void HandleInputEvent() { }
-        protected virtual void OnWorldStart() { }
-        protected virtual void OnWorldInitialized() { }
+        protected virtual void OnWorldInitialized(bool restore) { }
 
         public void RestoreState(SaveGame state)
         {
-            var DeserializedWorld = State.State.LoadState<World>(state.World);
+            var DeserializedWorld = State.Serialization.LoadState<World>(state.World);
 
-            if (World != null)
-            {
-                if (World.Loaded)
-                {
-                    World.UnloadContent();
-                }
+            UnloadWorld();
 
-                World.Unsubscribe(Engine.InputProvider);
-            }
+            GameSettings.SetCurrentCulture(state.Culture);
 
-            World = new World(Engine.Services, Engine.InputProvider, VirtualResolution, GetScenes());
-            World.Initialize();
-            World._Scenes = null;
-            World.RestoreState(DeserializedWorld, Engine.Services, Engine.GetWorldContent());
-
-            OnRestore();
+            World = DeserializedWorld;
+            World.Setup(Engine.Services, Engine.InputProvider);
+            World.LoadContent(Engine.GetWorldContent());
+            World.Initialize(true);
+            OnWorldInitialized(true);
         }
 
         public void StartWorld()
         {
+            UnloadWorld();
+
+            World = new World(Engine.Services, Engine.InputProvider, VirtualResolution, GetScenes());
+            World.LoadContent(Engine.GetWorldContent());
+            World.Initialize(false);
+            OnWorldInitialized(false);
+        }
+
+        public void UnloadWorld()
+        {
             if (World != null)
             {
                 if (World.Loaded)
@@ -70,17 +71,9 @@ namespace STACK
                 }
 
                 World.Unsubscribe(Engine.InputProvider);
+
+                World = null;
             }
-
-            World = new World(Engine.Services, Engine.InputProvider, VirtualResolution, GetScenes());
-            World._Scenes = null;
-            World.Initialize();
-
-            OnWorldInitialized();
-
-            World.LoadContent(Engine.GetWorldContent());
-
-            OnWorldStart();
         }
 
         public static EmptyGame Empty

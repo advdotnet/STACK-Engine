@@ -10,15 +10,18 @@ namespace STACK
     [Serializable]
     public class SaveGame
     {
+        const string FILE_EXTENSION = ".dat";
+
         public byte[] World;
-
         public string Name = "SaveGame";
-
+        public string Culture;
         public DateTime Date;
-
         public byte[] Screenshot;
 
-        private const string FILE_EXTENSION = ".dat";
+        private SaveGame()
+        {
+            Culture = GameSettings.GetCurrentCultureName();
+        }
 
         public SaveGame(string name, byte[] world, byte[] screen)
         {
@@ -58,9 +61,9 @@ namespace STACK
                 }
             }
 
-            var SerializedWorld = STACK.State.State.SaveState<World>(world);
+            var SerializedWorld = STACK.State.Serialization.SaveState<World>(world);
 
-            STACK.State.State.SaveToFile<SaveGame>(GetFilePath(folder, Filename), new SaveGame(name, SerializedWorld, screen));
+            STACK.State.Serialization.SaveToFile<SaveGame>(GetFilePath(folder, Filename), new SaveGame(name, SerializedWorld, screen));
         }
 
         private static string GetFilePath(string folder, string filename)
@@ -73,7 +76,7 @@ namespace STACK
             Log.WriteLine("Loading game " + name);
             try
             {
-                return STACK.State.State.LoadFromFile<SaveGame>(GetFilePath(folder, name));
+                return STACK.State.Serialization.LoadFromFile<SaveGame>(GetFilePath(folder, name));
             }
             catch (Exception e)
             {

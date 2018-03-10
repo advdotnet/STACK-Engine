@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameSettings>
+  <Resolution>
+    <X>640</X>
+    <Y>400</Y>
+  </Resolution>
+  <Culture>en-US</Culture>
+  <Adapter>0</Adapter>
+  <DisplayMode>WindowMaxInteger</DisplayMode>
+  <MultiSampling>false</MultiSampling>
+  <Bloom>true</Bloom>
+  <VSync>true</VSync>
+  <Debug>true</Debug>
+</GameSettings>

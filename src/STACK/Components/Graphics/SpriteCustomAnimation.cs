@@ -7,38 +7,54 @@ namespace STACK.Components
     /// Component for custom sprite animations.
     /// </summary>
     [Serializable]
-    public class SpriteCustomAnimation : Component, IPlayAnimation
+    public class SpriteCustomAnimation : Component, IPlayAnimation, IUpdate, IInitialize
     {
-        public Action<Transform, string, Frames> GetFramesAction { get; private set; }
-        string AnimationName = "";
+        Action<Transform, string, Frames> _GetFramesAction;
+        string _AnimationName = "";
         int Step = 0;
         [NonSerialized]
         Sprite _Sprite = null;
         [NonSerialized]
         Transform _Transform = null;
         Frames Frames = Frames.Empty;
-        public bool Playing { get; private set; }
-        public bool Looped { get; private set; }
-        public string Animation { get { return AnimationName; } }
+        bool _Playing;
+        bool _Looped;
+        bool _Enabled;
+        float _UpdateOrder;
+
+        public Action<Transform, string, Frames> GetFramesAction { get { return _GetFramesAction; } }
+        public bool Playing { get { return _Playing; } }
+        public bool Looped { get { return _Looped; } }
+        public string Animation { get { return _AnimationName; } }
+        public bool Enabled { get { return _Enabled; } set { _Enabled = value; } }
+        public float UpdateOrder { get { return _UpdateOrder; } set { _UpdateOrder = value; } }
+
+        public SpriteCustomAnimation()
+        {
+            Enabled = true;
+        }
+
+        public void Initialize(bool restore)
+        {
+            CacheComponents();
+        }
 
         private void CacheComponents()
         {
-            _Sprite = _Sprite ?? Get<Sprite>();
-            _Transform = _Transform ?? Get<Transform>();
+            _Sprite = Get<Sprite>();
+            _Transform = Get<Transform>();
         }
 
         public void StopAnimation()
         {
-            Playing = false;
+            _Playing = false;
             Step = 0;
-            AnimationName = string.Empty;
-            Looped = false;
+            _AnimationName = string.Empty;
+            _Looped = false;
         }
 
-        public override void OnUpdate()
+        public void Update()
         {
-            CacheComponents();
-
             if (null == _Sprite || !Playing)
             {
                 return;
@@ -63,16 +79,15 @@ namespace STACK.Components
 
         public void PlayAnimation(string animation, bool looped)
         {
-            CacheComponents();
             // avoid memory allocation
             Frames.Clear();
             GetFramesAction(_Transform, animation, Frames);
             if (Frames.Count > 0)
             {
-                Looped = looped;
-                Playing = true;
+                _Looped = looped;
+                _Playing = true;
                 Step = 0;
-                AnimationName = animation;
+                _AnimationName = animation;
                 _Sprite.CurrentFrame = Frames[Step];
             }
             else
@@ -86,6 +101,6 @@ namespace STACK.Components
             return addTo.Add<SpriteCustomAnimation>();
         }
 
-        public SpriteCustomAnimation SetGetFramesAction(Action<Transform, string, Frames> data) { GetFramesAction = data; return this; }
+        public SpriteCustomAnimation SetGetFramesAction(Action<Transform, string, Frames> value) { _GetFramesAction = value; return this; }
     }
 }

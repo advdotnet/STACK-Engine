@@ -134,10 +134,10 @@ namespace STACK.Test
         public void InitializeUpdatesStackPriority()
         {
             var World = new World(ServiceProvider);
-            World.Push(new Scene("s1") { Priority = 1 }, new Scene("s2") { Priority = 5 });
+            World.Push(new Scene("s1") { DrawOrder = 1 }, new Scene("s2") { DrawOrder = 5 });
             Assert.AreEqual("s2", World.Scenes[0].ID);
             Assert.AreEqual("s1", World.Scenes[1].ID);
-            World.Initialize();
+            World.Initialize(false);
             Assert.AreEqual("s2", World.Scenes[0].ID);
             Assert.AreEqual("s1", World.Scenes[1].ID);
         }
@@ -146,10 +146,10 @@ namespace STACK.Test
         public void PriorityChangeBubblesUp()
         {
             var World = new World(ServiceProvider);
-            World.Push(new Scene("s1") { Priority = 2 }, new Scene("s2") { Priority = 1 });
+            World.Push(new Scene("s1") { DrawOrder = 2 }, new Scene("s2") { DrawOrder = 1 });
             Assert.AreEqual("s1", World.Scenes[0].ID);
             Assert.AreEqual("s2", World.Scenes[1].ID);
-            World["s2"].Priority = 3;
+            World["s2"].DrawOrder = 3;
             Assert.AreEqual("s2", World.Scenes[0].ID);
             Assert.AreEqual("s1", World.Scenes[1].ID);
         }
@@ -168,7 +168,7 @@ namespace STACK.Test
             Scene.Push(o1);
 
             World.Push(Scene);
-            World.Initialize();
+            World.Initialize(false);
 
             return World;
         }
@@ -204,7 +204,7 @@ namespace STACK.Test
             var World = GetTestWorld(Input);
 
             // push another layer with higher priority
-            Scene Stack2 = new Scene("s2") { Enabled = true, Priority = 5 };
+            Scene Stack2 = new Scene("s2") { Enabled = true, DrawOrder = 5 };
 
             var o2 = new Entity("o2");
             o2.Add<HotspotRectangle>().SetRectangle(5, 5, 5, 5);

@@ -1,5 +1,4 @@
 ﻿using Microsoft.Xna.Framework;
-using STACK.Components;
 using STACK.Logging;
 using StarFinder;
 using System;
@@ -155,10 +154,10 @@ namespace STACK
             Scenes.Sort(PrioritySorter);
         }
 
-        public override void OnInitialize()
+        public override void OnInitialize(bool restore)
         {
             UpdatePriority();
-            base.OnInitialize();
+            base.OnInitialize(restore);
         }
 
         /// <summary>
@@ -185,17 +184,8 @@ namespace STACK
             if (!Items.Contains(scene))
             {
                 Log.WriteLine("Adding Scene " + scene.ID);
-
-                if (scene is Component)
-                {
-                    Add((Component)scene);
-                }
-                else
-                {
-                    Items.Add(scene);
-                    CacheScenes();
-                }
-
+                Items.Add(scene);
+                CacheScenes();
                 return true;
             }
 
@@ -257,26 +247,6 @@ namespace STACK
             }
 
             return null;
-        }
-
-        /// <summary>
-        /// Restores a snapshot of a list of scenes from the given file.
-        /// </summary>        
-        protected void RestoreState(List<BaseEntity> scenes, IServiceProvider provider, ContentLoader content)
-        {
-            Items.Clear();
-            Scenes.Clear();
-            ComponentCache.Clear();
-
-            foreach (var Scene in scenes)
-            {
-                Push(Scene);
-            }
-
-            Get<ServiceProvider>().SetProvider(provider);
-            Get<SkipContent>().SetInterfaceFromServiceProvider(provider);
-
-            LoadContent(content);
         }
     }
 }

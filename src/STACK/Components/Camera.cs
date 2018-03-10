@@ -12,16 +12,18 @@ namespace STACK.Components
         float _Zoom;
         Vector2 _Position;
         float _Rotation;
+        Matrix _Transformation;
+        Matrix _TransformationInverse;
 
         /// <summary>
         /// The transformation matrix for the camera.
         /// </summary>
-        public Matrix Transformation { get; private set; }
+        public Matrix Transformation { get { return _Transformation; } }
 
         /// <summary>
         /// The inverse of the transformation matrix.
         /// </summary>
-        public Matrix TransformationInverse { get; private set; }
+        public Matrix TransformationInverse { get { return _TransformationInverse; } }
 
         public Camera() : this(Vector2.Zero, 1f) { }
 
@@ -30,7 +32,6 @@ namespace STACK.Components
             _Zoom = zoom;
             _Rotation = 0.0f;
             _Position = position;
-            Visible = false;
             UpdateTransformation();
         }
 
@@ -93,11 +94,11 @@ namespace STACK.Components
 
         void UpdateTransformation()
         {
-            Transformation = Matrix.CreateRotationZ(Rotation)
+            _Transformation = Matrix.CreateRotationZ(Rotation)
                 * Matrix.CreateScale(new Vector3(Zoom, Zoom, 1))
                 * Matrix.CreateTranslation(new Vector3(-_Position.X, -_Position.Y, 0).ToInt());
 
-            TransformationInverse = Matrix.Invert(Transformation);
+            _TransformationInverse = Matrix.Invert(Transformation);
         }
 
         public static Camera Create(BaseEntityCollection addTo)

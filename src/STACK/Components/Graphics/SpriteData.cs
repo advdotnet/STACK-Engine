@@ -5,14 +5,15 @@ using System;
 namespace STACK.Components
 {
     [Serializable]
-    public class SpriteData : Component
+    public class SpriteData : Component, INotify
     {
         public SpriteData()
         {
-            Visible = false;
+
         }
 
-        public float Rotation { get; private set; }
+        float _Rotation;
+        public float Rotation { get { return _Rotation; } }
         public Color Color = Color.White;
         public Vector2 Scale = Vector2.One;
         public Vector2 Origin = Vector2.Zero;
@@ -27,11 +28,11 @@ namespace STACK.Components
             return addTo.Add<SpriteData>();
         }
 
-        public override void OnNotify<T>(string message, T data)
+        public void Notify<T>(string message, T data)
         {
             if (message == Messages.OrientationChanged && OrientationFlip)
             {
-                Vector2 Orientation = (Vector2)(object)data;
+                var Orientation = (Vector2)(object)data;
                 if (Orientation.X < 0)
                 {
                     Effects = SpriteEffects.FlipHorizontally;
@@ -43,7 +44,7 @@ namespace STACK.Components
             }
             else if (message == Messages.ColorChanged)
             {
-                Color NewColor = (Color)(object)data;
+                var NewColor = (Color)(object)data;
                 Color = NewColor;
             }
         }
@@ -52,7 +53,7 @@ namespace STACK.Components
         public SpriteData SetScale(float valueX, float valueY) { Scale = new Vector2(valueX, valueY); return this; }
         public SpriteData SetOffset(float valueX, float valueY) { Offset = new Vector2(valueX, valueY); return this; }
         public SpriteData SetEffects(SpriteEffects value) { Effects = value; return this; }
-        public SpriteData SetRotation(float value) { Rotation = value; return this; }
+        public SpriteData SetRotation(float value) { _Rotation = value; return this; }
         public SpriteData SetOrigin(float valueX, float valueY) { Origin = new Vector2(valueX, valueY); return this; }
         public SpriteData SetOrigin(Vector2 value) { Origin = value; return this; }
         public SpriteData SetOrientationFlip(bool value) { OrientationFlip = value; return this; }

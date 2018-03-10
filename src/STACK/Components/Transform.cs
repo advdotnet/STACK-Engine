@@ -3,190 +3,26 @@ using System;
 
 namespace STACK.Components
 {
-    [Flags]
-    public enum State
-    {
-        Idle = 0,
-        Walking = 1,
-        Talking = 2,
-        Custom = 4
-    }
-
-    /// <summary>
-    /// Discretizes an orientation vector into eight distinct directions.
-    /// </summary>
-    public enum Directions8
-    {
-        None, LeftUp, Up, RightUp, Right, RightDown, Down, LeftDown, Left
-    }
-
-    /// <summary>
-    /// Discretizes an orientation vector into four distinct directions.
-    /// </summary>
-    public enum Directions4
-    {
-        None, Left, Up, Right, Down
-    }
-
-    public static class Direction
-    {
-        public static Vector2 ToVector2(this Directions4 direction)
-        {
-            switch (direction)
-            {
-                case Directions4.Up: return new Vector2(0, -1);
-                case Directions4.Right: return new Vector2(1, 0);
-                case Directions4.Down: return new Vector2(0, 1);
-                case Directions4.Left: return new Vector2(-1, 0);
-            }
-            return Vector2.Zero;
-        }
-
-        public static Vector2 ToVector2(this Directions8 direction)
-        {
-            switch (direction)
-            {
-                case Directions8.LeftUp: return new Vector2(-1, -1);
-                case Directions8.Up: return new Vector2(0, -1);
-                case Directions8.RightUp: return new Vector2(1, -1);
-                case Directions8.Right: return new Vector2(1, 0);
-                case Directions8.RightDown: return new Vector2(1, 1);
-                case Directions8.Down: return new Vector2(0, 1);
-                case Directions8.LeftDown: return new Vector2(-1, 1);
-                case Directions8.Left: return new Vector2(-1, 0);
-            }
-            return Vector2.Zero;
-        }
-
-        public static Directions4 ToDirection4(this Vector2 value)
-        {
-            if (value.Equals(Vector2.Zero))
-            {
-                return Directions4.None;
-            }
-
-            if (Math.Abs(value.X) > Math.Abs(value.Y))
-            {
-                if (value.X > 0)
-                {
-                    return Directions4.Right;
-                }
-                else
-                {
-                    return Directions4.Left;
-                }
-            }
-            else
-            {
-                if (value.Y > 0)
-                {
-                    return Directions4.Down;
-                }
-                else
-                {
-                    return Directions4.Up;
-                }
-            }
-        }
-
-        public static Directions8 ToDirection8(this Vector2 value)
-        {
-            var AbsX = Math.Abs(value.X);
-            var AbsY = Math.Abs(value.Y);
-
-            if (AbsX == 0 && AbsY == 0)
-            {
-                return Directions8.None;
-            }
-
-            if (AbsX > AbsY)
-            {
-                // vertical side
-                double Half = AbsX * 0.4142;
-                if (value.X > 0)
-                {
-                    // left side
-                    if (value.Y > Half) return Directions8.LeftDown;
-                    if (value.Y < -Half) return Directions8.LeftUp;
-                    return Directions8.Left;
-                }
-                else
-                {
-                    // right side
-                    if (value.Y > Half) return Directions8.RightDown;
-                    if (value.Y < -Half) return Directions8.RightUp;
-                    return Directions8.Right;
-                }
-            }
-            else
-            {
-                // horizontal side
-                var Half = AbsY * 0.4142;
-                if (value.Y > 0)
-                {
-                    // bottom
-                    if (value.X > Half) return Directions8.RightDown;
-                    if (value.X < -Half) return Directions8.LeftDown;
-                    return Directions8.Down;
-                }
-                else
-                {
-                    // top
-                    if (value.X > Half) return Directions8.RightUp;
-                    if (value.X < -Half) return Directions8.LeftUp;
-                    return Directions8.Up;
-                }
-            }
-        }
-    }
-
-    public static class StateExtensions
-    {
-        public static string ToAnimationName(this State state)
-        {
-            switch (state)
-            {
-                case State.Idle: return "idle";
-                case State.Talking: return "talk";
-                case State.Walking: return "walk";
-                case State.Custom: return "custom";
-                case State.Talking | State.Walking: return "walktalk";
-            }
-
-            return string.Empty;
-        }
-
-        public static bool Has(this State state, State value)
-        {
-            // do not use enum.HasFlag
-            return (state & value) == value;
-        }
-
-        public static bool Is(this State state, State value)
-        {
-            return state == value;
-        }
-
-        public static State Add(this State state, State value)
-        {
-            state |= value;
-            return state;
-        }
-
-        public static State Remove(this State state, State value)
-        {
-            state &= ~value;
-            return state;
-        }
-    }
-
     [Serializable]
     public class Transform : Component
     {
-        public bool UpdateZWithPosition { get; set; }
-        public bool Absolute { get; private set; }
-
+        bool _UpdateZWithPosition;
+        bool _Absolute;
         float _Z = 0;
+        State _State = State.Idle;
+        Vector2 _Position = Vector2.Zero;
+        float _Scale = 1f;
+        float _Speed = 150.0f;
+        Vector2 _Orientation = Vector2.Zero;
+        Func<float> _CalculateEffectiveSpeedFn;
+
+        public bool UpdateZWithPosition { get { return _UpdateZWithPosition; } set { _UpdateZWithPosition = value; } }
+        public bool Absolute { get { return _Absolute; } }
+
+
+        public float Scale { get { return _Scale; } set { _Scale = value; } }
+        public float Speed { get { return _Speed; } set { _Speed = value; } }
+
         public float Z
         {
             get
@@ -197,13 +33,12 @@ namespace STACK.Components
             {
                 if (_Z != value)
                 {
-                    Entity.Priority = value;
+                    Entity.DrawOrder = value;
                     _Z = value;
                 }
             }
         }
 
-        private State _State = State.Idle;
         public State State
         {
             get
@@ -217,12 +52,11 @@ namespace STACK.Components
                     return;
                 }
 
-                NotifyParent(Messages.AnimationStateChanged, value);
+                Parent?.Notify(Messages.AnimationStateChanged, value);
                 _State = value;
             }
         }
 
-        private Vector2 _Position = Vector2.Zero;
         public Vector2 Position
         {
             get
@@ -241,13 +75,9 @@ namespace STACK.Components
                     Z = value.Y;
                 }
                 _Position = value;
-                NotifyParent(Messages.PositionChanged, value);
+                Parent?.Notify(Messages.PositionChanged, value);
             }
         }
-
-        public float Scale = 1f;
-        public float Speed = 150.0f;
-        private Func<float> CalculateEffectiveSpeedFn;
 
         private float CalculateEffectiveSpeedDefault()
         {
@@ -266,12 +96,10 @@ namespace STACK.Components
         {
             get
             {
-                return CalculateEffectiveSpeedFn();
+                return _CalculateEffectiveSpeedFn();
             }
         }
 
-
-        private Vector2 _Orientation = Vector2.Zero;
         public Vector2 Orientation
         {
             get
@@ -288,14 +116,13 @@ namespace STACK.Components
 
                 }
                 _Orientation = value;
-                NotifyParent(Messages.OrientationChanged, value);
+                Parent.Notify(Messages.OrientationChanged, value);
             }
         }
 
         public Transform()
         {
-            Visible = false;
-            CalculateEffectiveSpeedFn = CalculateEffectiveSpeedDefault;
+            _CalculateEffectiveSpeedFn = CalculateEffectiveSpeedDefault;
         }
 
         public void Turn(Directions8 direction)
@@ -348,9 +175,9 @@ namespace STACK.Components
         public Transform SetDirection(Directions4 value) { Orientation = value.ToVector2(); return this; }
         public Transform SetDirection(Directions8 value) { Orientation = value.ToVector2(); return this; }
         public Transform SetUpdateZWithPosition(bool value) { UpdateZWithPosition = value; return this; }
-        public Transform SetAbsolute(bool value) { Absolute = value; return this; }
+        public Transform SetAbsolute(bool value) { _Absolute = value; return this; }
         public Transform AddState(State state) { State = State.Add(state); return this; }
         public Transform RemoveState(State state) { State = State.Remove(state); return this; }
-        public Transform SetCalculateEffectiveSpeedFn(Func<float> calculateEffectiveSpeedFn) { CalculateEffectiveSpeedFn = calculateEffectiveSpeedFn; return this; }
+        public Transform SetCalculateEffectiveSpeedFn(Func<float> calculateEffectiveSpeedFn) { _CalculateEffectiveSpeedFn = calculateEffectiveSpeedFn; return this; }
     }
 }

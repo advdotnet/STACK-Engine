@@ -1,24 +1,29 @@
-﻿using System;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
+using System;
 
 namespace STACK
-{     
+{
     [Serializable]
     public struct TextLine
     {
-        public string Text { get; }
-        public Vector2 Position { get; }
-        public Vector2 Origin { get; }
-        public Rectangle Hitbox { get; }
-        public Color Color { get; }
+        string _Text;
+        Vector2 _Position, _Origin;
+        Rectangle _Hitbox;
+        Color _Color;
+
+        public string Text { get { return _Text; } }
+        public Vector2 Position { get { return _Position; } }
+        public Vector2 Origin { get { return _Origin; } }
+        public Rectangle Hitbox { get { return _Hitbox; } }
+        public Color Color { get { return _Color; } }
 
         public TextLine(string text, Vector2 position, Vector2 origin, Rectangle hitbox, Color color)
         {
-            Text = text;
-            Position = position;
-            Origin = origin;
-            Hitbox = hitbox;
-            Color = color;
+            _Text = text;
+            _Position = position;
+            _Origin = origin;
+            _Hitbox = hitbox;
+            _Color = color;
         }
 
         public TextLine ChangeColor(Color value)

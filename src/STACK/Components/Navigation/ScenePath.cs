@@ -4,8 +4,12 @@ using System;
 namespace STACK.Components
 {
     [Serializable]
-    public class ScenePath : Component
+    public class ScenePath : Component, IDraw, IContent
     {
+        public bool Visible { get; set; }
+        public float DrawOrder { get; set; }
+        [NonSerialized]
+        private bool Loaded = false;
         public string PathFile { get; private set; }
         Path _Path;
 
@@ -13,7 +17,6 @@ namespace STACK.Components
         {
             PathFile = string.Empty;
             Visible = true;
-            Enabled = false;
         }
 
         public Path Path
@@ -30,11 +33,12 @@ namespace STACK.Components
                 }
 
                 _Path = value;
-                NotifyParent(Messages.ScenePathChanged, value);
+
+                Parent?.Notify(Messages.ScenePathChanged, value);
             }
         }
 
-        public override void OnDraw(Renderer renderer)
+        public void Draw(Renderer renderer)
         {
             bool DrawPath = EngineVariables.DebugPath && Path != null && renderer.Stage != RenderStage.PostBloom;
 
@@ -44,7 +48,7 @@ namespace STACK.Components
             }
         }
 
-        public override void OnLoadContent(ContentLoader content)
+        public void LoadContent(ContentLoader content)
         {
             if (!string.IsNullOrEmpty(PathFile))
             {
@@ -52,12 +56,14 @@ namespace STACK.Components
             }
         }
 
+        public void UnloadContent() { }
+
         void LoadPath(string file)
         {
             PathFile = file;
             if (Loaded)
             {
-                OnLoadContent(((Scene)Parent).Content);
+                LoadContent(((Scene)Parent).Content);
             }
         }
 

@@ -38,7 +38,7 @@ namespace STACK
         /// </summary>
         /// <param name="key">verb</param>
         /// <param name="val">script</param>
-        /// <param name="actor">entity to execute the scripts on</param>
+        /// <param name="actor">entity to execute the script on</param>
         /// <param name="pred">predicate</param>
         /// <returns></returns>
         public Interactions Add(Verb key, IEnumerator val, Entity actor, Func<bool> pred = null)

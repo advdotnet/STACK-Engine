@@ -9,7 +9,7 @@ namespace STACK
     {
         int BloomIndex = 0;
 
-        public void HandleDebugInputEvent(InputEvent input)
+        public void HandleSkipInputEvent(InputEvent input)
         {
             if (input.Handled)
             {
@@ -31,10 +31,29 @@ namespace STACK
                 SkipCutscene.Start();
                 input.Handled = true;
             }
+        }
+
+        public void HandleDebugInputEvent(InputEvent input)
+        {
+            if (input.Handled)
+            {
+                return;
+            }
+
+            if (input.IsKeyPress(Keys.Tab))
+            {
+                StackEngine.Console.Toggle();
+                StackEngine.Pause(StackEngine.Console.Visible);
+            }
+
+            if (StackEngine.Console.Visible)
+            {
+                return;
+            }
 
             // Switch to the next bloom settings preset?
 
-            if (input.IsKeyPress(Keys.A))
+            if (input.IsKeyPress(Keys.A) && false)
             {
                 BloomIndex = (BloomIndex + 1) % BloomSettings.PresetSettings.Length;
 
@@ -63,6 +82,10 @@ namespace STACK
             if (input.IsKeyPress(Keys.F3)) SetSpeed(GameSpeed.Half);
             if (input.IsKeyPress(Keys.F4)) SetSpeed(GameSpeed.Infinity);
 
+            //if (input.IsKeyPress(Keys.R))
+            //{
+            //    ToggleFullScreen();
+            //}
 
             if (input.IsKeyPress(Keys.Add))
             {

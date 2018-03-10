@@ -5,8 +5,11 @@ using System.Collections.Generic;
 namespace STACK.Components
 {
     [Serializable]
-    public class Navigation : Component
+    public class Navigation : Component, INotify, IUpdate
     {
+        public bool Enabled { get; set; }
+        public float UpdateOrder { get; set; }
+
         public List<Vector2> WayPoints
         {
             get
@@ -70,11 +73,12 @@ namespace STACK.Components
             ApplyScale = true;
             ApplyColoring = false;
             RestrictPosition = true;
+            Enabled = true;
             UseScenePath = true;
             _WayPoints = new List<Vector2>(5);
         }
 
-        public override void OnNotify<T>(string message, T data)
+        public void Notify<T>(string message, T data)
         {
             if (message == Messages.ScenePathChanged && UseScenePath)
             {
@@ -121,7 +125,7 @@ namespace STACK.Components
         private Vector2 LastPosition = Vector2.Zero;
         private bool _IsDirty = false;
 
-        public override void OnUpdate()
+        public void Update()
         {
             var Transform = Get<Transform>();
 
@@ -154,7 +158,7 @@ namespace STACK.Components
 
                     if (LastColor != Color)
                     {
-                        NotifyParent(Messages.ColorChanged, Color);
+                        Parent?.Notify(Messages.ColorChanged, Color);
                         LastColor = Color;
                     }
                 }

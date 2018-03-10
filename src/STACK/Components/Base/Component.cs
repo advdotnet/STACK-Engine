@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace STACK
 {
     [Serializable]
-    public abstract class Component : BaseEntity
+    public abstract class Component
     {
         private BaseEntityCollection _Parent;
 
@@ -36,8 +36,8 @@ namespace STACK
 
         private void CacheTransients()
         {
-            CastedEntity = Parent as Entity;
-            CastedScene = Parent as Scene;
+            CastedEntity = _Parent as Entity;
+            CastedScene = _Parent as Scene;
             ParentWorld = _Parent as World;
         }
 
@@ -68,14 +68,6 @@ namespace STACK
         public T Get<T>() where T : Component
         {
             return Entity.Get<T>();
-        }
-
-        public void NotifyParent<T>(string message, T data)
-        {
-            if (Parent != null)
-            {
-                Parent.Notify(message, data);
-            }
         }
     }
 }

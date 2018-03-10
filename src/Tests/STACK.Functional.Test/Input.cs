@@ -1,8 +1,13 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using STACK;
+using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using STACK.Components;
-using System;
-using System.Collections.Generic;
 
 namespace STACK.Functional.Test
 {
@@ -23,7 +28,7 @@ namespace STACK.Functional.Test
 
                 public void OnMouseUp(Vector2 position, MouseButton button)
                 {
-                    throw new Exception();
+                    throw new Exception();                    
                 }
             }
 
@@ -38,15 +43,15 @@ namespace STACK.Functional.Test
             }
         }
 
-        [TestMethod, TestCategory("GPU")]
+        [TestMethod, TestCategory("GPU")]        
         public void InputNotSendToWorldWhenPaused()
         {
-            using (var GraphicsDevice = Mock.CreateGraphicsDevice())
-            using (var Runner = new TestEngine(new TestGame(), Mock.Wrap(GraphicsDevice), Mock.Input))
-            {
-                Runner.Pause();
-                Runner.MouseClick(10, 10);
-            }
-        }
+			using (var GraphicsDevice = Mock.CreateGraphicsDevice())
+			using (var Runner = new TestEngine(new TestGame(), Mock.Wrap(GraphicsDevice), Mock.Input))
+			{
+				Runner.Pause();
+				Runner.MouseClick(10, 10);
+			}
+        }      
     }
 }

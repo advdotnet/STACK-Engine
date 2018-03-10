@@ -6,22 +6,25 @@ namespace STACK.Components
     [Serializable]
     public class RenderSettings : Component
     {
-        public BloomSettings BloomSettings { get; set; }
-        public bool BloomEnabled { get; set; }
-        public Point VirtualResolution { get; private set; }
+        BloomSettings _BloomSettings;
+        bool _BloomEnabled;
+        Point _VirtualResolution;
+
+        public BloomSettings BloomSettings { get { return _BloomSettings; } set { _BloomSettings = value; } }
+        public bool BloomEnabled { get { return _BloomEnabled; } set { _BloomEnabled = value; } }
+        public Point VirtualResolution { get { return _VirtualResolution; } }
 
         public RenderSettings()
         {
-             BloomSettings = BloomSettings.PresetSettings[5];
-             BloomEnabled = true;
-             Visible = false;
+            _BloomSettings = BloomSettings.PresetSettings[5];
+            BloomEnabled = true;
         }
 
         public static RenderSettings Create(World addTo)
         {
-            return addTo.Add<RenderSettings>();            
+            return addTo.Add<RenderSettings>();
         }
 
-        public RenderSettings SetVirtualResolution(Point value) { VirtualResolution = value; return this; }
-    }  
+        public RenderSettings SetVirtualResolution(Point value) { _VirtualResolution = value; return this; }
+    }
 }

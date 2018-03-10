@@ -43,6 +43,8 @@ namespace STACK
         {
             IGraphicsDeviceService Service = (IGraphicsDeviceService)this.ServiceProvider.GetService(typeof(IGraphicsDeviceService));
             var Texture = Util.LoadTexture(Service.GraphicsDevice, path);
+            //path = System.IO.Path.ChangeExtension(path, null);
+            //var Texture = this.Load<Texture2D>(path);
 
             page.rendererObject = Texture;
             page.width = Texture.Width;
