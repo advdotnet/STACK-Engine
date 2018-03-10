@@ -1,20 +1,11 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Xna.Framework;
-using STACK;
-using STACK.Input;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using STACK.Components;
-using StarFinder;
 
 namespace STACK.Test
 {
     [TestClass]
     public class NavigationTest
-    {           
+    {
         [TestMethod]
         public void UseScenePathEnterSceneTest()
         {
@@ -23,7 +14,7 @@ namespace STACK.Test
             Scene Scene = new Scene("s1");
             ScenePath.Create(Scene).SetPath(ScriptsTest.CreateRectangularPath(100));
             Scene.Push(Entity);
-            Scene.Initialize();
+            Scene.Initialize(false);
             Entity.EnterScene(Scene);
             Assert.AreEqual(Scene.Get<ScenePath>().Path, Entity.Get<Navigation>().Path);
         }
@@ -48,8 +39,8 @@ namespace STACK.Test
             Scene Scene = new Scene("s1");
             ScenePath.Create(Scene).SetPath(ScriptsTest.CreateRectangularPath(100));
             Scene.Push(Entity);
-            Scene.Initialize();
-            Scene.Get<ScenePath>().Path = ScriptsTest.CreateRectangularPath(50);           
+            Scene.Initialize(false);
+            Scene.Get<ScenePath>().Path = ScriptsTest.CreateRectangularPath(50);
             Assert.AreEqual(Scene.Get<ScenePath>().Path, Entity.Get<Navigation>().Path);
         }
 
@@ -62,7 +53,7 @@ namespace STACK.Test
             Scene Scene = new Scene("s1");
             ScenePath.Create(Scene);
             Scene.Push(Entity);
-            Scene.Initialize();
+            Scene.Initialize(false);
             var Path = ScriptsTest.CreateRectangularPath(50);
             Assert.IsFalse(Path.Contains(Entity.Get<Transform>().Position));
             Scene.Get<ScenePath>().Path = Path;
@@ -70,6 +61,6 @@ namespace STACK.Test
         }
 
 
-        
+
     }
 }

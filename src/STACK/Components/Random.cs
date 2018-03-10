@@ -13,7 +13,6 @@ namespace STACK.Components
         public Randomizer()
         {
             Random = new Random(23);
-            Visible = false;
         }
 
         public double CreateDouble()

@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using StarFinder;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace STACK.Test
 {
@@ -28,11 +29,12 @@ namespace STACK.Test
 
             var Path = new Path(A, B, C, D);
 
-            byte[] Check = STACK.State.State.SaveState<Path>(Path);
+            byte[] Check = STACK.State.Serialization.SaveState<Path>(Path);
+            File.WriteAllBytes("pathstate.txt", Check);
 
             Console.Write(Check.Length + " bytes.");
 
-            var NewPath = STACK.State.State.LoadState<Path>(Check);
+            var NewPath = STACK.State.Serialization.LoadState<Path>(Check);
             Assert.AreEqual(2, NewPath.Mesh.MaxX);
             Assert.AreEqual(0, NewPath.Mesh.MinX);
             Assert.IsTrue(Check.Length < 4089);

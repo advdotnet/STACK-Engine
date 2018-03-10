@@ -10,14 +10,21 @@ namespace STACK.Components
     /// </summary>
     [Serializable]
     [DebuggerDisplay("{ScriptCollection}")]
-    public class Scripts : Component
+    public class Scripts : Component, IUpdate
     {
         public readonly List<Script> ScriptCollection = new List<Script>(3);
+        public bool Enabled { get; set; }
+        public float UpdateOrder { get; set; }
+
+        public Scripts()
+        {
+            Enabled = true;
+        }
 
         /// <summary>
         /// Updates all scripts.
         /// </summary>        				
-        public override void OnUpdate()
+        public void Update()
         {
             for (int i = ScriptCollection.Count - 1; i >= 0; i--)
             {

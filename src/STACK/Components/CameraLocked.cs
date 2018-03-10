@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
-using System.Runtime.Serialization;
 
 namespace STACK.Components
 {
@@ -11,12 +10,14 @@ namespace STACK.Components
     /// Also the DrawScene's camera will scroll to ensure the entity is in the visible region.
     /// </summary>
     [Serializable]
-    public class CameraLocked : Component
+    public class CameraLocked : Component, INotify, IUpdate, IInitialize
     {
+        public bool Enabled { get; set; }
         public float Acceleration { get; set; }
         public float Damping { get; set; }
         public bool Scroll { get; set; }
         public bool CenterCharacter { get; set; }
+        public float UpdateOrder { get; set; }
 
         private bool NewSceneEntered = false;
 
@@ -26,20 +27,15 @@ namespace STACK.Components
             Damping = 3.0f;
             Scroll = true;
             CenterCharacter = true;
+            Enabled = true;
         }
 
-        public override void OnLoadContent(ContentLoader content)
+        public void Initialize(bool restore)
         {
             CacheTransients();
         }
 
-        [OnDeserialized]
-        void OnDeserialized(StreamingContext c)
-        {
-            CacheTransients();
-        }
-
-        public override void OnNotify<T>(string message, T data)
+        public void Notify<T>(string message, T data)
         {
             if (!Enabled)
             {
@@ -91,7 +87,7 @@ namespace STACK.Components
         [NonSerialized]
         Camera Camera;
 
-        public override void OnUpdate()
+        public void Update()
         {
             if (!Scroll || !HasBackground)
             {
@@ -142,5 +138,6 @@ namespace STACK.Components
         public CameraLocked SetDamping(float value) { Damping = value; return this; }
         public CameraLocked SetScroll(bool value) { Scroll = value; return this; }
         public CameraLocked SetCenterCharacter(bool value) { CenterCharacter = value; return this; }
+        public CameraLocked SetEnabled(bool value) { Enabled = value; return this; }
     }
 }

@@ -124,12 +124,12 @@ namespace STACK
         }
 
         [NonSerialized]
-        List<BaseEntity> _ObjectsToDraw = null;
+        List<IDraw> _ObjectsToDraw = null;
 
         /// <summary>
         /// List of Entities / Components to draw.
         /// </summary>
-        public List<BaseEntity> ObjectsToDraw
+        public List<IDraw> ObjectsToDraw
         {
             get
             {
@@ -146,7 +146,7 @@ namespace STACK
         {
             if (_ObjectsToDraw == null)
             {
-                _ObjectsToDraw = new List<BaseEntity>(15);
+                _ObjectsToDraw = new List<IDraw>(15);
             }
 
             if (!onlySort)
@@ -161,7 +161,11 @@ namespace STACK
 
                 for (int i = 0; i < Components.Count; i++)
                 {
-                    ObjectsToDraw.Add(Components[i]);
+                    var DrawableComponent = Components[i] as IDraw;
+                    if (null != DrawableComponent)
+                    {
+                        ObjectsToDraw.Add(DrawableComponent);
+                    }
                 }
             }
 
@@ -234,13 +238,10 @@ namespace STACK
 
             _Components.Clear();
 
-            for (int i = 0; i < Scene.Items.Count; i++)
+            for (int i = 0; i < Scene.Components.Count; i++)
             {
-                var Component = Scene.Items[i] as Component;
-                if (Component != null)
-                {
-                    _Components.Add(Component);
-                }
+                var Component = Scene.Components[i];
+                _Components.Add(Component);
             }
         }
 

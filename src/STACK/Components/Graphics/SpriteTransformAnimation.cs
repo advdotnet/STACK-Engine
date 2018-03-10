@@ -6,16 +6,32 @@ namespace STACK.Components
     /// Component for animating an entity based on it's transform component.
     /// </summary>
     [Serializable]
-    public class SpriteTransformAnimation : Component
+    public class SpriteTransformAnimation : Component, INotify, IUpdate, IInitialize
     {
-        public Func<Transform, int, int, int> SetFrameFn { get; private set; }
-        int Step = 0;
+        Func<Transform, int, int, int> _SetFrameFn;
+        bool _Enabled;
+        float _UpdateOrder;
+        int _Step = 0;
         [NonSerialized]
         Sprite _Sprite = null;
         [NonSerialized]
         Transform _Transform = null;
 
-        public override void OnNotify<T>(string message, T data)
+        public Func<Transform, int, int, int> SetFrameFn { get { return _SetFrameFn; } }
+        public bool Enabled { get { return _Enabled; } set { _Enabled = value; } }
+        public float UpdateOrder { get { return _UpdateOrder; } set { _UpdateOrder = value; } }
+
+        public SpriteTransformAnimation()
+        {
+            Enabled = true;
+        }
+
+        public void Initialize(bool restore)
+        {
+            CacheComponents();
+        }
+
+        public void Notify<T>(string message, T data)
         {
             if (Messages.OrientationChanged == message)
             {
@@ -24,21 +40,19 @@ namespace STACK.Components
 
             if (Messages.AnimationStateChanged == message)
             {
-                Step = 0;
+                _Step = 0;
             }
         }
 
-        public override void OnUpdate()
+        public void Update()
         {
-            CacheComponents();
-
             if (null == _Sprite || null == _Transform || IsCustomAnimationPlaying() || !Enabled)
             {
                 return;
             }
 
             SetFrame();
-            Step++;
+            _Step++;
         }
 
         private void CacheComponents()
@@ -49,14 +63,12 @@ namespace STACK.Components
 
         public void SetFrame()
         {
-            CacheComponents();
-
             if (null == _Sprite || null == _Transform || IsCustomAnimationPlaying() || !Enabled)
             {
                 return;
             }
 
-            _Sprite.CurrentFrame = SetFrameFn(_Transform, Step, _Sprite.CurrentFrame);
+            _Sprite.CurrentFrame = SetFrameFn(_Transform, _Step, _Sprite.CurrentFrame);
         }
 
         private bool IsCustomAnimationPlaying()
@@ -70,6 +82,6 @@ namespace STACK.Components
             return addTo.Add<SpriteTransformAnimation>();
         }
 
-        public SpriteTransformAnimation SetSetFrameFn(Func<Transform, int, int, int> data) { SetFrameFn = data; return this; }
+        public SpriteTransformAnimation SetSetFrameFn(Func<Transform, int, int, int> data) { _SetFrameFn = data; return this; }
     }
 }

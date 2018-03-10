@@ -9,11 +9,11 @@ namespace STACK.Components
     /// Dispatches incoming input events to various delegates.
     /// </summary>
     [Serializable]
-    public class InputDispatcher : Component
+    public class InputDispatcher : Component, IInteractive
     {
         public InputDispatcher()
         {
-            Visible = false;
+
         }
 
         public Action<Vector2> OnMouseMove { get; set; }
@@ -22,7 +22,7 @@ namespace STACK.Components
         public Action<Keys> OnKeyUp { get; set; }
         public Action<Keys> OnKeyDown { get; set; }
 
-        public override void OnHandleInputEvent(Vector2 mouse, InputEvent inputEvent)
+        public void HandleInputEvent(Vector2 mouse, InputEvent inputEvent)
         {
             inputEvent.Dispatch(mouse, OnMouseMove, OnMouseDown, OnMouseUp, OnKeyDown, OnKeyUp);
         }

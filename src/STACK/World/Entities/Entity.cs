@@ -88,7 +88,7 @@ namespace STACK
         {
             if (!string.IsNullOrEmpty(id))
             {
-                ID = id;
+                _ID = id;
             }
         }
 
@@ -108,21 +108,21 @@ namespace STACK
 
         public override void OnPropertyChanged(string property)
         {
-            if (Properties.Priority == property || Properties.Visible == property)
+            if (Properties.DrawOrder == property || Properties.Visible == property)
             {
                 if (UpdateScene != DrawScene)
                 {
                     if (DrawScene != null && DrawScene.Initialized)
                     {
                         DrawScene.GameObjectCache.CacheVisibleObjects();
-                        DrawScene.GameObjectCache.CacheObjectsToDraw(Properties.Priority == property);
+                        DrawScene.GameObjectCache.CacheObjectsToDraw(Properties.DrawOrder == property);
                     }
                 }
 
                 if (UpdateScene != null && UpdateScene.Initialized)
                 {
                     UpdateScene.GameObjectCache.CacheVisibleObjects();
-                    UpdateScene.GameObjectCache.CacheObjectsToDraw(Properties.Priority == property);
+                    UpdateScene.GameObjectCache.CacheObjectsToDraw(Properties.DrawOrder == property);
                 }
             }
 

@@ -1,6 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Xna.Framework;
-using STACK.Graphics;
 using System.IO;
 
 namespace STACK.Test
@@ -11,7 +10,7 @@ namespace STACK.Test
         [TestMethod, TestCategory("FileSystem")]
         public void ResolutionSettingsTest()
         {
-            const string FILENAME = GraphicSettings.CONFIGFILENAME;
+            const string FILENAME = GameSettings.CONFIGFILENAME;
 
             var Resolution = new Point(10, 10);
             var Adapter = 1;
@@ -19,7 +18,7 @@ namespace STACK.Test
             var VSync = true;
             var MultiSampling = false;
 
-            var Settings = new GraphicSettings()
+            var Settings = new GameSettings()
             {
                 Resolution = Resolution,
                 Adapter = Adapter,
@@ -32,7 +31,7 @@ namespace STACK.Test
 
             using (var FileStream = File.Open(FILENAME, FileMode.Open))
             {
-                var DeserializedSettings = GraphicSettings.DeserializeFromStream(FileStream);
+                var DeserializedSettings = GameSettings.DeserializeFromStream(FileStream);
                 Assert.AreEqual(Resolution, DeserializedSettings.Resolution);
                 Assert.AreEqual(Adapter, DeserializedSettings.Adapter);
                 Assert.AreEqual(Mode, DeserializedSettings.DisplayMode);

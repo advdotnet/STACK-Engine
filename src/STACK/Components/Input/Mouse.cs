@@ -9,14 +9,21 @@ namespace STACK.Components
     /// currently under the mouse.
     /// </summary>
     [Serializable]
-    public class Mouse : Component
+    public class Mouse : Component, IUpdate, IInteractive
     {
-        public Vector2 Position { get; set; }
-        public Entity ObjectUnderMouse { get; private set; }
+        Vector2 _Position;
+        Entity _ObjectUnderMouse;
+        bool _Enabled;
+        float _UpdateOrder;
+
+        public Vector2 Position { get { return _Position; } set { _Position = value; } }
+        public Entity ObjectUnderMouse { get { return _ObjectUnderMouse; } }
+        public bool Enabled { get { return _Enabled; } set { _Enabled = value; } }
+        public float UpdateOrder { get { return _UpdateOrder; } set { _UpdateOrder = value; } }
 
         public Mouse()
         {
-            Visible = false;
+            Enabled = true;
         }
 
         public static Mouse Create(World addTo)
@@ -24,19 +31,19 @@ namespace STACK.Components
             return addTo.Add<Mouse>();
         }
 
-        public override void OnHandleInputEvent(Vector2 mouse, InputEvent inputEvent)
+        public void HandleInputEvent(Vector2 mouse, InputEvent inputEvent)
         {
             if (inputEvent.Type == InputEventType.MouseMove)
             {
                 Position = InputEvent.IntToVector2(inputEvent.Param);
 
-                ObjectUnderMouse = World.GetObjectAtPosition(Position);
+                _ObjectUnderMouse = World.GetObjectAtPosition(Position);
             }
         }
 
-        public override void OnUpdate()
+        public void Update()
         {
-            ObjectUnderMouse = World.GetObjectAtPosition(Position);
+            _ObjectUnderMouse = World.GetObjectAtPosition(Position);
         }
 
         public Mouse SetPosition(Vector2 value) { Position = value; return this; }

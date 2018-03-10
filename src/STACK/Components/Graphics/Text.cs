@@ -8,32 +8,18 @@ using System.Runtime.Serialization;
 namespace STACK
 {
     [Serializable]
-    public class Text : Component
+    public class Text : Component, IContent, IDraw, IUpdate, IInitialize
     {
-        public Alignment Align = Alignment.Center;
-
-        public Color Color
-        {
-            get
-            {
-                return _Color;
-            }
-            set
-            {
-                _Color = value;
-                for (int i = 0; i < Lines.Count; i++)
-                {
-                    Lines[i] = Lines[i].ChangeColor(value);
-                }
-            }
-        }
+        Alignment _Align = Alignment.Center;
+        RenderStage _RenderStage = RenderStage.PostBloom;
 
         [NonSerialized]
         public Func<string, Vector2> MeasureStringFn = null;
+        public Alignment Align { get { return _Align; } set { _Align = value; } }
         public SpriteFont SpriteFont { get { return _SpriteFont; } }
         public Rectangle Bounds;
         public Vector2 Offset = Vector2.Zero;
-        public RenderStage RenderStage { get; set; }
+        public RenderStage RenderStage { get { return _RenderStage; } set { _RenderStage = value; } }
         public List<TextLine> Lines = new List<TextLine>(5);
         public Rectangle ConstrainingRectangle = Rectangle.Empty;
         public bool Constrain = false;
@@ -58,23 +44,72 @@ namespace STACK
         float AlphaPercentage = 1;
         float Duration = -1;
 
-        public Text()
+        Vector2 _ConstrainOffset;
+        bool _Visible;
+        float _DrawOrder;
+        bool _Enabled;
+        float _UpdateOrder;
+
+        public Vector2 ConstrainOffset { get { return _ConstrainOffset; } }
+        public bool Visible { get { return _Visible; } set { _Visible = value; } }
+        public float DrawOrder { get { return _DrawOrder; } set { _DrawOrder = value; } }
+        public bool Enabled { get { return _Enabled; } set { _Enabled = value; } }
+        public float UpdateOrder { get { return _UpdateOrder; } set { _UpdateOrder = value; } }
+
+        Vector2 TextBounds = Vector2.Zero;
+
+        public Color Color
         {
-            RenderStage = RenderStage.PostBloom;
+            get
+            {
+                return _Color;
+            }
+            set
+            {
+                _Color = value;
+                for (int i = 0; i < Lines.Count; i++)
+                {
+                    Lines[i] = Lines[i].ChangeColor(value);
+                }
+            }
         }
 
-        public override void OnInitialize()
+        public Text()
         {
-            Transform = Get<Transform>();
+            Enabled = true;
+            Visible = true;
+        }
+
+        [OnSerializing]
+        public void OnSerializing(StreamingContext context)
+        {
+            if (null != Lines && Lines.Count == 0)
+            {
+                Lines = null;
+            }
+        }
+
+        [OnSerialized]
+        public void OnSerialized(StreamingContext context)
+        {
+            if (null == Lines)
+            {
+                Lines = new List<TextLine>(5);
+            }
         }
 
         [OnDeserialized]
         void OnDeserialized(StreamingContext c)
         {
+            OnSerialized(c);
+        }
+
+        public void Initialize(bool restore)
+        {
             Transform = Get<Transform>();
         }
 
-        public override void OnLoadContent(ContentLoader content)
+        public void LoadContent(ContentLoader content)
         {
             _SpriteFont = content.Load<SpriteFont>(Font);
 
@@ -84,6 +119,8 @@ namespace STACK
                 MeasureStringFn = _SpriteFont.MeasureString;
             }
         }
+
+        public void UnloadContent() { }
 
         public void Set(string text, float duration, Vector2 position)
         {
@@ -105,7 +142,7 @@ namespace STACK
             }
 
             CreateLines(position, wrappedText);
-            ConstrainOffset = ConstrainBounds();
+            _ConstrainOffset = ConstrainBounds();
         }
 
         private void SetBounds(Vector2 position)
@@ -115,8 +152,6 @@ namespace STACK
             Bounds.Width = Width;
             Bounds.Height = Height;
         }
-
-        public Vector2 ConstrainOffset { get; private set; }
 
         private Vector2 ConstrainBounds()
         {
@@ -180,8 +215,6 @@ namespace STACK
 
             return Result + Line.TrimEnd(SPACE);
         }
-
-        Vector2 TextBounds = Vector2.Zero;
 
         void CreateLines(Vector2 position, string wrappedText)
         {
@@ -249,11 +282,11 @@ namespace STACK
 
                 Position = position;
                 SetBounds(position);
-                ConstrainOffset = ConstrainBounds();
+                _ConstrainOffset = ConstrainBounds();
             }
         }
 
-        public override void OnUpdate()
+        public void Update()
         {
             if (Duration > 0)
             {
@@ -277,7 +310,7 @@ namespace STACK
             }
         }
 
-        public override void OnDraw(Graphics.Renderer renderer)
+        public void Draw(Graphics.Renderer renderer)
         {
             if (RenderStage != renderer.Stage || Lines.Count == 0 || _SpriteFont == null)
             {
@@ -319,5 +352,7 @@ namespace STACK
         public Text SetRenderStage(RenderStage value) { RenderStage = value; return this; }
         public Text SetConstrain(bool value) { Constrain = value; return this; }
         public Text SetConstrainingRectangle(Rectangle value) { ConstrainingRectangle = value; return this; }
+        public Text SetVisible(bool value) { Visible = value; return this; }
+        public Text SetFadeDuration(float value) { FadeDuration = value; return this; }
     }
 }

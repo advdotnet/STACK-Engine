@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using STACK.Graphics;
 using STACK.Input;
 using STACK.Logging;
 using STACK.Utils;
@@ -10,7 +9,7 @@ namespace STACK
 {
     public partial class Window : Game, ISkipContent
     {
-        public GraphicSettings GraphicSettings { get; private set; }
+        public GameSettings GameSettings { get; private set; }
         public StackEngine StackEngine { get; private set; }
         public SkipText SkipText { get; }
         public SkipCutscene SkipCutscene { get; }
@@ -25,13 +24,13 @@ namespace STACK
             Game = game;
 
             Log.AddLogger(new DebugLogHandler());
-            Log.WriteLine("Loading graphic settings");
+            Log.WriteLine("Loading game settings");
 
-            GraphicSettings = GraphicSettings.LoadFromConfigFile();
+            GameSettings = GameSettings.LoadFromConfigFile();
 
             Log.WriteLine("Initializing graphics");
 
-            Graphics = GraphicSettings.CreateGraphicsDeviceManager(this);
+            Graphics = GameSettings.CreateGraphicsDeviceManager(this);
 
             Window.ClientSizeChanged += OnClientSizeChanged;
             Window.AllowUserResizing = true;
@@ -46,15 +45,22 @@ namespace STACK
             IsFixedTimeStep = true;
             IsMouseVisible = false;
 
-            GraphicSettings.Initialize(Graphics);
+            GameSettings.Initialize(Graphics, Game.VirtualResolution);
 
             var Services = new GameServiceContainer();
             Services.AddService(typeof(IGraphicsDeviceService), Graphics);
             Services.AddService(typeof(ISkipContent), this);
 
             InputProvider = new UserInputProvider();
-            StackEngine = new StackEngine(Game, Services, InputProvider, GraphicSettings.GetTargetResolution());
-            InputProvider.Handler += HandleDebugInputEvent;
+            StackEngine = new StackEngine(Game, Services, InputProvider, GameSettings);
+
+            if (GameSettings.Debug)
+            {
+                InputProvider.Handler += HandleDebugInputEvent;
+            }
+
+            InputProvider.Handler += HandleSkipInputEvent;
+
             StackEngine.OnExit += Exit;
 
             Counter = new FrameRateCounter();

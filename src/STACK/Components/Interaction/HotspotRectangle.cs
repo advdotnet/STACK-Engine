@@ -1,5 +1,4 @@
 ﻿using Microsoft.Xna.Framework;
-using STACK.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -31,17 +30,6 @@ namespace STACK.Components
             }
 
             return false;
-        }
-
-        public override void OnEndDraw(Renderer renderer)
-        {
-            if (EngineVariables.DebugPath)
-            {
-                foreach (var Rectangle in Rectangles)
-                {
-                    renderer.SpriteBatch.Draw(renderer.WhitePixelTexture, Rectangle, new Color(255, 255, 255, 100));
-                }
-            }
         }
 
         public static HotspotRectangle Create(Entity addTo)

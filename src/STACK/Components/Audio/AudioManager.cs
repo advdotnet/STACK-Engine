@@ -9,8 +9,11 @@ namespace STACK.Components
     /// AudioManager class which handles playback of songs and sound effects.
     /// </summary>
     [Serializable]
-    public class AudioManager : Component
+    public class AudioManager : Component, IContent, IUpdate, IInitialize
     {
+        public bool Enabled { get; set; }
+        public float UpdateOrder { get; set; }
+
         [NonSerialized]
         ContentLoader Content;
 
@@ -29,23 +32,20 @@ namespace STACK.Components
         string CurrentSongName;
 
         [NonSerialized]
-        ISkipContent _SkipContent = null;
+        ISkipContent SkipContent = null;
 
-        public ISkipContent SkipContent
+        public void Initialize(bool restore)
         {
-            get
-            {
-                return _SkipContent ?? (_SkipContent = ((World)Parent).Get<SkipContent>());
-            }
+            SkipContent = ((World)Parent).Get<SkipContent>();
         }
 
         public AudioManager()
         {
-            Priority = 500;
-            Visible = false;
+            UpdateOrder = 500;
+            Enabled = true;
         }
 
-        public override void OnLoadContent(ContentLoader content)
+        public void LoadContent(ContentLoader content)
         {
             var Service = ((World)Parent).Get<ServiceProvider>();
 
@@ -118,7 +118,7 @@ namespace STACK.Components
         /// </summary>
         /// <param name="soundEffect"></param>
         /// <returns>SoundEffectInstance, or null if in fast forward mode</returns>
-        public SoundEffectInstance PlaySoundEffect(string soundEffect)
+        public SoundEffectInstance PlaySoundEffect(string soundEffect, bool looped = false)
         {
             if (null != SkipContent.SkipCutscene && SkipContent.SkipCutscene.Enabled)
             {
@@ -131,10 +131,11 @@ namespace STACK.Components
             PlayingInstances.Add(Instance);
 
             Instance.Play();
+            Instance.IsLooped = looped;
             return Instance;
         }
 
-        public void Unload()
+        public void UnloadContent()
         {
             StopSong();
 
@@ -147,18 +148,12 @@ namespace STACK.Components
             }
         }
 
-        public override void OnUnloadContent()
-        {
-            Unload();
-            base.OnUnloadContent();
-        }
-
         public static AudioManager Create(World addTo)
         {
             return addTo.Add<AudioManager>();
         }
 
-        public override void OnUpdate()
+        public void Update()
         {
             if (null != SkipContent.SkipCutscene && SkipContent.SkipCutscene.Enabled)
             {

@@ -1,7 +1,8 @@
-﻿using Microsoft.Xna.Framework;
-using STACK.Input;
+﻿using STACK.Input;
+using STACK.Logging;
 using System;
 using System.Collections.Generic;
+using Console = STACK.Debug.Console;
 using Renderer = STACK.Graphics.Renderer;
 
 namespace STACK
@@ -13,20 +14,24 @@ namespace STACK
         public StackGame Game { get; private set; }
         public ContentLoader EngineContent { get; private set; }
         public IServiceProvider Services { get; private set; }
+        public Console Console { get; private set; }
         public InputProvider InputProvider { get; private set; }
         public event Action OnExit;
         ContentLoader WorldContent { get; set; }
 
-        public StackEngine(StackGame game, IServiceProvider services, InputProvider input, Point? targetResolution = null)
+        public StackEngine(StackGame game, IServiceProvider services, InputProvider input, GameSettings gameSettings)
         {
             Services = services;
+            gameSettings.SetCulture();
 
+            var ConsoleLogHandler = new ConsoleLogHandler(Console);
             EngineContent = new ContentLoader(Services);
-
-            Renderer = new Renderer(Services, EngineContent, game.VirtualResolution, targetResolution);
+            Renderer = new Renderer(Services, EngineContent, game.VirtualResolution, gameSettings.GetTargetResolution(game.VirtualResolution), gameSettings.Bloom);
 
             Game = game;
 
+            Console = new Console(this);
+            ConsoleLogHandler.Console = Console;
             Paused = true;
 
             InputProvider = input;
@@ -73,11 +78,7 @@ namespace STACK
 
         public void Dispose()
         {
-            if (Game.World != null)
-            {
-                Game.World.UnloadContent();
-            }
-
+            Game.World?.UnloadContent();
             Renderer.Dispose();
             WorldContent?.Dispose();
             EngineContent.Dispose();

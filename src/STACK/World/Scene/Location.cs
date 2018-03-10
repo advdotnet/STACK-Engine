@@ -11,7 +11,7 @@ namespace STACK
         public Location(string image, int columns = 1, int rows = 1)
         {
             var Background = new Entity(BACKGROUND_ENTITY_ID);
-            Background.SetPriority(-2);
+            Background.SetDrawOrder(-2);
 
             Sprite
                 .Create(Background)

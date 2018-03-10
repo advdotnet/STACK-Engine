@@ -1,11 +1,13 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Xml.Serialization;
 
-namespace STACK.Graphics
+namespace STACK
 {
 
     public enum DisplayMode
@@ -15,6 +17,12 @@ namespace STACK.Graphics
         /// Scaling happens if the target resolution does not match the game's virtual resolution.
         /// </summary>
         Window,
+
+        /// <summary>
+        /// Game is displayed in a window sized the maximum integer multiple of the game's virtual resolution
+        /// fitting on the preferred adapter.
+        /// </summary>
+        WindowMaxInteger,
 
         /// <summary>
         /// Fullscreen mode using the target resolution.
@@ -30,16 +38,26 @@ namespace STACK.Graphics
         /// <summary>
         /// The desktop resolution is used and the game is upscaled.
         /// </summary>
-        BorderlessScale
+        BorderlessScale,
+
+        /// <summary>
+        /// Desktop resolution with max integer scaling factor
+        /// </summary>
+        BorderlessMaxInteger
     }
 
     /// <summary>
-    /// Class holding target resolution, which adapter to render on, display mode,
+    /// Class holding culture, target resolution, which adapter to render on, display mode,
     /// VSync and MultiSampling properties.
     /// </summary>
-    public class GraphicSettings
+    public class GameSettings
     {
-        public const string CONFIGFILENAME = "graphicsettings.xml";
+        public const string CONFIGFILENAME = "settings.xml";
+
+        /// <summary>
+        /// Culture 
+        /// </summary>
+        public string Culture = "en-US";
 
         /// <summary>
         /// Target Resolution
@@ -62,14 +80,25 @@ namespace STACK.Graphics
         public bool MultiSampling = false;
 
         /// <summary>
+        /// Enable bloom
+        /// </summary>
+        public bool Bloom = true;
+
+        /// <summary>
         /// Enable vsync
         /// </summary>
         public bool VSync = true;
 
+        /// <summary>
+        /// Enable debug mode
+        /// </summary>
+        public bool Debug = true;
+
         public bool IsBorderless()
         {
             return DisplayMode.Borderless == DisplayMode ||
-               DisplayMode.BorderlessScale == DisplayMode;
+               DisplayMode.BorderlessScale == DisplayMode ||
+               DisplayMode.BorderlessMaxInteger == DisplayMode;
         }
 
         public bool IsFullscreen()
@@ -77,19 +106,33 @@ namespace STACK.Graphics
             return DisplayMode.Fullscreen == DisplayMode;
         }
 
+        private GraphicsAdapter PreferedGraphicsAdapter
+        {
+            get
+            {
+                var GA = GraphicsAdapter.Adapters.ElementAtOrDefault(Adapter);
+                if (null != GA)
+                {
+                    return GA;
+                }
+
+                return GraphicsAdapter.DefaultAdapter;
+            }
+        }
+
         public void PrepareDevice(object sender, PreparingDeviceSettingsEventArgs eventargs)
         {
             eventargs.GraphicsDeviceInformation.PresentationParameters.PresentationInterval = PresentInterval.One;
             eventargs.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage = RenderTargetUsage.DiscardContents;
 
-            if (Adapter != 0 && GraphicsAdapter.Adapters.ElementAtOrDefault(Adapter) != null)
+            if (!PreferedGraphicsAdapter.IsDefaultAdapter)
             {
-                eventargs.GraphicsDeviceInformation.Adapter = GraphicsAdapter.Adapters[Adapter];
+                eventargs.GraphicsDeviceInformation.Adapter = PreferedGraphicsAdapter;
             }
 
             if (IsBorderless())
             {
-                var displayMode = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode;
+                var displayMode = PreferedGraphicsAdapter.CurrentDisplayMode;
 
                 eventargs.GraphicsDeviceInformation.PresentationParameters.BackBufferFormat = displayMode.Format;
                 eventargs.GraphicsDeviceInformation.PresentationParameters.BackBufferWidth = displayMode.Width;
@@ -111,58 +154,89 @@ namespace STACK.Graphics
             return Graphics;
         }
 
-        public void Initialize(GraphicsDeviceManager graphics)
+        public void Initialize(GraphicsDeviceManager graphics, Point virtualResolution)
         {
             graphics.PreferMultiSampling = MultiSampling;
             graphics.SynchronizeWithVerticalRetrace = VSync;
             graphics.IsFullScreen = IsFullscreen();
 
-            graphics.PreferredBackBufferWidth = Resolution.X;
-            graphics.PreferredBackBufferHeight = Resolution.Y;
+            var TargetResolution = GetTargetResolution(virtualResolution);
+
+            graphics.PreferredBackBufferWidth = TargetResolution.X;
+            graphics.PreferredBackBufferHeight = TargetResolution.Y;
 
             graphics.ApplyChanges();
         }
 
-        public static GraphicSettings DeserializeFromStream(Stream stream)
+        public static GameSettings DeserializeFromStream(Stream stream)
         {
-            var serializer = new XmlSerializer(typeof(GraphicSettings));
-            return serializer.Deserialize(stream) as GraphicSettings;
+            var serializer = new XmlSerializer(typeof(GameSettings));
+
+            return serializer.Deserialize(stream) as GameSettings;
         }
 
-        public static GraphicSettings LoadFromConfigFile()
+        public static GameSettings LoadFromConfigFile()
         {
             try
             {
-                using (var stream = TitleContainer.OpenStream(CONFIGFILENAME))
+                using (var Stream = TitleContainer.OpenStream(CONFIGFILENAME))
                 {
-                    return DeserializeFromStream(stream);
+                    return DeserializeFromStream(Stream);
                 }
             }
             catch
             {
-                return new GraphicSettings();
+                return new GameSettings();
             }
         }
 
         public void Save(string fileName)
         {
-            using (var writer = new StreamWriter(fileName))
+            using (var Writer = new StreamWriter(fileName))
             {
-                var serializer = new XmlSerializer(GetType());
-                var xmlns = new XmlSerializerNamespaces();
-                xmlns.Add(string.Empty, string.Empty);
-                serializer.Serialize(writer, this, xmlns);
-                writer.Flush();
+                var Serializer = new XmlSerializer(GetType());
+                var XmlNS = new XmlSerializerNamespaces();
+                XmlNS.Add(string.Empty, string.Empty);
+                Serializer.Serialize(Writer, this, XmlNS);
+                Writer.Flush();
             }
         }
 
-        public Point? GetTargetResolution()
+        public Point GetTargetResolution(Point virtualResolution)
         {
             if (DisplayMode.Borderless == DisplayMode)
             {
                 return Resolution;
             }
-            return null;
+
+            if (DisplayMode.BorderlessMaxInteger == DisplayMode ||
+                DisplayMode.WindowMaxInteger == DisplayMode)
+            {
+                var DisplayMode = PreferedGraphicsAdapter.CurrentDisplayMode;
+                var IntegerScaleFactor = Math.Min(DisplayMode.Width / virtualResolution.X, DisplayMode.Height / virtualResolution.Y);
+
+                return new Point(virtualResolution.X * IntegerScaleFactor, virtualResolution.Y * IntegerScaleFactor);
+            }
+
+            return Resolution;
+        }
+
+        public void SetCulture()
+        {
+            SetCurrentCulture(Culture);
+        }
+
+        public static string GetCurrentCultureName()
+        {
+            return Thread.CurrentThread.CurrentCulture.Name;
+        }
+
+        public static void SetCurrentCulture(string name)
+        {
+            if (!string.IsNullOrEmpty(name) && name != GetCurrentCultureName())
+            {
+                Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(name);
+            }
         }
     }
 }

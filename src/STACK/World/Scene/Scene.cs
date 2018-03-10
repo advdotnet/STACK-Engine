@@ -45,7 +45,7 @@ namespace STACK
         {
             if (!string.IsNullOrEmpty(id))
             {
-                ID = id;
+                _ID = id;
             }
         }
 
@@ -125,9 +125,9 @@ namespace STACK
             base.OnHandleInputEvent(Get<Camera>().Transform(World.Get<Mouse>().Position), inputEvent);
         }
 
-        public override void OnInitialize()
+        public override void OnInitialize(bool restore)
         {
-            base.OnInitialize();
+            base.OnInitialize(restore);
 
             GameObjectCache.CacheAll();
         }
@@ -197,7 +197,7 @@ namespace STACK
                         var Transform = Entity.Get<Transform>();
                         var UseOriginalPosition = (Transform != null && Transform.Absolute);
 
-                        if (Hotspot.Enabled && Hotspot.IsHit(UseOriginalPosition ? position : TransformedPosition) && Entity.DrawScene == this)
+                        if (Hotspot.IsHit(UseOriginalPosition ? position : TransformedPosition) && Entity.DrawScene == this)
                         {
                             return Entity;
                         }
@@ -221,7 +221,7 @@ namespace STACK
 
         public override void OnPropertyChanged(string property)
         {
-            if (property == BaseEntity.Properties.Priority && World != null)
+            if (property == BaseEntity.Properties.DrawOrder && World != null)
             {
                 World.UpdatePriority();
             }

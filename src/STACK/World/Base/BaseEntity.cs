@@ -6,30 +6,38 @@ using System;
 namespace STACK
 {
     [Serializable]
-    public abstract class BaseEntity
+    public abstract class BaseEntity : IUpdate, IDraw, IInitialize, IContent, IInteractive, INotify
     {
         public static class Properties
         {
             public const string Interactive = "Interactive";
             public const string Enabled = "Enabled";
             public const string Visible = "Visible";
-            public const string Priority = "Priority";
+            public const string DrawOrder = "DrawOrder";
+            public const string UpdateOrder = "UpdateOrder";
         }
 
-        public bool Initialized { get; private set; }
-        public bool Loaded { get; private set; }
-        public string ID { get; protected set; }
-        float _Priority = 0;
+        public bool Initialized { get { return _Initialized; } }
+        public bool Loaded { get { return _Loaded; } }
+        public string ID { get { return _ID; } }
+
+        protected string _ID = string.Empty;
+        float _DrawOrder = 0;
+        float _UpdateOrder = 0;
         bool _Interactive = true;
         bool _Enabled = true;
         bool _Visible = true;
+        [NonSerialized]
+        bool _Initialized = false;
+        [NonSerialized]
+        bool _Loaded = false;
 
         public BaseEntity(string id)
-            : this()
+                : this()
         {
             if (!string.IsNullOrEmpty(id))
             {
-                ID = id;
+                _ID = id;
             }
         }
 
@@ -37,7 +45,7 @@ namespace STACK
         {
             if (string.IsNullOrEmpty(ID))
             {
-                ID = GetType().FullName;
+                _ID = GetType().FullName;
             }
         }
 
@@ -92,19 +100,36 @@ namespace STACK
             }
         }
 
-        public float Priority
+        public float DrawOrder
         {
             get
             {
-                return _Priority;
+                return _DrawOrder;
             }
             set
             {
-                bool Changed = _Priority != value;
+                bool Changed = _DrawOrder != value;
                 if (Changed)
                 {
-                    _Priority = value;
-                    OnPropertyChanged(Properties.Priority);
+                    _DrawOrder = value;
+                    OnPropertyChanged(Properties.DrawOrder);
+                }
+            }
+        }
+
+        public float UpdateOrder
+        {
+            get
+            {
+                return _UpdateOrder;
+            }
+            set
+            {
+                bool Changed = _UpdateOrder != value;
+                if (Changed)
+                {
+                    _UpdateOrder = value;
+                    OnPropertyChanged(Properties.UpdateOrder);
                 }
             }
         }
@@ -138,7 +163,7 @@ namespace STACK
         public void LoadContent(ContentLoader content)
         {
             OnLoadContent(content);
-            Loaded = true;
+            _Loaded = true;
         }
 
         public void Notify<T>(string message, T data)
@@ -152,18 +177,24 @@ namespace STACK
         public void UnloadContent()
         {
             OnUnloadContent();
-            Loaded = false;
+            _Loaded = false;
         }
 
-        public void Initialize()
+        /// <summary>
+        /// Called after the content has been loaded. Can be used to programatically create additional resources
+        /// or to cache some components.
+        /// </summary>
+        /// <param name="restore"></param>
+        public void Initialize(bool restore)
         {
-            OnInitialize();
-            Initialized = true;
+            OnInitialize(restore);
+            _Initialized = true;
         }
 
         public void SetEnabled(bool value) { Enabled = value; }
         public void SetVisible(bool value) { Visible = value; }
-        public void SetPriority(float value) { Priority = value; }
+        public void SetDrawOrder(float value) { DrawOrder = value; }
+        public void SetUpdateOrder(float value) { UpdateOrder = value; }
 
         public virtual void OnUpdate() { }
         public virtual void OnNotify<T>(string message, T data) { }
@@ -174,6 +205,6 @@ namespace STACK
         public virtual void OnDraw(Renderer renderer) { }
         public virtual void OnEndDraw(Renderer renderer) { }
         public virtual void OnPropertyChanged(string property) { }
-        public virtual void OnInitialize() { }
+        public virtual void OnInitialize(bool restore) { }
     }
 }

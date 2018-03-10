@@ -10,8 +10,8 @@ namespace STACK.Functional.Test
         protected TestInputProvider Input;
         protected GraphicsDeviceServiceMock GraphicsDevice;
 
-        public TestEngine(StackGame game, IServiceProvider services, TestInputProvider input)
-            : base(game, services, input)
+        public TestEngine(StackGame game, IServiceProvider services, TestInputProvider input, GameSettings settings = null)
+        : base(game, services, input, settings ?? GameSettings.LoadFromConfigFile())
         {
             Input = input;
         }
@@ -31,7 +31,7 @@ namespace STACK.Functional.Test
 
         public virtual void AdvanceToInteractive()
         {
-            Advance(() => Game.World.Interactive);
+            Advance(() => null == Game.World || Game.World.Interactive);
         }
 
         public void Advance(Func<bool> predicate)

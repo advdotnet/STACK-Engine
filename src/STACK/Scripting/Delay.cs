@@ -1,17 +1,18 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 
 namespace STACK
-{    
-    public static class Delay 
+{
+    public static class Delay
     {
         /// <summary>
         /// Delay for a duration in seconds.
         /// </summary>  
-        public static IEnumerator Seconds(float seconds) 
+        public static IEnumerator Seconds(float seconds)
         {
             float Elapsed = 0;
 
-            while (Elapsed < seconds) 
+            while (Elapsed < seconds)
             {
                 Elapsed += GameSpeed.TickDuration;
                 yield return 0;
@@ -21,9 +22,9 @@ namespace STACK
         /// <summary>
         /// Delay for a number of updates.
         /// </summary>
-        public static IEnumerator Updates(int count) 
+        public static IEnumerator Updates(int count)
         {
-            return Seconds(count * GameSpeed.TickDuration);
+            return Seconds(Math.Max(0, (count - 1)) * GameSpeed.TickDuration);
         }
-    }        
+    }
 }

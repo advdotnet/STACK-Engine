@@ -48,9 +48,7 @@ namespace STACK.Components
 
         public SkipContent()
         {
-            Enabled = false;
-            Visible = false;
-            Interactive = false;
+
         }
 
         public SkipCutscene SkipCutscene

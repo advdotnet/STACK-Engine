@@ -168,7 +168,7 @@ namespace STACK.Test
         public IEnumerator NestedScript(Scripts engine)
         {
             yield return 0;
-            yield return engine.Start(Delay.Updates(2), "");
+            yield return engine.Start(Delay.Updates(3), "");
             FinishedNestedScript = true;
         }
 
