@@ -10,3 +10,4 @@ The STACK Engine is a .NET framework which is used to create an oldschool graphi
 
 STACK Engine is released under the Microsoft Public License. See LICENSE for details.
 STACK Engine uses FNA, released under the Microsoft Public License. See LICENSE for details.
+STACK Engine uses Neoforce Controls, released under the GNU Lesser Generic Public License. 
