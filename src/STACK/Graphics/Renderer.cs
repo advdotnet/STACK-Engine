@@ -2,7 +2,6 @@
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Spine;
 using STACK.Components;
 using STACK.Logging;
 using System;
@@ -24,7 +23,6 @@ namespace STACK.Graphics
 
         public RenderStage Stage = RenderStage.PreBloom;
         public SpriteBatch SpriteBatch;
-        public SkeletonMeshRenderer SkeletonRenderer;
         public PrimitivesRenderer PrimitivesRenderer;
         public GraphicsDevice GraphicsDevice;
         public Effect NormalmapEffect;
@@ -44,12 +42,6 @@ namespace STACK.Graphics
             var RealResolution = new Point(GraphicsDevice.PresentationParameters.BackBufferWidth, GraphicsDevice.PresentationParameters.BackBufferHeight);
             DisplaySettings = new DisplaySettings(virtualResolution, RealResolution, targetResolution);
             BloomEnabled = bloom;
-
-            SkeletonRenderer = new SkeletonMeshRenderer(GraphicsDevice)
-            {
-                PremultipliedAlpha = false
-            };
-
             PrimitivesRenderer = new PrimitivesRenderer(GraphicsDevice);
             SpriteBatch = new SpriteBatch(GraphicsDevice);
             BloomEffect = new BloomComponent(GraphicsDevice);

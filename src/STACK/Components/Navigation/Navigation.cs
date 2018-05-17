@@ -108,7 +108,7 @@ namespace STACK.Components
         {
             var Transform = Get<Transform>();
 
-            if (Path == null || Transform == null)
+            if (Path == null || Transform == null || !RestrictPosition)
             {
                 WayPoints.Clear();
                 WayPoints.Add(target);

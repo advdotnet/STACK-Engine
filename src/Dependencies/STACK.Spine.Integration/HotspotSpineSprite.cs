@@ -1,13 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
-using STACK.Graphics;
-using STACK.Input;
+using STACK.Components;
 using System;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Text;
 
-namespace STACK.Components
+namespace STACK.Spine
 {
     /// <summary>
     /// Hotspot described by a spine sprite component.
@@ -36,5 +31,5 @@ namespace STACK.Components
 
         public HotspotSpineSprite SetPixelPerfect(bool value) { PixelPerfect = value; return this; }
         public HotspotSpineSprite SetCaption(string value) { Caption = value; return this; }
-    }    
+    }
 }

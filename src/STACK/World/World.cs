@@ -31,6 +31,8 @@ namespace STACK
 
             AudioManager
                 .Create(this);
+
+            ExtensionMethods.AutoAddWorldComponents(this);
         }
 
         public World(IServiceProvider services, InputProvider input = null, Point? resolution = null)

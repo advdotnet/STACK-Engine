@@ -62,6 +62,16 @@ namespace STACK.Test
         }
 
         [TestMethod]
+        public void GetsInterface()
+        {
+            var Test = new Entity();
+            var SpriteCustomAnimation = Test.Add<SpriteCustomAnimation>();
+            var GotInterface = Test.GetInterface<IPlayAnimation>();
+
+            Assert.AreEqual(GotInterface, SpriteCustomAnimation);
+        }
+
+        [TestMethod]
         public void NotifyDoesNotThrowWithoutEntity()
         {
             new Transform().Position = new Vector2(1, 1);

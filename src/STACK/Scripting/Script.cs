@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework.Audio;
+using System;
 using System.Collections;
 using System.Diagnostics;
 
@@ -79,6 +80,45 @@ namespace STACK
             {
                 return new Script() { Done = true };
             }
+        }
+
+        /// <summary>
+        /// Yields as long as the given script is not done executing.
+        /// </summary>
+        /// <param name="script"></param>
+        /// <returns></returns>
+        public static IEnumerator WaitFor(params Script[] scripts)
+        {
+            while (!AllScriptsDone(scripts))
+            {
+                yield return 0;
+            }
+        }
+
+        /// <summary>
+        /// Yields as long as the given soundeffect is playing.
+        /// </summary>
+        /// <param name="script"></param>
+        /// <returns></returns>
+        public static IEnumerator WaitFor(SoundEffectInstance soundEffect)
+        {
+            while (soundEffect.IsPlaying())
+            {
+                yield return 0;
+            }
+        }
+
+        private static bool AllScriptsDone(Script[] scripts)
+        {
+            for (var i = 0; i < scripts.Length; i++)
+            {
+                if (scripts[i].Done == false)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

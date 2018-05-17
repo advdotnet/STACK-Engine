@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Spine;
 using STACK;
 using STACK.Components;
+using STACK.Spine;
 using System;
 using System.Collections;
 

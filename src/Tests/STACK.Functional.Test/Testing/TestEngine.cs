@@ -34,6 +34,11 @@ namespace STACK.Functional.Test
             Advance(() => null == Game.World || Game.World.Interactive);
         }
 
+        public virtual void AdvanceToNonInteractive()
+        {
+            Advance(() => null == Game.World || !Game.World.Interactive);
+        }
+
         public void Advance(Func<bool> predicate)
         {
             while (!predicate())

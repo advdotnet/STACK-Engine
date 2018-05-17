@@ -73,6 +73,69 @@ namespace STACK.Test
             Console.WriteLine("Elapsed 2: " + Watch.ElapsedMilliseconds);
         }
 
+        [TestMethod]
+        public void PopInvalidatesWorldCache()
+        {
+            const string ENTITY_ID = "entity1";
+            var World = new World(ServiceProvider);
+            var Scene = new Scene("stack1");
+
+            World.Push(Scene);
+            World.Initialize(false);
+
+            var E1 = new Entity(ENTITY_ID);
+            var E2 = new Entity(ENTITY_ID);
+
+            Scene.Push(E1);
+            Assert.AreEqual(E1, World.GetGameObject(ENTITY_ID));
+
+            Scene.Pop(E1);
+            Assert.AreEqual(null, World.GetGameObject(ENTITY_ID));
+
+            Scene.Push(E2);
+            Assert.AreEqual(E2, World.GetGameObject(ENTITY_ID));
+        }
+
+        [TestMethod]
+        public void PopInvalidatesSceneCacheInitialized()
+        {
+            const string ENTITY_ID = "entity1";
+
+            var Scene = new Scene("stack1");
+            Scene.Initialize(false);
+
+            var E1 = new Entity(ENTITY_ID);
+            var E2 = new Entity(ENTITY_ID);
+
+            Scene.Push(E1);
+            Assert.AreEqual(E1, Scene.GetObject(ENTITY_ID));
+
+            Scene.Pop(E1);
+            Assert.AreEqual(null, Scene.GetObject(ENTITY_ID));
+
+            Scene.Push(E2);
+            Assert.AreEqual(E2, Scene.GetObject(ENTITY_ID));
+        }
+
+        [TestMethod]
+        public void PopInvalidatesSceneCacheUnInitialized()
+        {
+            const string ENTITY_ID = "entity1";
+
+            var Scene = new Scene("stack1");
+
+            var E1 = new Entity(ENTITY_ID);
+            var E2 = new Entity(ENTITY_ID);
+
+            Scene.Push(E1);
+            Assert.AreEqual(E1, Scene.GetObject(ENTITY_ID));
+
+            Scene.Pop(E1);
+            Assert.AreEqual(null, Scene.GetObject(ENTITY_ID));
+
+            Scene.Push(E2);
+            Assert.AreEqual(E2, Scene.GetObject(ENTITY_ID));
+        }
 
         [TestMethod]
         public void GetsNeighbors()

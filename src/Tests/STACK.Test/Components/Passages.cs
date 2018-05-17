@@ -48,18 +48,12 @@ namespace STACK.Test
             }
         }
 
-        class SkipContent : ISkipContent
-        {
-            public SkipCutscene SkipCutscene => null;
-            public SkipText SkipText => null;
-        }
-
         /// <summary>
         /// Asserts the entrance script is executed immediately after changing the scene.        
         /// </summary>
         [TestMethod]
         public void PassingSetsDrawScene()
-        {            
+        {
             var World = new World(WorldTest.ServiceProvider);
             var ExitScene = new Scene("s1") { Enabled = true, Visible = true };
             var EntranceScene = new Scene("s2") { Enabled = true, Visible = true };

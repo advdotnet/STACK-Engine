@@ -134,6 +134,24 @@ namespace STACK
             return null;
         }
 
+        public T GetInterface<T>()
+        {
+            var Type = typeof(T);
+
+            if (Type.IsInterface)
+            {
+                foreach (var Component in Components)
+                {
+                    if (Type.IsAssignableFrom(Component.GetType()))
+                    {
+                        return (T)(object)Component;
+                    }
+                }
+            }
+
+            return default(T);
+        }
+
         public bool Remove<T>() where T : Component
         {
             var Component = Get<T>();

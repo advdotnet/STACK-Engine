@@ -1,5 +1,4 @@
-﻿using STACK.State;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -11,8 +10,8 @@ namespace STACK.Surrogates
     {
         ISurrogateSelector _next;
 
-        List<Type> SerializedTypes = new List<Type>() 
-        { 
+        List<Type> SerializedTypes = new List<Type>()
+        {
             typeof(System.Collections.IEnumerator),
             typeof(Microsoft.Xna.Framework.GameTime),
             typeof(Microsoft.Xna.Framework.Point),
@@ -20,7 +19,9 @@ namespace STACK.Surrogates
             typeof(Microsoft.Xna.Framework.Vector3),
             typeof(Microsoft.Xna.Framework.Rectangle),
             typeof(Microsoft.Xna.Framework.Matrix),
-            typeof(Microsoft.Xna.Framework.Color)
+            typeof(Microsoft.Xna.Framework.Color),
+            typeof(Microsoft.Xna.Framework.Audio.AudioListener),
+            typeof(Microsoft.Xna.Framework.Audio.AudioEmitter)
         };
 
         public void ChainSelector(ISurrogateSelector selector)
@@ -35,13 +36,13 @@ namespace STACK.Surrogates
 
         public ISerializationSurrogate GetSurrogate(Type type, StreamingContext context, out ISurrogateSelector selector)
         {
-            if (SerializedTypes.Any(t => t.IsAssignableFrom(type)))            
+            if (SerializedTypes.Any(t => t.IsAssignableFrom(type)))
             {
                 selector = this;
                 return new FieldSerializationSurrogate();
             }
             else
-            {                
+            {
                 if (_next == null)
                 {
                     selector = null;

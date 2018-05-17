@@ -272,7 +272,7 @@ namespace STACK
         /// </summary>
         public Entity GetObject(string id)
         {
-            return GameObjectCache.GetEntityById(id);
+            return GameObjectCache.GetEntityById(id, Initialized);
         }
 
         public Entity this[string id]
@@ -305,6 +305,11 @@ namespace STACK
             if (Initialized)
             {
                 GameObjectCache.CacheAll();
+            }
+
+            if (null != World)
+            {
+                World.InvalidateEntityIDCache(gameObject);
             }
         }
     }

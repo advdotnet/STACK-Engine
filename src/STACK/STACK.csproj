@@ -53,7 +53,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Components\Audio\AudioEmitter.cs" />
+    <Compile Include="Components\Audio\AudioListener.cs" />
     <Compile Include="Components\Audio\AudioManager.cs" />
+    <Compile Include="Components\Audio\Base\AudioTransmission.cs" />
     <Compile Include="Components\DataTypes\DirectionExtensions.cs" />
     <Compile Include="Components\DataTypes\Directions4.cs" />
     <Compile Include="Components\DataTypes\Directions8.cs" />
@@ -112,6 +115,7 @@
     <Compile Include="World\Base\Interfaces\IInteractive.cs" />
     <Compile Include="World\Base\Interfaces\INotify.cs" />
     <Compile Include="World\Base\Interfaces\IUpdate.cs" />
+    <Compile Include="World\Base\Interfaces\IWorldAutoAdd.cs" />
     <Compile Include="World\ContentLoader.cs" />
     <Compile Include="Components\Navigation\ScenePath.cs" />
     <Compile Include="World\Scene\GameObjectCache.cs" />
@@ -120,7 +124,6 @@
     <Compile Include="Components\Navigation\Exit.cs" />
     <Compile Include="Components\Interaction\HotspotPersistent.cs" />
     <Compile Include="Components\Interaction\HotspotSprite.cs" />
-    <Compile Include="Components\Interaction\HotspotSpineSprite.cs" />
     <Compile Include="Components\Interaction\InteractiveVisibility.cs" />
     <Compile Include="Components\Navigation\Entrance.cs" />
     <Compile Include="Components\Graphics\Text.cs" />
@@ -137,7 +140,6 @@
     <Compile Include="Components\Input\InputDispatcher.cs" />
     <Compile Include="Components\Interaction\HotspotRectangle.cs" />
     <Compile Include="Components\Navigation\Passage.cs" />
-    <Compile Include="Components\Graphics\SpineSprite.cs" />
     <Compile Include="Components\Graphics\Sprite.cs" />
     <Compile Include="Components\Scripting\Scripts.cs" />
     <Compile Include="Components\Navigation\Navigation.cs" />

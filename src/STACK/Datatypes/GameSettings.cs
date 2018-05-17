@@ -60,19 +60,29 @@ namespace STACK
         public string Culture = "en-US";
 
         /// <summary>
+        /// Volume of music
+        /// </summary>
+        public float MusicVolume = 1;
+
+        /// <summary>
+        /// Volume of sound effects
+        /// </summary>
+        public float SoundEffectVolume = 1;
+
+        /// <summary>
         /// Target Resolution
         /// </summary>
         public Point Resolution = new Point(640, 400);
 
         /// <summary>
-        /// Adapter to create the game window on (enumeration starting with 0)
+        /// Display Adapter to create the game window on (starting with 0)
         /// </summary>
         public int Adapter = 0;
 
         /// <summary>
         /// Display mode
         /// </summary>
-        public DisplayMode DisplayMode = DisplayMode.Window;
+        public DisplayMode DisplayMode = DisplayMode.BorderlessScale;
 
         /// <summary>
         /// Enable multisampling
@@ -175,10 +185,19 @@ namespace STACK
             return serializer.Deserialize(stream) as GameSettings;
         }
 
-        public static GameSettings LoadFromConfigFile()
+        public static GameSettings LoadFromConfigFile(string directory = null)
         {
             try
             {
+                var FileName = System.IO.Path.Combine(SaveGame.UserStorageFolder(directory), CONFIGFILENAME);
+                if (File.Exists(FileName))
+                {
+                    using (var Stream = File.Open(FileName, FileMode.Open))
+                    {
+                        return DeserializeFromStream(Stream);
+                    }
+                }
+
                 using (var Stream = TitleContainer.OpenStream(CONFIGFILENAME))
                 {
                     return DeserializeFromStream(Stream);
@@ -190,9 +209,11 @@ namespace STACK
             }
         }
 
-        public void Save(string fileName)
+        public void Save(string directory)
         {
-            using (var Writer = new StreamWriter(fileName))
+            SaveGame.EnsureStorageFolderExists(directory);
+            var FileName = System.IO.Path.Combine(SaveGame.UserStorageFolder(directory), CONFIGFILENAME);
+            using (var Writer = new StreamWriter(FileName))
             {
                 var Serializer = new XmlSerializer(GetType());
                 var XmlNS = new XmlSerializerNamespaces();
@@ -216,6 +237,13 @@ namespace STACK
                 var IntegerScaleFactor = Math.Min(DisplayMode.Width / virtualResolution.X, DisplayMode.Height / virtualResolution.Y);
 
                 return new Point(virtualResolution.X * IntegerScaleFactor, virtualResolution.Y * IntegerScaleFactor);
+            }
+
+            if (DisplayMode.BorderlessScale == DisplayMode)
+            {
+                var DisplayMode = PreferedGraphicsAdapter.CurrentDisplayMode;
+
+                return new Point(DisplayMode.Width, DisplayMode.Height);
             }
 
             return Resolution;

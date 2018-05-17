@@ -1,6 +1,6 @@
 ﻿namespace STACK.Components
 {
-    interface IPlayAnimation
+    public interface IPlayAnimation
     {
         void PlayAnimation(string animation, bool looped);
         bool Playing { get; }

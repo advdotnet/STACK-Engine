@@ -26,7 +26,7 @@ namespace STACK
             Log.AddLogger(new DebugLogHandler());
             Log.WriteLine("Loading game settings");
 
-            GameSettings = GameSettings.LoadFromConfigFile();
+            GameSettings = GameSettings.LoadFromConfigFile(Game.SaveGameFolder);
 
             Log.WriteLine("Initializing graphics");
 
@@ -69,6 +69,11 @@ namespace STACK
             base.Initialize();
         }
 
+        protected override void UnloadContent()
+        {
+            StackEngine.Dispose();
+        }
+
         private void OnClientSizeChanged(object sender, EventArgs eventArgs)
         {
             if (StackEngine != null && StackEngine.Renderer != null)
@@ -95,6 +100,8 @@ namespace STACK
             {
                 SuppressDraw();
             }
+
+            base.Update(time);
         }
 
         protected override void Draw(GameTime time)
@@ -111,7 +118,7 @@ namespace STACK
         {
             if (!GameSpeed.Equals(speed))
             {
-                Log.WriteLine("Setting game speed to " + speed.Text);
+                Log.WriteLine("Setting game speed to " + speed.Description);
                 GameSpeed = speed;
                 TargetElapsedTime = speed.TargetElapsedTime;
             }

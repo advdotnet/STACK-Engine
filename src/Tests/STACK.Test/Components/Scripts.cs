@@ -82,6 +82,19 @@ namespace STACK.Test
         }
 
         [TestMethod]
+        public void RemoveSetsScriptDone()
+        {
+            var TestScriptEngine = new Scripts();
+            var Enumerable = new EnumerableClass();
+            var Script = TestScriptEngine.Start(Enumerable.Foo(), "ScriptName");
+            Assert.IsFalse(Script.Done);
+            TestScriptEngine.Update();
+            Assert.IsFalse(Script.Done);
+            TestScriptEngine.Remove("ScriptName");
+            Assert.IsTrue(Script.Done);
+        }
+
+        [TestMethod]
         public void NestedIEnumerator()
         {
             var Script = new Scripts();
