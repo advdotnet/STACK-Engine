@@ -7,7 +7,7 @@ namespace STACK.Test
     [TestClass]
     public class GameSettingsTests
     {
-        [TestMethod]
+        [TestMethod, TestCategory("FileSystem")]
         public void GameSettingsTest()
         {
             const string FILENAME = GameSettings.CONFIGFILENAME;
