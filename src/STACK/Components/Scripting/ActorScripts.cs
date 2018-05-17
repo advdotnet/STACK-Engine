@@ -91,7 +91,7 @@ namespace STACK.Components
 
         private static IEnumerator PlayAnimationScript(Scripts scripts, string animation, bool looped = false)
         {
-            var PlayAnimation = scripts.Get<SpineSprite>() ?? (IPlayAnimation)scripts.Get<SpriteCustomAnimation>();
+            var PlayAnimation = scripts.GetInterface<IPlayAnimation>();
 
             if (PlayAnimation != null)
             {

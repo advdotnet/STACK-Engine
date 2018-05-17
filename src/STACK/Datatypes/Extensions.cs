@@ -2,6 +2,9 @@
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using STACK.Logging;
+using System;
+using System.Linq;
 
 namespace STACK
 {
@@ -64,6 +67,29 @@ namespace STACK
         public static bool Has(this SpriteEffects spriteEffects, SpriteEffects value)
         {
             return (spriteEffects & value) == value;
+        }
+
+        /// <summary>
+        /// Searches the current AppDomain for components implementing IWorldAutoAdd and
+        /// adds them to the World.
+        /// </summary>
+        /// <param name="world"></param>
+        public static void AutoAddWorldComponents(World world)
+        {
+            var Assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            var Types = Assemblies.SelectMany(a => a.GetTypes());
+
+            var q = from t in Types
+                    where t.IsClass && typeof(IWorldAutoAdd).IsAssignableFrom(t) &&
+                        !t.IsAbstract && typeof(Component).IsAssignableFrom(t)
+                    select t;
+
+            foreach (var ComponentType in q)
+            {
+                Log.WriteLine("Adding World Component: " + ComponentType.Name);
+                var method = typeof(World).GetMethod("Add", new Type[] { });
+                method.MakeGenericMethod(ComponentType).Invoke(world, null);
+            }
         }
     }
 }

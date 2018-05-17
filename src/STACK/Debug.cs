@@ -81,56 +81,6 @@ namespace STACK
             if (input.IsKeyPress(Keys.F2)) SetSpeed(GameSpeed.Double);
             if (input.IsKeyPress(Keys.F3)) SetSpeed(GameSpeed.Half);
             if (input.IsKeyPress(Keys.F4)) SetSpeed(GameSpeed.Infinity);
-
-            //if (input.IsKeyPress(Keys.R))
-            //{
-            //    ToggleFullScreen();
-            //}
-
-            if (input.IsKeyPress(Keys.Add))
-            {
-                StackEngine.Game.World.Get<Camera>().Zoom += 0.01f;
-            }
-
-            if (input.IsKeyPress(Keys.Subtract))
-            {
-                StackEngine.Game.World.Get<Camera>().Zoom -= 0.01f;
-            }
-
-            if (input.IsKeyPress(Keys.Up))
-            {
-                StackEngine.Game.World.Get<Camera>().Position = new Vector2(StackEngine.Game.World.Get<Camera>().Position.X, StackEngine.Game.World.Get<Camera>().Position.Y - 10.0f);
-            }
-
-            if (input.IsKeyPress(Keys.Down))
-            {
-                StackEngine.Game.World.Get<Camera>().Position = new Vector2(StackEngine.Game.World.Get<Camera>().Position.X, StackEngine.Game.World.Get<Camera>().Position.Y + 10.0f);
-            }
-
-            if (input.IsKeyPress(Keys.Left))
-            {
-                StackEngine.Game.World.Get<Camera>().Position = new Vector2(StackEngine.Game.World.Get<Camera>().Position.X + 10.00f, StackEngine.Game.World.Get<Camera>().Position.Y);
-            }
-
-            if (input.IsKeyPress(Keys.Right))
-            {
-                StackEngine.Game.World.Get<Camera>().Position = new Vector2(StackEngine.Game.World.Get<Camera>().Position.X - 10.00f, StackEngine.Game.World.Get<Camera>().Position.Y);
-            }
-
-            if (input.IsKeyPress(Keys.Y))
-            {
-                StackEngine.Game.World.Get<Camera>().Rotation += 0.025f;
-            }
-
-            if (input.IsKeyPress(Keys.X))
-            {
-                StackEngine.Game.World.Get<Camera>().Rotation -= 0.025f;
-            }
-
-            if (input.IsKeyPress(Keys.C))
-            {
-                StackEngine.Game.World.Get<Camera>().Rotation = 0.00f;
-            }
         }
     }
 }

@@ -1,11 +1,12 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Spine;
+using STACK.Components;
 using STACK.Graphics;
 using STACK.Logging;
 using System;
 
-namespace STACK.Components
+namespace STACK.Spine
 {
     /// <summary>
     /// Renders a spine animation.
@@ -69,7 +70,8 @@ namespace STACK.Components
         {
             SkeletonBounds = new SkeletonBounds();
 
-            Skeleton = content.Load<Skeleton>(Image);
+            var Loader = Entity.World.Get<SpineTextureLoader>();
+            Skeleton = Loader.Load(Image);
 
             var NormalsImage = Image + "_normals.png";
 
@@ -167,21 +169,23 @@ namespace STACK.Components
 
             Skeleton.UpdateWorldTransform();
 
-            renderer.SkeletonRenderer.Begin(renderer.Projection);
+            var SpineRenderer = Entity.World.Get<SpineRenderer>();
+
+            SpineRenderer.SkeletonRenderer.Begin(renderer.Projection);
             Skeleton.R = Data.Color.R / 255f;
             Skeleton.G = Data.Color.G / 255f;
             Skeleton.B = Data.Color.B / 255f;
             Skeleton.A = Data.Color.A / 255f;
-            renderer.SkeletonRenderer.Draw(Skeleton);
+            SpineRenderer.SkeletonRenderer.Draw(Skeleton);
 
             if (NormalMap != null && Lightning != null)
             {
                 renderer.ApplyNormalmapEffectParameter(Lightning, NormalMap);
-                renderer.SkeletonRenderer.End(renderer.NormalmapEffect);
+                SpineRenderer.SkeletonRenderer.End(renderer.NormalmapEffect);
             }
             else
             {
-                renderer.SkeletonRenderer.End(null);
+                SpineRenderer.SkeletonRenderer.End(null);
             }
 
             renderer.Begin(renderer.Projection);
@@ -267,7 +271,7 @@ namespace STACK.Components
         {
             if (message == Messages.AnimationStateChanged)
             {
-                var NewState = (State)(object)data;
+                var NewState = (STACK.Components.State)(object)data;
 
                 PlayAnimation(NewState.ToAnimationName(), true);
             }

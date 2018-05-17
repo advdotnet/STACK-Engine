@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 
 namespace STACK.Debug
 {
@@ -31,7 +28,7 @@ namespace STACK.Debug
 
         public SetCommand(StackEngine game)
         {
-            Engine = game;            
+            Engine = game;
         }
 
         public static T Parse<T>(string value)
@@ -45,8 +42,8 @@ namespace STACK.Debug
             {
 
                 var VariableName = arguments[0].Split('.')[1].ToUpperInvariant();
-                var Properties = typeof(EngineVariables).GetFields();                
-                string Value = arguments[2].Trim();                
+                var Properties = typeof(EngineVariables).GetFields();
+                string Value = arguments[2].Trim();
 
                 foreach (var prop in Properties)
                 {
@@ -78,7 +75,7 @@ namespace STACK.Debug
             }
             else
             {
-                console.WriteLine("Syntax is SET <namespace>.<variable> = <value>.", Console.Channel.Error);
+                console.WriteLine("Syntax is SET <namespace>.<variable> = <value>", Console.Channel.Error);
             }
         }
     }

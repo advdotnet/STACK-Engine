@@ -5,14 +5,15 @@ using System.IO;
 namespace STACK.Test
 {
     [TestClass]
-    public class GraphicsSettingsTests
+    public class GameSettingsTests
     {
-        [TestMethod, TestCategory("FileSystem")]
-        public void ResolutionSettingsTest()
+        [TestMethod]
+        public void GameSettingsTest()
         {
             const string FILENAME = GameSettings.CONFIGFILENAME;
 
             var Resolution = new Point(10, 10);
+            var Volume = 0.4f;
             var Adapter = 1;
             var Mode = DisplayMode.Window;
             var VSync = true;
@@ -21,6 +22,8 @@ namespace STACK.Test
             var Settings = new GameSettings()
             {
                 Resolution = Resolution,
+                SoundEffectVolume = Volume,
+                MusicVolume = Volume,
                 Adapter = Adapter,
                 DisplayMode = Mode,
                 VSync = VSync,
@@ -32,6 +35,8 @@ namespace STACK.Test
             using (var FileStream = File.Open(FILENAME, FileMode.Open))
             {
                 var DeserializedSettings = GameSettings.DeserializeFromStream(FileStream);
+                Assert.AreEqual(Volume, DeserializedSettings.MusicVolume);
+                Assert.AreEqual(Volume, DeserializedSettings.SoundEffectVolume);
                 Assert.AreEqual(Resolution, DeserializedSettings.Resolution);
                 Assert.AreEqual(Adapter, DeserializedSettings.Adapter);
                 Assert.AreEqual(Mode, DeserializedSettings.DisplayMode);

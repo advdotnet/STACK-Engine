@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using STACK.Logging;
 using System.Collections.Generic;
 
 namespace STACK
@@ -38,6 +39,8 @@ namespace STACK
 
         public void RestoreState(SaveGame state)
         {
+            Log.WriteLine("Loading game " + state.Name);
+
             var DeserializedWorld = State.Serialization.LoadState<World>(state.World);
 
             UnloadWorld();
@@ -48,6 +51,7 @@ namespace STACK
             World.Setup(Engine.Services, Engine.InputProvider);
             World.LoadContent(Engine.GetWorldContent());
             World.Initialize(true);
+            Engine.ApplyGameSettingsVolume();
             OnWorldInitialized(true);
         }
 
@@ -58,6 +62,7 @@ namespace STACK
             World = new World(Engine.Services, Engine.InputProvider, VirtualResolution, GetScenes());
             World.LoadContent(Engine.GetWorldContent());
             World.Initialize(false);
+            Engine.ApplyGameSettingsVolume();
             OnWorldInitialized(false);
         }
 

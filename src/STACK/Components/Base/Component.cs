@@ -69,5 +69,10 @@ namespace STACK
         {
             return Entity.Get<T>();
         }
+
+        public T GetInterface<T>()
+        {
+            return Entity.GetInterface<T>();
+        }
     }
 }

@@ -158,7 +158,7 @@ namespace STACK
             if (Constrain && !ConstrainingRectangle.Contains(Bounds))
             {
                 var ConstrainedBounds = ConstrainRectangle(Bounds, ConstrainingRectangle);
-                var Diff = ConstrainedBounds.Center - (Position).ToPoint();
+                var Diff = ConstrainedBounds.Center - Position.ToPoint();
                 return new Vector2(Diff.X, 0);
             }
 
@@ -332,7 +332,11 @@ namespace STACK
                 }
 
                 LinePositon += ConstrainOffset;
-                var LineOrigin = Line.Origin.ToInt();
+                var LineOrigin = (Line.Origin).ToInt();
+                if (LineOrigin.X > LinePositon.X)
+                {
+                    LineOrigin.X = (int)LinePositon.X;
+                }
 
                 renderer.SpriteBatch.DrawString(_SpriteFont, Line.Text, LinePositon, CurrentColor, 0, LineOrigin, 1, SpriteEffects.None, 0);
             }

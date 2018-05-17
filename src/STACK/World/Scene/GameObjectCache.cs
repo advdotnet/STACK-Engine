@@ -245,13 +245,27 @@ namespace STACK
             }
         }
 
-        public Entity GetEntityById(string id)
+        public Entity GetEntityById(string id, bool initialized)
         {
-            for (int i = 0; i < Entities.Count; i++)
+            if (initialized)
             {
-                if (Entities[i].ID.Equals(id))
+                for (int i = 0; i < Entities.Count; i++)
                 {
-                    return Entities[i];
+                    if (Entities[i].ID.Equals(id))
+                    {
+                        return Entities[i];
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < Scene.Items.Count; i++)
+                {
+                    var Entity = Scene.Items[i] as Entity;
+                    if (Entity != null && Entity.ID.Equals(id))
+                    {
+                        return Entity;
+                    }
                 }
             }
 

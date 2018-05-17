@@ -16,6 +16,8 @@ namespace STACK
         AStar<Scene> _SceneFinder;
         [NonSerialized]
         internal List<Scene> _Scenes = null;
+        [NonSerialized]
+        List<Scene> FindPathResult = new List<Scene>();
 
         public List<Scene> Scenes
         {
@@ -61,9 +63,6 @@ namespace STACK
         {
             FindPath(this.GetScene(from), this.GetScene(to), ref result);
         }
-
-        [NonSerialized]
-        List<Scene> FindPathResult = new List<Scene>();
 
         /// <summary>
         /// Returns the subsequent IDs of all scenes between source and target scene.
@@ -119,6 +118,14 @@ namespace STACK
         void OnDeserialized(StreamingContext c)
         {
             EntityIDCache = new Dictionary<string, Entity>();
+        }
+
+        public void InvalidateEntityIDCache(Entity entity)
+        {
+            if (null != entity)
+            {
+                EntityIDCache.Remove(entity.ID);
+            }
         }
 
         /// <summary>

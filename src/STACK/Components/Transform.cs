@@ -113,8 +113,8 @@ namespace STACK.Components
                 if (_Orientation == value)
                 {
                     return;
-
                 }
+
                 _Orientation = value;
                 Parent.Notify(Messages.OrientationChanged, value);
             }

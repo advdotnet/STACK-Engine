@@ -1,6 +1,6 @@
 ﻿namespace STACK.Logging
 {
-    class SystemConsoleLogHandler : ILogHandler
+    public class SystemConsoleLogHandler : ILogHandler
     {
         public void WriteLine(string text, LogLevel level)
         {

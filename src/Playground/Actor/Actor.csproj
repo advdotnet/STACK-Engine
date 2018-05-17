@@ -114,6 +114,10 @@
       <Project>{7f8f2327-c016-49c8-bb4d-f3f77971961e}</Project>
       <Name>spine-xna</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Dependencies\STACK.Spine.Integration\STACK.Spine.Integration.csproj">
+      <Project>{759834fa-093e-4142-b67e-716de22157db}</Project>
+      <Name>STACK.Spine.Integration</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\STACK\STACK.csproj">
       <Project>{bdd5e5df-a2f6-44fc-a44b-33488ba054bb}</Project>
       <Name>STACK</Name>
@@ -129,6 +133,7 @@
     <Folder Include="Content\characters\ego\" />
     <Folder Include="Content\fonts\" />
     <Folder Include="Content\shaders\" />
+    <Folder Include="Content\Skins\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -34,11 +34,27 @@ namespace STACK
         /// <summary>
         /// Stores the current state of all scenes to the given filename.
         /// </summary>        
-        public static void SaveToFile(string folder, string name, World world, byte[] screen)
+        public static SaveGame SaveToFile(string folder, string name, World world, byte[] screen)
         {
             Log.WriteLine("Saving game " + name);
-            SaveGame.EnsureStorageFolderExists(folder);
+            EnsureStorageFolderExists(folder);
 
+            var FileName = GetFileName(name, folder);
+            var SerializedWorld = State.Serialization.SaveState(world);
+            var SaveGame = new SaveGame(name, SerializedWorld, screen);
+
+            State.Serialization.SaveToFile<SaveGame>(GetFilePath(folder, FileName), SaveGame);
+
+            return SaveGame;
+        }
+
+        private static string GetFilePath(string folder, string filename)
+        {
+            return System.IO.Path.Combine(SaveGame.UserStorageFolder(folder), filename + FILE_EXTENSION);
+        }
+
+        private static string GetFileName(string name, string folder)
+        {
             int index = 1;
             string Filename = "game" + index;
             bool Found = false;
@@ -61,26 +77,31 @@ namespace STACK
                 }
             }
 
-            var SerializedWorld = STACK.State.Serialization.SaveState<World>(world);
-
-            STACK.State.Serialization.SaveToFile<SaveGame>(GetFilePath(folder, Filename), new SaveGame(name, SerializedWorld, screen));
+            return Filename;
         }
 
-        private static string GetFilePath(string folder, string filename)
+        public static string ExistsStateByName(string folder, string name)
         {
-            return System.IO.Path.Combine(SaveGame.UserStorageFolder(folder), filename + FILE_EXTENSION);
+            var Saves = GetSaveGames(folder);
+            var Save = Saves.FirstOrDefault(s => s.Value != null && s.Value.Name.Equals(name));
+
+            if (!Save.Equals(default(KeyValuePair<string, SaveGame>)))
+            {
+                return Save.Key;
+            }
+
+            return null;
         }
 
-        public static SaveGame LoadFromFile(string folder, string name)
+        public static SaveGame LoadFromFile(string folder, string fileName)
         {
-            Log.WriteLine("Loading game " + name);
             try
             {
-                return STACK.State.Serialization.LoadFromFile<SaveGame>(GetFilePath(folder, name));
+                return State.Serialization.LoadFromFile<SaveGame>(GetFilePath(folder, fileName));
             }
             catch (Exception e)
             {
-                Log.WriteLine("Could not open savegame " + name + ": " + e.Message, LogLevel.Error);
+                Log.WriteLine("Could not open savegame " + fileName + ": " + e.Message, LogLevel.Error);
             }
 
             return null;
@@ -104,9 +125,10 @@ namespace STACK
                 .ToDictionary(t => t.Filename, t => t.Savegame);
         }
 
-        internal static string UserStorageFolder(string subdirectory = "STACK")
+        public static string UserStorageFolder(string subdirectory = "STACK")
         {
             string platform = SDL.SDL_GetPlatform();
+
             if (platform.Equals("Windows"))
             {
                 return System.IO.Path.Combine(
@@ -125,6 +147,7 @@ namespace STACK
                     return "."; // Oh well.
                 }
                 osConfigDir += "/Library/Application Support";
+
                 return System.IO.Path.Combine(osConfigDir, subdirectory);
             }
             else if (platform.Equals("Linux"))
@@ -139,13 +162,14 @@ namespace STACK
                     }
                     osConfigDir += "/.local/share";
                 }
+
                 return System.IO.Path.Combine(osConfigDir, subdirectory);
             }
 
             throw new Exception("SDL platform unhandled: " + platform);
         }
 
-        private static void EnsureStorageFolderExists(string folder)
+        public static void EnsureStorageFolderExists(string folder)
         {
             var Folder = SaveGame.UserStorageFolder(folder);
 

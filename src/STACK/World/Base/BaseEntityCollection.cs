@@ -77,6 +77,11 @@ namespace STACK
             return Components.Get<T>();
         }
 
+        public T GetInterface<T>()
+        {
+            return Components.GetInterface<T>();
+        }
+
         public BaseEntityCollection Remove<T>() where T : Component
         {
             var Removed = Components.Remove<T>();

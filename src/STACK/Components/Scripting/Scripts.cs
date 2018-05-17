@@ -66,6 +66,7 @@ namespace STACK.Components
             {
                 Script.Clear();
             }
+
             ScriptCollection.Clear();
         }
 
@@ -74,7 +75,14 @@ namespace STACK.Components
         /// </summary>        
         public void Remove(string id)
         {
-            ScriptCollection.RemoveAll(s => s.ID == id);
+            for (int i = ScriptCollection.Count - 1; i >= 0; i--)
+            {
+                if (id == ScriptCollection[i].ID)
+                {
+                    ScriptCollection[i].Clear();
+                    ScriptCollection.RemoveAt(i);
+                }
+            }
         }
 
         public void DisableAll()

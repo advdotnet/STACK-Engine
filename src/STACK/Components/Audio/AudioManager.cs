@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Audio;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Media;
 using System;
 using System.Collections.Generic;
@@ -31,18 +32,69 @@ namespace STACK.Components
 
         string CurrentSongName;
 
+        float _SoundEffectVolume = 1;
+        float _MusicVolume = 1;
+
+        MediaState LastMediaState;
+        bool IsRepeating = false;
+
         [NonSerialized]
         ISkipContent SkipContent = null;
 
         public void Initialize(bool restore)
         {
             SkipContent = ((World)Parent).Get<SkipContent>();
+
+            if (null != CurrentSongName)
+            {
+                LoadSong(CurrentSongName);
+                if (MediaState.Playing == LastMediaState)
+                {
+                    PlaySong(CurrentSongName);
+                    RepeatSong = IsRepeating;
+                }
+            }
         }
 
         public AudioManager()
         {
             UpdateOrder = 500;
             Enabled = true;
+        }
+
+        public float MusicVolume
+        {
+            get
+            {
+                return MediaPlayer.Volume;
+            }
+            set
+            {
+                _MusicVolume = value;
+                MediaPlayer.Volume = value;
+            }
+        }
+
+        public float SoundEffectVolume
+        {
+            get
+            {
+                return _SoundEffectVolume;
+            }
+            set
+            {
+                _SoundEffectVolume = MathHelper.Clamp(value, 0.0f, 1.0f);
+            }
+        }
+
+        private void OnMediaStateChanged(object sender, EventArgs e)
+        {
+            LastMediaState = MediaPlayer.State;
+            if (MediaState.Stopped == LastMediaState)
+            {
+                CurrentSongName = null;
+                CurrentSong = null;
+            }
         }
 
         public void LoadContent(ContentLoader content)
@@ -57,6 +109,8 @@ namespace STACK.Components
             SoundEffects = new Dictionary<string, SoundEffect>();
             Songs = new Dictionary<string, Song>();
             PlayingInstances = new List<SoundEffectInstance>();
+
+            MediaPlayer.MediaStateChanged += this.OnMediaStateChanged;
         }
 
         /// <summary>
@@ -70,6 +124,13 @@ namespace STACK.Components
                 return;
             }
 
+            LoadSong(song);
+
+            MediaPlayer.Play(CurrentSong);
+        }
+
+        private void LoadSong(string song)
+        {
             if (!Songs.ContainsKey(song))
             {
                 Songs[song] = Content.Load<Song>(song);
@@ -77,14 +138,19 @@ namespace STACK.Components
 
             CurrentSong = Songs[song];
             CurrentSongName = song;
-
-            MediaPlayer.Play(CurrentSong);
         }
 
         public bool RepeatSong
         {
-            get { return MediaPlayer.IsRepeating; }
-            set { MediaPlayer.IsRepeating = value; }
+            get
+            {
+                return MediaPlayer.IsRepeating;
+            }
+            set
+            {
+                MediaPlayer.IsRepeating = value;
+                IsRepeating = value;
+            }
         }
 
         public void PauseSong()
@@ -94,7 +160,14 @@ namespace STACK.Components
 
         public void ResumeSong()
         {
-            MediaPlayer.Resume();
+            if (CurrentSongName != null && MediaPlayer.State == MediaState.Stopped)
+            {
+                PlaySong(CurrentSongName);
+            }
+            else
+            {
+                MediaPlayer.Resume();
+            }
         }
 
         public void StopSong()
@@ -118,7 +191,7 @@ namespace STACK.Components
         /// </summary>
         /// <param name="soundEffect"></param>
         /// <returns>SoundEffectInstance, or null if in fast forward mode</returns>
-        public SoundEffectInstance PlaySoundEffect(string soundEffect, bool looped = false)
+        public SoundEffectInstance PlaySoundEffect(string soundEffect, bool looped = false, AudioEmitter emitter = null, AudioListener listener = null)
         {
             if (null != SkipContent.SkipCutscene && SkipContent.SkipCutscene.Enabled)
             {
@@ -130,13 +203,21 @@ namespace STACK.Components
 
             PlayingInstances.Add(Instance);
 
-            Instance.Play();
+            Instance.Volume = SoundEffectVolume;
             Instance.IsLooped = looped;
+            if (null != emitter && null != listener)
+            {
+                Instance.Apply3D(listener.Listener, emitter.Emitter);
+            }
+
+            Instance.Play();
+
             return Instance;
         }
 
         public void UnloadContent()
         {
+            MediaPlayer.MediaStateChanged -= this.OnMediaStateChanged;
             StopSong();
 
             SoundEffects.Clear();
@@ -148,16 +229,22 @@ namespace STACK.Components
             }
         }
 
-        public static AudioManager Create(World addTo)
-        {
-            return addTo.Add<AudioManager>();
-        }
-
         public void Update()
         {
             if (null != SkipContent.SkipCutscene && SkipContent.SkipCutscene.Enabled)
             {
                 StopAll();
+            }
+
+            if (PlayingInstances.Count > 0)
+            {
+                for (int i = PlayingInstances.Count - 1; i >= 0; i--)
+                {
+                    if (SoundState.Stopped == PlayingInstances[i].State)
+                    {
+                        PlayingInstances.RemoveAt(i);
+                    }
+                }
             }
         }
 
@@ -179,5 +266,13 @@ namespace STACK.Components
                 }
             }
         }
+
+        public static AudioManager Create(World addTo)
+        {
+            return addTo.Add<AudioManager>();
+        }
+
+        public AudioManager SetSongVolume(float val) { MusicVolume = val; return this; }
+        public AudioManager SetSoundEffectVolume(float val) { SoundEffectVolume = val; return this; }
     }
 }

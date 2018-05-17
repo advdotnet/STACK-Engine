@@ -1,4 +1,6 @@
-﻿using STACK.Input;
+﻿using Microsoft.Xna.Framework.Media;
+using STACK.Components;
+using STACK.Input;
 using STACK.Logging;
 using System;
 using System.Collections.Generic;
@@ -10,6 +12,7 @@ namespace STACK
 
     public class StackEngine : IDisposable
     {
+        public GameSettings GameSettings { get; private set; }
         public Renderer Renderer { get; private set; }
         public StackGame Game { get; private set; }
         public ContentLoader EngineContent { get; private set; }
@@ -18,9 +21,11 @@ namespace STACK
         public InputProvider InputProvider { get; private set; }
         public event Action OnExit;
         ContentLoader WorldContent { get; set; }
+        bool _Paused = true;
 
         public StackEngine(StackGame game, IServiceProvider services, InputProvider input, GameSettings gameSettings)
         {
+            GameSettings = gameSettings;
             Services = services;
             gameSettings.SetCulture();
 
@@ -32,7 +37,7 @@ namespace STACK
 
             Console = new Console(this);
             ConsoleLogHandler.Console = Console;
-            Paused = true;
+            _Paused = true;
 
             InputProvider = input;
 
@@ -90,7 +95,30 @@ namespace STACK
             Resume();
         }
 
-        public bool Paused { get; private set; }
+        public bool Paused
+        {
+            get
+            {
+                return _Paused;
+            }
+            private set
+            {
+                if (value == _Paused)
+                {
+                    return;
+                }
+
+                _Paused = value;
+                if (_Paused)
+                {
+                    MediaPlayer.Pause();
+                }
+                else
+                {
+                    MediaPlayer.Resume();
+                }
+            }
+        }
 
         public void Pause(bool paused = true)
         {
@@ -109,10 +137,20 @@ namespace STACK
             OnExit?.Invoke();
         }
 
-        public void SaveState(string name = "game1")
+        public void ApplyGameSettingsVolume()
+        {
+            if (null != Game.World && null != GameSettings)
+            {
+                Game.World.Get<AudioManager>().SoundEffectVolume = GameSettings.SoundEffectVolume;
+                Game.World.Get<AudioManager>().MusicVolume = GameSettings.MusicVolume;
+            }
+        }
+
+        public SaveGame SaveState(string name = "game1")
         {
             var ScreenshotData = Renderer.GetScreenshotPNGData(Game.World);
-            SaveGame.SaveToFile(Game.SaveGameFolder, name, Game.World, ScreenshotData);
+
+            return SaveGame.SaveToFile(Game.SaveGameFolder, name, Game.World, ScreenshotData);
         }
 
         public void LoadState(SaveGame state)
@@ -120,10 +158,15 @@ namespace STACK
             Game.RestoreState(state);
         }
 
-        public void LoadState(string name = "game1")
+        public void LoadState(string fileName = "game1")
         {
-            var State = SaveGame.LoadFromFile(Game.SaveGameFolder, name);
+            var State = SaveGame.LoadFromFile(Game.SaveGameFolder, fileName);
             LoadState(State);
+        }
+
+        public string ExistsStateByName(string name)
+        {
+            return SaveGame.ExistsStateByName(Game.SaveGameFolder, name);
         }
 
         public Dictionary<string, SaveGame> GetSaveGames()

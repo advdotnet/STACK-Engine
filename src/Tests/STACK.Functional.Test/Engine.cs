@@ -10,7 +10,7 @@ namespace STACK.Functional.Test
         public void EngineLoadsWorldComponentStates()
         {
             using (var GraphicsDevice = Mock.CreateGraphicsDevice())
-            using (var Engine = new StackEngine(StackGame.Empty, Mock.Wrap(GraphicsDevice), Mock.Input, GameSettings.LoadFromConfigFile()))
+            using (var Engine = new StackEngine(StackGame.Empty, Mock.Wrap(GraphicsDevice), Mock.Input, GameSettings.LoadFromConfigFile("")))
             {
                 var Bytes1 = State.Serialization.SaveState(Engine.Game.World);
                 var SaveGame1 = new STACK.SaveGame("TestSave", Bytes1, null);
