@@ -59,16 +59,18 @@ namespace STACK.Test
         [TestMethod]
         public void ReferencesAfterDeserializing()
         {
-            World World = WorldTest.GetTestWorld();
-            Scene Scene = new Scene("s2");
+            var World = WorldTest.GetTestWorld();
+            var Scene = new Scene("s2");
             Scene.Push(new Entity("o2") { DrawScene = World["s1"] });
             Scene.Push(new Entity("o3") { DrawScene = World["s1"] });
             World.Push(Scene);
-            byte[] Check = STACK.State.Serialization.SaveState<World>(World);
-            World World2 = (World)STACK.State.Serialization.LoadState<World>(Check);
+            var Check = State.Serialization.SaveState(World);
+            var World2 = State.Serialization.LoadState<World>(Check);
             World2.Initialize(true);
-            Assert.AreSame(World2.Scenes[1], World2.Scenes[1].GameObjectCache.Entities[0].UpdateScene);
-            Assert.AreSame(World2.Scenes[1], World2.Scenes[1].GameObjectCache.Entities[1].UpdateScene);
+            var SecondScene = World2.Scenes.FirstOrDefault(s => s.ID == "s2");
+
+            Assert.AreSame(SecondScene, SecondScene.GameObjectCache.Entities[0].UpdateScene);
+            Assert.AreSame(SecondScene, SecondScene.GameObjectCache.Entities[1].UpdateScene);
         }
 
         [TestMethod]
