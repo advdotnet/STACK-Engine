@@ -38,9 +38,6 @@
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FNA">
-      <HintPath>..\..\..\lib\FNA.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
   </ItemGroup>
   <Choose>
@@ -66,6 +63,10 @@
     <Compile Include="TriangleVertex.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Dependencies\Neoforce\FNA\FNA.csproj">
+      <Project>{35253ce1-c864-4cd3-8249-4d1319748e8f}</Project>
+      <Name>FNA</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Dependencies\StarFinder\StarFinder.csproj">
       <Project>{3785df4d-65ef-40e4-9177-2a8b396afb0c}</Project>
       <Name>StarFinder</Name>
