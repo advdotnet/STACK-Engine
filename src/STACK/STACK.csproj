@@ -37,10 +37,6 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FNA, Version=17.2.0.0, Culture=neutral, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\FNA.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Windows.Forms" />
@@ -48,9 +44,6 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="TomShane.Neoforce.Controls">
-      <HintPath>..\..\lib\TomShane.Neoforce.Controls.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Components\Audio\AudioEmitter.cs" />
@@ -174,6 +167,14 @@
     <Compile Include="Utils\FrameRateCounter.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Dependencies\Neoforce\FNA\FNA.csproj">
+      <Project>{35253ce1-c864-4cd3-8249-4d1319748e8f}</Project>
+      <Name>FNA</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Dependencies\Neoforce\Neoforce\TomShane.Neoforce.Controls.csproj">
+      <Project>{ac5f1cd8-aa8e-4db5-814f-86c214175841}</Project>
+      <Name>TomShane.Neoforce.Controls</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Dependencies\Spine\spine-csharp\spine-csharp.csproj">
       <Project>{94144e22-2431-4a8f-ac04-dec22f7edd8f}</Project>
       <Name>spine-csharp</Name>

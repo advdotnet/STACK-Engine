@@ -60,10 +60,6 @@
     <XnaCompressContent>true</XnaCompressContent>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FNA, Version=17.2.0.0, Culture=neutral, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\lib\FNA.dll</HintPath>
-    </Reference>
     <Reference Include="mscorlib">
       <Private>False</Private>
     </Reference>
@@ -119,6 +115,10 @@
     <Compile Include="src\SkeletonMeshRenderer.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Neoforce\FNA\FNA.csproj">
+      <Project>{35253ce1-c864-4cd3-8249-4d1319748e8f}</Project>
+      <Name>FNA</Name>
+    </ProjectReference>
     <ProjectReference Include="..\spine-csharp\spine-csharp.csproj">
       <Project>{94144e22-2431-4a8f-ac04-dec22f7edd8f}</Project>
       <Name>spine-csharp</Name>
