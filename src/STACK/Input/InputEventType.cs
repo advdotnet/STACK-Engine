@@ -2,11 +2,11 @@
 {
     public enum InputEventType : byte
     {
-        MouseUp, 
-		MouseDown, 
-		KeyUp, 
-		KeyDown, 
-		MouseMove, 
-		MouseWheel
-    }    
+        MouseUp,
+        MouseDown,
+        KeyUp,
+        KeyDown,
+        MouseMove,
+        MouseWheel
+    }
 }

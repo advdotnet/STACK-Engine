@@ -87,6 +87,8 @@
     </Compile>
     <Compile Include="Datatypes\GameSettings.cs" />
     <Compile Include="Graphics\DisplaySettings.cs" />
+    <Compile Include="Graphics\Effects\BloomSettings.cs" />
+    <Compile Include="Input\InputEventFileLogger.cs" />
     <Compile Include="Input\Provider\InputProvider.cs" />
     <Compile Include="Input\Provider\PlaybackInputProvider.cs" />
     <Compile Include="Input\Provider\UserInputProvider.cs" />
@@ -95,8 +97,13 @@
     <Compile Include="Log\Handler\SystemConsoleLogHandler.cs" />
     <Compile Include="Log\ILogHandler.cs" />
     <Compile Include="Log\LogLevel.cs" />
+    <Compile Include="State\SerializationReader.cs" />
     <Compile Include="State\SerializationWriter.cs" />
-    <Compile Include="Utils\FastForward.cs" />
+    <Compile Include="State\FieldSerializationSurrogate.cs" />
+    <Compile Include="Utils\SkipContent\SkipCutscene.cs" />
+    <Compile Include="Utils\SkipContent\SkipText.cs" />
+    <Compile Include="Utils\SkipContent\ISkipContent.cs" />
+    <Compile Include="Utils\SkipContent\Base\BaseSkip.cs" />
     <Compile Include="World\Base\BaseEntityCollection.cs" />
     <Compile Include="World\Base\BaseEntity.cs" />
     <Compile Include="Components\Interaction\HotspotMesh.cs" />
@@ -148,6 +155,7 @@
     <Compile Include="Scripting\Script.cs" />
     <Compile Include="EngineVariables.cs" />
     <Compile Include="StackEngine.cs" />
+    <Compile Include="World\EmptyGame.cs" />
     <Compile Include="World\StackGame.cs" />
     <Compile Include="Components\Camera.cs" />
     <Compile Include="Scripting\Delay.cs" />
@@ -162,7 +170,7 @@
     <Compile Include="Window.cs" />
     <Compile Include="State\SaveGame.cs" />
     <Compile Include="State\State.cs" />
-    <Compile Include="State\Surrogates.cs" />
+    <Compile Include="State\StackSurrogateSelector.cs" />
     <Compile Include="Graphics\Effects\Bloom.cs" />
     <Compile Include="Utils\FrameRateCounter.cs" />
   </ItemGroup>

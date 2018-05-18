@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using STACK.Components;
+using STACK.TestBase;
 
 namespace STACK.Functional.Test
 {
@@ -24,6 +25,15 @@ namespace STACK.Functional.Test
                 Assert.AreEqual(1f, Engine.Game.World.Get<Camera>().Zoom);
                 Engine.LoadState(SaveGame2);
                 Assert.AreEqual(2f, Engine.Game.World.Get<Camera>().Zoom);
+            }
+        }
+
+        [TestMethod, TestCategory("GPU")]
+        public void GraphicsDeviceMockAvaiable()
+        {
+            using (var GraphicsDevice = Mock.CreateGraphicsDevice())
+            {
+                Assert.IsNotNull(GraphicsDevice.GraphicsDevice);
             }
         }
     }

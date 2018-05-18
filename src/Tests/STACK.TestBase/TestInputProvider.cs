@@ -1,16 +1,19 @@
-﻿using STACK.Input;
-using Microsoft.Xna.Framework;
-using System.Collections.Generic;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using STACK.Input;
+using System.Collections.Generic;
 
-namespace STACK.Functional.Test
+namespace STACK.TestBase
 {
+    /// <summary>
+    /// Allows to add input events programatically.
+    /// </summary>
     public class TestInputProvider : InputProvider
     {
         Queue<InputEvent> EventsToAdd = new Queue<InputEvent>();
         List<Keys> PressedKeys = new List<Keys>();
         int MouseX, MouseY;
-        ButtonState Left, Right;        
+        ButtonState Left, Right;
 
         public override KeyboardState KeyboardState
         {
@@ -39,7 +42,7 @@ namespace STACK.Functional.Test
         }
 
         public void KeyDown(Keys key)
-        {            
+        {
             EventsToAdd.Enqueue(InputEvent.KeyPress(KeyState.Down, 0, key));
             if (!PressedKeys.Contains(key))
             {
@@ -56,16 +59,30 @@ namespace STACK.Functional.Test
             }
         }
 
-        public void MouseDown()
+        public void MouseDown(MouseButton button = MouseButton.Left)
         {
-            EventsToAdd.Enqueue(InputEvent.MouseClick(ButtonState.Pressed, 0, MouseButton.Left));
-            Left = ButtonState.Pressed;
+            EventsToAdd.Enqueue(InputEvent.MouseClick(ButtonState.Pressed, 0, button));
+            if (MouseButton.Left == button)
+            {
+                Left = ButtonState.Pressed;
+            }
+            else
+            {
+                Right = ButtonState.Pressed;
+            }
         }
 
-        public void MouseUp()
+        public void MouseUp(MouseButton button = MouseButton.Left)
         {
-            EventsToAdd.Enqueue(InputEvent.MouseClick(ButtonState.Released, 0, MouseButton.Left));
-            Left = ButtonState.Released;
+            EventsToAdd.Enqueue(InputEvent.MouseClick(ButtonState.Released, 0, button));
+            if (MouseButton.Left == button)
+            {
+                Left = ButtonState.Released;
+            }
+            else
+            {
+                Right = ButtonState.Released;
+            }
         }
 
         public void MouseMove(int x, int y)
@@ -80,16 +97,16 @@ namespace STACK.Functional.Test
             MouseMove(p.X, p.Y);
         }
 
-        public void MouseClick()
+        public void MouseClick(MouseButton button = MouseButton.Left)
         {
-            MouseDown();
-            MouseUp();
+            MouseDown(button);
+            MouseUp(button);
         }
 
-        public void MouseClick(int x, int y)
+        public void MouseClick(int x, int y, MouseButton button = MouseButton.Left)
         {
             MouseMove(x, y);
-            MouseClick();
+            MouseClick(button);
         }
-    }               
+    }
 }

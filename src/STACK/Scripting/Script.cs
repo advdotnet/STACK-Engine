@@ -61,7 +61,8 @@ namespace STACK
 
         private bool NestedMoveNext(IEnumerator enumerator)
         {
-            return NestedRunningScript() || (enumerator.Current is IEnumerator && MoveNext((IEnumerator)enumerator.Current));
+            return NestedRunningScript() ||
+                (enumerator.Current is IEnumerator && MoveNext((IEnumerator)enumerator.Current));
         }
 
         private bool MoveNext(IEnumerator enumerator)

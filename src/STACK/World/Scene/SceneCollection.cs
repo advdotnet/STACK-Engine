@@ -18,6 +18,8 @@ namespace STACK
         internal List<Scene> _Scenes = null;
         [NonSerialized]
         List<Scene> FindPathResult = new List<Scene>();
+        [NonSerialized]
+        protected Dictionary<string, Entity> EntityIDCache = new Dictionary<string, Entity>();
 
         public List<Scene> Scenes
         {
@@ -110,9 +112,6 @@ namespace STACK
 
             return null;
         }
-
-        [NonSerialized]
-        protected Dictionary<string, Entity> EntityIDCache = new Dictionary<string, Entity>();
 
         [OnDeserialized]
         void OnDeserialized(StreamingContext c)

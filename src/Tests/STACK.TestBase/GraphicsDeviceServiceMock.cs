@@ -3,14 +3,17 @@ using Microsoft.Xna.Framework.Graphics;
 using SDL2;
 using System;
 
-namespace STACK.Functional.Test
+namespace STACK.TestBase
 {
-
+    /// <summary>
+    /// IGraphicsDeviceService mock
+    /// </summary>
     public class GraphicsDeviceServiceMock : IGraphicsDeviceService, IDisposable
     {
         GraphicsDevice _GraphicsDevice;
         IntPtr _Handle;
-        SDL2.SDL.SDL_WindowFlags _WindowFlags = (SDL2.SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL | SDL2.SDL.SDL_WindowFlags.SDL_WINDOW_HIDDEN);
+        SDL.SDL_WindowFlags _WindowFlags = (SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL |
+            SDL.SDL_WindowFlags.SDL_WINDOW_HIDDEN);
 
         public GraphicsDeviceServiceMock()
         {
@@ -26,7 +29,7 @@ namespace STACK.Functional.Test
                 IsFullScreen = false
             };
 
-            System.Environment.SetEnvironmentVariable("FNA_AUDIO_DISABLE_SOUND", "1");
+            Environment.SetEnvironmentVariable("FNA_AUDIO_DISABLE_SOUND", "1");
             FrameworkDispatcher.Update();
 
             _GraphicsDevice = new GraphicsDevice(GraphicsAdapter.DefaultAdapter, GraphicsProfile.HiDef, Parameters);

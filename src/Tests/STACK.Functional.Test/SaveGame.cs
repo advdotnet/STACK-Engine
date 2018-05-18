@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using STACK.Input;
+using STACK.TestBase;
 using System;
 using System.IO;
 using System.Linq;

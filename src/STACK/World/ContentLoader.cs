@@ -25,7 +25,6 @@ namespace STACK
                 return (T)(object)Path.LoadFromFile(RootDirectory + "/" + assetName);
             }
 
-
             return base.Load<T>(assetName);
         }
     }
