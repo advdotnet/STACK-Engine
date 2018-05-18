@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Xna.Framework;
 using STACK.Components;
+using STACK.TestBase;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;

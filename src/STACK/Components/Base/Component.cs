@@ -7,6 +7,12 @@ namespace STACK
     public abstract class Component
     {
         private BaseEntityCollection _Parent;
+        [NonSerialized]
+        Entity CastedEntity = null;
+        [NonSerialized]
+        Scene CastedScene = null;
+        [NonSerialized]
+        World ParentWorld = null;
 
         public BaseEntityCollection Parent
         {
@@ -20,13 +26,6 @@ namespace STACK
                 CacheTransients();
             }
         }
-
-        [NonSerialized]
-        Entity CastedEntity = null;
-        [NonSerialized]
-        Scene CastedScene = null;
-        [NonSerialized]
-        World ParentWorld = null;
 
         [OnDeserialized]
         void OnDeserialized(StreamingContext c)

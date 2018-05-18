@@ -11,6 +11,16 @@ namespace STACK
     public class GameObjectCache
     {
         private Scene Scene { get; set; }
+        [NonSerialized]
+        List<Entity> _VisibleObjects = null;
+        [NonSerialized]
+        List<Exit> _Exits = null;
+        [NonSerialized]
+        List<IDraw> _ObjectsToDraw = null;
+        [NonSerialized]
+        List<Entity> _Entities = null;
+        [NonSerialized]
+        List<Component> _Components = null;
 
         public GameObjectCache(Scene scene)
         {
@@ -24,9 +34,6 @@ namespace STACK
             CacheObjectsToDraw();
             CacheExits();
         }
-
-        [NonSerialized]
-        List<Entity> _VisibleObjects = null;
 
         /// <summary>
         /// List of visible
@@ -85,9 +92,6 @@ namespace STACK
             _VisibleObjects.Sort(BaseEntityCollection.PrioritySorter);
         }
 
-        [NonSerialized]
-        List<Exit> _Exits = null;
-
         /// <summary>
         /// List of entities with an Exit component.
         /// </summary>
@@ -122,9 +126,6 @@ namespace STACK
                 }
             }
         }
-
-        [NonSerialized]
-        List<IDraw> _ObjectsToDraw = null;
 
         /// <summary>
         /// List of Entities / Components to draw.
@@ -172,9 +173,6 @@ namespace STACK
             ObjectsToDraw.Sort(BaseEntityCollection.ReversePrioritySorter);
         }
 
-        [NonSerialized]
-        List<Entity> _Entities = null;
-
         /// <summary>
         /// List of Entities of this Scene.
         /// </summary>
@@ -209,9 +207,6 @@ namespace STACK
                 }
             }
         }
-
-        [NonSerialized]
-        List<Component> _Components = null;
 
         /// <summary>
         /// List of Components of this Scene.

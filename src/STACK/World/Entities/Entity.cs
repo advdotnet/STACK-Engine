@@ -10,6 +10,8 @@ namespace STACK
     public class Entity : BaseEntityCollection
     {
         public Scene _DrawScene;
+        [NonSerialized]
+        private Scene _UpdateScene;
 
         public Scene DrawScene
         {
@@ -38,9 +40,6 @@ namespace STACK
                 }
             }
         }
-
-        [NonSerialized]
-        private Scene _UpdateScene;
 
         [OnDeserialized]
         void OnDeserialized(StreamingContext c)

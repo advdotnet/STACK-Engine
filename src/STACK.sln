@@ -39,6 +39,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FNA", "Dependencies\Neoforc
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TomShane.Neoforce.Controls", "Dependencies\Neoforce\Neoforce\TomShane.Neoforce.Controls.csproj", "{AC5F1CD8-AA8E-4DB5-814F-86C214175841}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "STACK.TestBase", "Tests\STACK.TestBase\STACK.TestBase.csproj", "{A0CCDFD1-14C8-4B91-80CE-209C2EA6C4F7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -101,6 +103,10 @@ Global
 		{AC5F1CD8-AA8E-4DB5-814F-86C214175841}.Debug|x86.Build.0 = Debug|Any CPU
 		{AC5F1CD8-AA8E-4DB5-814F-86C214175841}.Release|x86.ActiveCfg = Release|Any CPU
 		{AC5F1CD8-AA8E-4DB5-814F-86C214175841}.Release|x86.Build.0 = Release|Any CPU
+		{A0CCDFD1-14C8-4B91-80CE-209C2EA6C4F7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A0CCDFD1-14C8-4B91-80CE-209C2EA6C4F7}.Debug|x86.Build.0 = Debug|Any CPU
+		{A0CCDFD1-14C8-4B91-80CE-209C2EA6C4F7}.Release|x86.ActiveCfg = Release|Any CPU
+		{A0CCDFD1-14C8-4B91-80CE-209C2EA6C4F7}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -119,5 +125,6 @@ Global
 		{759834FA-093E-4142-B67E-716DE22157DB} = {592CAE4F-81B6-4CAD-88EF-0BEDC14BA608}
 		{35253CE1-C864-4CD3-8249-4D1319748E8F} = {592CAE4F-81B6-4CAD-88EF-0BEDC14BA608}
 		{AC5F1CD8-AA8E-4DB5-814F-86C214175841} = {592CAE4F-81B6-4CAD-88EF-0BEDC14BA608}
+		{A0CCDFD1-14C8-4B91-80CE-209C2EA6C4F7} = {4B3B21EA-0DD4-4207-AD01-C39116AB7E9F}
 	EndGlobalSection
 EndGlobal

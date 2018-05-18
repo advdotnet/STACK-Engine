@@ -7,10 +7,13 @@ namespace STACK.Test
     [TestClass]
     public class GameSettingsTests
     {
+        /// <summary>
+        /// Execute this test in the STACK.Functional.Test test project as SDL2.dll is required
+        /// </summary>
         [TestMethod, TestCategory("FileSystem")]
         public void GameSettingsTest()
         {
-            const string FILENAME = GameSettings.CONFIGFILENAME;
+            const string FILEPATH = "test";
 
             var Resolution = new Point(10, 10);
             var Volume = 0.4f;
@@ -30,9 +33,11 @@ namespace STACK.Test
                 MultiSampling = MultiSampling
             };
 
-            Settings.Save(FILENAME);
+            Settings.Save(FILEPATH);
 
-            using (var FileStream = File.Open(FILENAME, FileMode.Open))
+            var FileName = System.IO.Path.Combine(SaveGame.UserStorageFolder(FILEPATH), GameSettings.CONFIGFILENAME);
+
+            using (var FileStream = File.Open(FileName, FileMode.Open))
             {
                 var DeserializedSettings = GameSettings.DeserializeFromStream(FileStream);
                 Assert.AreEqual(Volume, DeserializedSettings.MusicVolume);
@@ -44,7 +49,7 @@ namespace STACK.Test
                 Assert.AreEqual(MultiSampling, DeserializedSettings.MultiSampling);
             }
 
-            File.Delete(FILENAME);
+            File.Delete(FileName);
         }
     }
 }

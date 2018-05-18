@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 
-namespace STACK.Functional.Test
+namespace STACK.TestBase
 {
     public class TestEngine : StackEngine, IDisposable
     {

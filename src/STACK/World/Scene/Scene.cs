@@ -16,6 +16,8 @@ namespace STACK
     public class Scene : BaseEntityCollection, IMapPosition
     {
         [NonSerialized]
+        World _World = null;
+        [NonSerialized]
         ContentLoader _Content;
         public ContentLoader Content { get { return _Content; } }
 
@@ -89,9 +91,6 @@ namespace STACK
                 }
             }
         }
-
-        [NonSerialized]
-        World _World = null;
 
         /// <summary>
         /// The World which this scene is assigned to.
@@ -207,7 +206,6 @@ namespace STACK
 
             return null;
         }
-
 
         public override void OnUnloadContent()
         {

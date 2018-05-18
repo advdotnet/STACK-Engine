@@ -74,12 +74,9 @@
     <Compile Include="Serialization\World.cs" />
     <Compile Include="Serialization\Path.cs" />
     <Compile Include="Serialization\Script.cs" />
-    <Compile Include="Testing\TestServiceProvider.cs" />
-    <Compile Include="Testing\TestInputProvider.cs" />
     <Compile Include="Utils\ASCII.cs" />
     <Compile Include="Utils\DisplaySettings.cs" />
     <Compile Include="Components\Projection.cs" />
-    <Compile Include="Utils\GameSettings.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Dependencies\Neoforce\FNA\FNA.csproj">
@@ -101,6 +98,10 @@
     <ProjectReference Include="..\..\STACK\STACK.csproj">
       <Project>{bdd5e5df-a2f6-44fc-a44b-33488ba054bb}</Project>
       <Name>STACK</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\STACK.TestBase\STACK.TestBase.csproj">
+      <Project>{A0CCDFD1-14C8-4B91-80CE-209C2EA6C4F7}</Project>
+      <Name>STACK.TestBase</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
