@@ -53,7 +53,7 @@ namespace STACK
 
             // Switch to the next bloom settings preset?
 
-            if (input.IsKeyPress(Keys.A) && false)
+            if (input.IsKeyPress(Keys.F11) && false)
             {
                 BloomIndex = (BloomIndex + 1) % BloomSettings.PresetSettings.Length;
 
@@ -67,20 +67,9 @@ namespace STACK
                 StackEngine.Game.World.Get<RenderSettings>().BloomEnabled = !StackEngine.Game.World.Get<RenderSettings>().BloomEnabled;
             }
 
-            // Cycle through the intermediate buffer debug display modes?
-            if (input.IsKeyPress(Keys.D))
-            {
-                StackEngine.Renderer.BloomEffect.Visible = true;
-                StackEngine.Renderer.BloomEffect.ShowBuffer++;
-
-                if (StackEngine.Renderer.BloomEffect.ShowBuffer > BloomComponent.IntermediateBuffer.FinalResult)
-                    StackEngine.Renderer.BloomEffect.ShowBuffer = 0;
-            }
-
             if (input.IsKeyPress(Keys.F1)) SetSpeed(GameSpeed.Default);
             if (input.IsKeyPress(Keys.F2)) SetSpeed(GameSpeed.Double);
             if (input.IsKeyPress(Keys.F3)) SetSpeed(GameSpeed.Half);
-            if (input.IsKeyPress(Keys.F4)) SetSpeed(GameSpeed.Infinity);
         }
     }
 }
