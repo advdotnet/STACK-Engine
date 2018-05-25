@@ -132,6 +132,11 @@ namespace STACK
 
         public void Exit()
         {
+            if (null != Game)
+            {
+                Game.OnExit();
+            }
+
             Dispose();
 
             OnExit?.Invoke();

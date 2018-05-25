@@ -34,6 +34,7 @@ namespace STACK
         }
 
         protected virtual void OnStart() { }
+        public virtual void OnExit() { }
         protected virtual void HandleInputEvent() { }
         protected virtual void OnWorldInitialized(bool restore) { }
 
