@@ -11,6 +11,7 @@ namespace STACK.Input
     {
         KeyboardState _KeyboardState, OldKeyboardState;
         MouseState _MouseState, OldMouseState;
+        int _ScrollValue, OldScrollValue;
         long TimeStamp;
         InputQueue Queue = new InputQueue();
 
@@ -58,9 +59,11 @@ namespace STACK.Input
 
             OldKeyboardState = _KeyboardState;
             OldMouseState = _MouseState;
+            OldScrollValue = _ScrollValue;
 
             _KeyboardState = Keyboard.GetState();
             _MouseState = Mouse.GetState();
+            _ScrollValue = _MouseState.ScrollWheelValue;
 
             var ScreenCoordinates = new Vector2(_MouseState.X, _MouseState.Y);
             var WorldCoordinates = DisplaySettings.TransformPoint(_MouseState.X, _MouseState.Y);
@@ -70,6 +73,10 @@ namespace STACK.Input
             // mouse move
             if (IsInsideWindow((int)ScreenCoordinates.X, (int)ScreenCoordinates.Y))
             {
+                if (OldScrollValue != _ScrollValue)
+                {
+                    Queue.Enqueue(InputEvent.MouseScroll(TimeStamp, _ScrollValue - OldScrollValue));
+                }
 
                 if (OldMouseState.X != _MouseState.X || OldMouseState.Y != _MouseState.Y)
                 {

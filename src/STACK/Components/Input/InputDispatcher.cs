@@ -21,10 +21,11 @@ namespace STACK.Components
         public Action<Vector2, MouseButton> OnMouseUp { get; set; }
         public Action<Keys> OnKeyUp { get; set; }
         public Action<Keys> OnKeyDown { get; set; }
+        public Action<Vector2, int> OnMouseScroll { get; set; }
 
         public void HandleInputEvent(Vector2 mouse, InputEvent inputEvent)
         {
-            inputEvent.Dispatch(mouse, OnMouseMove, OnMouseDown, OnMouseUp, OnKeyDown, OnKeyUp);
+            inputEvent.Dispatch(mouse, OnMouseMove, OnMouseDown, OnMouseUp, OnKeyDown, OnKeyUp, OnMouseScroll);
         }
 
         public static InputDispatcher Create(BaseEntityCollection addTo)
@@ -37,5 +38,6 @@ namespace STACK.Components
         public InputDispatcher SetOnMouseUpFn(Action<Vector2, MouseButton> value) { OnMouseUp = value; return this; }
         public InputDispatcher SetOnKeyUpFn(Action<Keys> value) { OnKeyUp = value; return this; }
         public InputDispatcher SetOnKeyDownFn(Action<Keys> value) { OnKeyDown = value; return this; }
+        public InputDispatcher SetOnMouseScrollFn(Action<Vector2, int> value) { OnMouseScroll = value; return this; }
     }
 }

@@ -19,7 +19,7 @@ namespace STACK.TestBase
         {
             SDL.SDL_SetMainReady();
             SDL.SDL_Init(SDL.SDL_INIT_VIDEO);
-            _Handle = SDL.SDL_CreateWindow("", 0, 0, 1, 1, _WindowFlags);
+            _Handle = SDL.SDL_CreateWindow(string.Empty, 0, 0, 1, 1, _WindowFlags);
 
             var Parameters = new PresentationParameters()
             {

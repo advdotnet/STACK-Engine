@@ -25,11 +25,13 @@ namespace STACK.Input
             Paused = false;
         }
 
-        public void Dispatch(Vector2 mouse, Action<Vector2> mouseMove = null,
+        public void Dispatch(Vector2 mouse,
+            Action<Vector2> mouseMove = null,
             Action<Vector2, MouseButton> mouseDown = null,
             Action<Vector2, MouseButton> mouseUp = null,
             Action<Keys> keyDown = null,
-            Action<Keys> keyUp = null)
+            Action<Keys> keyUp = null,
+            Action<Vector2, int> mouseScroll = null)
         {
 
             switch (Type)
@@ -52,6 +54,9 @@ namespace STACK.Input
 
                 case InputEventType.KeyUp:
                     keyUp?.Invoke((Keys)Param);
+                    break;
+                case InputEventType.MouseScroll:
+                    mouseScroll?.Invoke(mouse, Param);
                     break;
             }
         }
@@ -93,6 +98,11 @@ namespace STACK.Input
         public static InputEvent MouseMove(long timestamp, int x, int y)
         {
             return new InputEvent(InputEventType.MouseMove, timestamp, ShortsToInt((short)x, (short)y));
+        }
+
+        public static InputEvent MouseScroll(long timestamp, int diff)
+        {
+            return new InputEvent(InputEventType.MouseScroll, timestamp, diff);
         }
     }
 }
