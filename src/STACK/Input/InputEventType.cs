@@ -7,6 +7,6 @@
         KeyUp,
         KeyDown,
         MouseMove,
-        MouseWheel
+        MouseScroll
     }
 }
