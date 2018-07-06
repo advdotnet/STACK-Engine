@@ -6,6 +6,7 @@ using STACK.Components;
 using STACK.Logging;
 using System;
 using System.IO;
+using System.Threading;
 using TomShane.Neoforce.Controls;
 
 namespace STACK.Graphics
@@ -54,7 +55,10 @@ namespace STACK.Graphics
                 ShowSoftwareCursor = false
             };
 
-            GUIManager.KeyboardLayout = new GermanKeyboardLayout();
+            if ("de-DE" == Thread.CurrentThread.CurrentUICulture.Name)
+            {
+                GUIManager.KeyboardLayout = new GermanKeyboardLayout();
+            }
 
             LoadContent(content);
         }
