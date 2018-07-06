@@ -67,7 +67,7 @@ namespace STACK.Test
             Manager.SoundEffectVolume = 1f;
             Manager.MaxSoundEffectVolume = 0.5f;
 
-            Assert.AreEqual(0.5f, Manager.SoundEffectVolume);
+            Assert.AreEqual(0.5f, Manager.EffectiveSoundEffectVolume);
         }
 
         [TestMethod]
@@ -76,7 +76,20 @@ namespace STACK.Test
             Manager.MaxSoundEffectVolume = 0.5f;
             Manager.SoundEffectVolume = 0.5f;
 
-            Assert.AreEqual(0.25f, Manager.SoundEffectVolume);
+            Assert.AreEqual(0.25f, Manager.EffectiveSoundEffectVolume);
+        }
+
+        [TestMethod]
+        public void SetSoundEffectEffectiveVolumeTwice()
+        {
+            Manager.MaxSoundEffectVolume = 0.5f;
+            Manager.SoundEffectVolume = 0.5f;
+
+            Assert.AreEqual(0.25f, Manager.EffectiveSoundEffectVolume);
+
+            Manager.MaxSoundEffectVolume = 0.25f;
+
+            Assert.AreEqual(0.125f, Manager.EffectiveSoundEffectVolume);
         }
 
         [TestMethod]
