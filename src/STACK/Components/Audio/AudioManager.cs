@@ -73,7 +73,7 @@ namespace STACK.Components
             }
             set
             {
-                _MusicVolume = value;
+                _MusicVolume = MathHelper.Clamp(value, 0.0f, 1.0f);
                 MediaPlayer.Volume = value * MaxMusicVolume;
             }
         }
@@ -86,7 +86,7 @@ namespace STACK.Components
             }
             set
             {
-                _SoundEffectVolume = MathHelper.Clamp(value, 0.0f, 1.0f) * MaxSoundEffectVolume;
+                _SoundEffectVolume = MathHelper.Clamp(value, 0.0f, 1.0f);
             }
         }
 
@@ -112,7 +112,14 @@ namespace STACK.Components
             set
             {
                 _MaxSoundEffectVolume = MathHelper.Clamp(value, 0.0f, 1.0f);
-                _SoundEffectVolume = _SoundEffectVolume * _MaxSoundEffectVolume;
+            }
+        }
+
+        public float EffectiveSoundEffectVolume
+        {
+            get
+            {
+                return _MaxSoundEffectVolume * _SoundEffectVolume;
             }
         }
 
@@ -232,7 +239,7 @@ namespace STACK.Components
 
             PlayingInstances.Add(Instance);
 
-            Instance.Volume = SoundEffectVolume;
+            Instance.Volume = EffectiveSoundEffectVolume;
             Instance.IsLooped = looped;
             if (null != emitter && null != listener)
             {
