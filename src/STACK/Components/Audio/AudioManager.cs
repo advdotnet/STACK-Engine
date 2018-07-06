@@ -35,6 +35,9 @@ namespace STACK.Components
         float _SoundEffectVolume = 1;
         float _MusicVolume = 1;
 
+        float _MaxSoundEffectVolume = 1;
+        float _MaxMusicVolume = 1;
+
         MediaState LastMediaState;
         bool IsRepeating = false;
 
@@ -71,7 +74,7 @@ namespace STACK.Components
             set
             {
                 _MusicVolume = value;
-                MediaPlayer.Volume = value;
+                MediaPlayer.Volume = value * MaxMusicVolume;
             }
         }
 
@@ -83,7 +86,33 @@ namespace STACK.Components
             }
             set
             {
-                _SoundEffectVolume = MathHelper.Clamp(value, 0.0f, 1.0f);
+                _SoundEffectVolume = MathHelper.Clamp(value, 0.0f, 1.0f) * MaxSoundEffectVolume;
+            }
+        }
+
+        public float MaxMusicVolume
+        {
+            get
+            {
+                return _MaxMusicVolume;
+            }
+            set
+            {
+                _MaxMusicVolume = MathHelper.Clamp(value, 0.0f, 1.0f);
+                MediaPlayer.Volume = MusicVolume * value;
+            }
+        }
+
+        public float MaxSoundEffectVolume
+        {
+            get
+            {
+                return _MaxSoundEffectVolume;
+            }
+            set
+            {
+                _MaxSoundEffectVolume = MathHelper.Clamp(value, 0.0f, 1.0f);
+                _SoundEffectVolume = _SoundEffectVolume * _MaxSoundEffectVolume;
             }
         }
 
@@ -210,9 +239,25 @@ namespace STACK.Components
                 Instance.Apply3D(listener.Listener, emitter.Emitter);
             }
 
-            Instance.Play();
+
+            if (!SoundDisabled)
+            {
+                Instance.Play();
+            }
+            else
+            {
+                Instance.Stop();
+            }
 
             return Instance;
+        }
+
+        private bool SoundDisabled
+        {
+            get
+            {
+                return "1" == Environment.GetEnvironmentVariable("FNA_AUDIO_DISABLE_SOUND");
+            }
         }
 
         public void UnloadContent()
@@ -274,5 +319,7 @@ namespace STACK.Components
 
         public AudioManager SetSongVolume(float val) { MusicVolume = val; return this; }
         public AudioManager SetSoundEffectVolume(float val) { SoundEffectVolume = val; return this; }
+        public AudioManager SetMaxSongVolume(float val) { MaxMusicVolume = val; return this; }
+        public AudioManager SetMaxSoundEffectVolume(float val) { MaxSoundEffectVolume = val; return this; }
     }
 }
