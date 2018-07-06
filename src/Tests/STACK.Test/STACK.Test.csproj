@@ -58,6 +58,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Components\AudioManager.cs" />
     <Compile Include="Components\AudioEmitter.cs" />
     <Compile Include="Components\Interaction.cs" />
     <Compile Include="Components\Text.cs" />
