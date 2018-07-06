@@ -146,8 +146,8 @@ namespace STACK
         {
             if (null != Game.World && null != GameSettings)
             {
-                Game.World.Get<AudioManager>().SoundEffectVolume = GameSettings.SoundEffectVolume;
-                Game.World.Get<AudioManager>().MusicVolume = GameSettings.MusicVolume;
+                Game.World.Get<AudioManager>().MaxSoundEffectVolume = GameSettings.SoundEffectVolume;
+                Game.World.Get<AudioManager>().MaxMusicVolume = GameSettings.MusicVolume;
             }
         }
 
