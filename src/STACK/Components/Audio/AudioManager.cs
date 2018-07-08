@@ -30,6 +30,9 @@ namespace STACK.Components
         [NonSerialized]
         Song CurrentSong;
 
+        [NonSerialized]
+        bool _IsEnginePaused;
+
         string CurrentSongName;
 
         float _SoundEffectVolume = 1;
@@ -63,6 +66,18 @@ namespace STACK.Components
         {
             UpdateOrder = 500;
             Enabled = true;
+        }
+
+        public bool IsEnginePaused
+        {
+            get
+            {
+                return _IsEnginePaused;
+            }
+            set
+            {
+                _IsEnginePaused = value;
+            }
         }
 
         public float MusicVolume
@@ -123,8 +138,25 @@ namespace STACK.Components
             }
         }
 
+        public void ApplyGameSettingsVolume(GameSettings gameSettings)
+        {
+            if (null != gameSettings)
+            {
+                MaxSoundEffectVolume = gameSettings.SoundEffectVolume;
+                MaxMusicVolume = gameSettings.MusicVolume;
+            }
+        }
+
         private void OnMediaStateChanged(object sender, EventArgs e)
         {
+            // if the media player state was paused due to an engine pause, don't 
+            // store the last state.
+
+            if (MediaPlayer.State == MediaState.Paused && IsEnginePaused)
+            {
+                return;
+            }
+
             LastMediaState = MediaPlayer.State;
             if (MediaState.Stopped == LastMediaState)
             {
