@@ -25,11 +25,11 @@ namespace ContentAnalyzer.Test
             Assert.IsTrue(Result.Contains("public static partial class content"));
 
             Assert.IsTrue(Result.Contains("public static partial class Skins"));
-            Assert.IsTrue(Result.Contains("public const string _path_ = \"Skins\\\\\";"));
-            Assert.IsTrue(Result.Contains("public const string Default = \"Skins\\\\Default\";"));
-            Assert.IsTrue(Result.Contains("public const string Normalmap = \"shaders\\\\Normalmap\";"));
+            Assert.IsTrue(Result.Contains("public const string _path_ = \"Skins/\";"));
+            Assert.IsTrue(Result.Contains("public const string Default = \"Skins/Default\";"));
+            Assert.IsTrue(Result.Contains("public const string Normalmap = \"shaders/Normalmap\";"));
             Assert.IsTrue(Result.Contains("public const string stacklogo = \"stacklogo\";"));
-            Assert.IsTrue(Result.Contains("public const string stack = \"fonts\\\\stack\";"));
+            Assert.IsTrue(Result.Contains("public const string stack = \"fonts/stack\";"));
         }
     }
 }
