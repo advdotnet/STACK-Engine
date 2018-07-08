@@ -109,6 +109,12 @@ namespace STACK
                 }
 
                 _Paused = value;
+
+                if (null != Game.World)
+                {
+                    Game.World.Get<AudioManager>().IsEnginePaused = value;
+                }
+
                 if (_Paused)
                 {
                     MediaPlayer.Pause();
@@ -144,10 +150,9 @@ namespace STACK
 
         public void ApplyGameSettingsVolume()
         {
-            if (null != Game.World && null != GameSettings)
+            if (null != Game.World)
             {
-                Game.World.Get<AudioManager>().MaxSoundEffectVolume = GameSettings.SoundEffectVolume;
-                Game.World.Get<AudioManager>().MaxMusicVolume = GameSettings.MusicVolume;
+                Game.World.Get<AudioManager>().ApplyGameSettingsVolume(GameSettings);
             }
         }
 
