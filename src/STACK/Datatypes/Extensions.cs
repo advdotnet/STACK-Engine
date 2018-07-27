@@ -4,7 +4,9 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using STACK.Logging;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace STACK
 {
@@ -77,7 +79,7 @@ namespace STACK
         public static void AutoAddWorldComponents(World world)
         {
             var Assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            var Types = Assemblies.SelectMany(a => a.GetTypes());
+            var Types = Assemblies.SelectMany(a => GetLoadableTypes(a));
 
             var q = from t in Types
                     where t.IsClass && typeof(IWorldAutoAdd).IsAssignableFrom(t) &&
@@ -89,6 +91,23 @@ namespace STACK
                 Log.WriteLine("Adding World Component: " + ComponentType.Name);
                 var method = typeof(World).GetMethod("Add", new Type[] { });
                 method.MakeGenericMethod(ComponentType).Invoke(world, null);
+            }
+        }
+
+        /// <summary>
+        /// Circumvent ReflectionTypeLoadException in mono.
+        /// </summary>
+        /// <param name="assembly"></param>
+        /// <returns></returns>
+        private static IEnumerable<Type> GetLoadableTypes(Assembly assembly)
+        {
+            try
+            {
+                return assembly.GetTypes();
+            }
+            catch (ReflectionTypeLoadException e)
+            {
+                return e.Types.Where(t => t != null);
             }
         }
     }

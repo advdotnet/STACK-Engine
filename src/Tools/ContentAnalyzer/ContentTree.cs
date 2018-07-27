@@ -44,6 +44,7 @@ namespace ContentAnalyzer
                 foreach (var FileName in ContentType.EnumerateFiles(ContentDirectory, BuildDirectory))
                 {
                     var WithoutContentDirAndExtension = StripExtension(RemoveContentDir(FileName));
+                    var NormalizedPath = WithoutContentDirAndExtension.Replace("\\", "/");
                     var Parts = WithoutContentDirAndExtension.Split('\\');
                     var PathParts = Parts.Take(Parts.Length - 1).ToArray();
                     var Name = Parts.Last();
@@ -61,7 +62,7 @@ namespace ContentAnalyzer
                         Name = "_" + Name;
                     }
 
-                    var Content = "public const string " + Name + " = " + ToLiteral(WithoutContentDirAndExtension) + ";";
+                    var Content = "public const string " + Name + " = " + ToLiteral(NormalizedPath) + ";";
 
                     TreeElements[Relevant].Add(Content);
                 }
@@ -107,7 +108,7 @@ namespace ContentAnalyzer
 
                     builder.AppendLine(Indent(2 + i) + "public static partial class " + pathParts[i]);
                     builder.AppendLine(Indent(2 + i) + "{");
-                    var CurrentPath = string.Join("\\", pathParts.Take(i + 1)) + "\\";
+                    var CurrentPath = string.Join("/", pathParts.Take(i + 1)) + "/";
                     builder.AppendLine(Indent(3 + i) + "public const string _path_ = " + ToLiteral(CurrentPath) + ";");
                 }
             }
