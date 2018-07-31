@@ -8,6 +8,7 @@ namespace STACK
     [Serializable]
     public class Verb
     {
+        public string Id { get; protected set; }
         public string Text { get; protected set; }
         public string Preposition { get; protected set; }
         public bool Ditransitive { get; protected set; }
@@ -29,7 +30,7 @@ namespace STACK
                 return false;
             }
 
-            return (Text == item.Text && Preposition == item.Preposition && Ditransitive == item.Ditransitive);
+            return (Id == item.Id);
         }
 
         public override int GetHashCode()
