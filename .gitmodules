@@ -1,3 +1,5 @@
 [submodule "src/Dependencies/Neoforce"]
 	path = src/Dependencies/Neoforce
 	url = https://github.com/advdotnet/Neoforce-Mono
+	branch = master
+
