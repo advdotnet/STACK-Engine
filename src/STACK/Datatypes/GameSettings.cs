@@ -219,7 +219,7 @@ namespace STACK
 
         public static string GetCurrentCultureName()
         {
-            return Thread.CurrentThread.CurrentCulture.Name;
+            return Thread.CurrentThread.CurrentUICulture.Name;
         }
 
         public static void SetCurrentCulture(string name)
