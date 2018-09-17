@@ -37,8 +37,13 @@ namespace STACK.Functional.Test
         [TestMethod, TestCategory("GPU")]
         public void SetCommand()
         {
+            var GameSettings = new GameSettings()
+            {
+                Culture = "de-DE"
+            };
+
             using (var GraphicsDevice = Mock.CreateGraphicsDevice())
-            using (var Runner = new TestEngine(StackGame.Empty, Mock.Wrap(GraphicsDevice), Mock.Input))
+            using (var Runner = new TestEngine(StackGame.Empty, Mock.Wrap(GraphicsDevice), Mock.Input, GameSettings))
             {
                 EngineVariables.DebugPath = false;
                 Runner.Console.Visible = true;

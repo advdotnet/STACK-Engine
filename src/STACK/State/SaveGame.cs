@@ -18,15 +18,11 @@ namespace STACK
         public DateTime Date;
         public byte[] Screenshot;
 
-        private SaveGame()
-        {
-            Culture = GameSettings.GetCurrentCultureName();
-        }
-
         public SaveGame(string name, byte[] world, byte[] screen)
         {
             World = world;
             Name = name;
+            Culture = GameSettings.GetCurrentCultureName();
             //ScreenShot = screen;
             Date = DateTime.Now;
         }
