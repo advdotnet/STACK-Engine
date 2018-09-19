@@ -126,6 +126,16 @@ namespace STACK.Test
         }
 
         [TestMethod]
+        public void TextLineCopyFunctionsCopyTag()
+        {
+            var TextLine = new TextLine("Text", Vector2.Zero, Vector2.Zero, Rectangle.Empty, Color.White, "Tag");
+
+            Assert.AreEqual("Tag", TextLine.ChangeColor(Color.Blue).Tag);
+            Assert.AreEqual("Tag", TextLine.ChangeHitbox(Rectangle.Empty).Tag);
+            Assert.AreEqual("Tag", TextLine.Move(Vector2.One).Tag);
+        }
+
+        [TestMethod]
         public void DeserializeTest()
         {
             var Entity = new Entity();
