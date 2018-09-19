@@ -43,7 +43,7 @@ namespace STACK
 
         public TextLine ChangeColor(Color value)
         {
-            return new TextLine(Text, Position, Origin, Hitbox, value);
+            return new TextLine(Text, Position, Origin, Hitbox, value, Tag);
         }
 
         public TextLine Move(Vector2 value)
@@ -51,12 +51,12 @@ namespace STACK
             var position = Position - value;
             var hitbox = new Rectangle(Hitbox.X - (int)value.X, Hitbox.Y - (int)value.Y, Hitbox.Width, Hitbox.Height);
 
-            return new TextLine(Text, position, Origin, hitbox, Color);
+            return new TextLine(Text, position, Origin, hitbox, Color, Tag);
         }
 
         public TextLine ChangeHitbox(Rectangle rectangle)
         {
-            return new TextLine(Text, Position, Origin, rectangle, Color);
+            return new TextLine(Text, Position, Origin, rectangle, Color, Tag);
         }
     }
 }
