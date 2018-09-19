@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using STACK.Components;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 
 namespace STACK
@@ -49,6 +50,9 @@ namespace STACK
         float _DrawOrder;
         bool _Enabled;
         float _UpdateOrder;
+
+        const char SPACE = ' ';
+        const char NL = '\n';
 
         public Vector2 ConstrainOffset { get { return _ConstrainOffset; } }
         public bool Visible { get { return _Visible; } set { _Visible = value; } }
@@ -141,7 +145,40 @@ namespace STACK
                 AlphaPercentage = 0;
             }
 
-            CreateLines(position, wrappedText);
+            CreateLines(position, wrappedText, null);
+            _ConstrainOffset = ConstrainBounds();
+        }
+
+        public void Set(List<TextInfo> textInfos, float duration, Vector2 position)
+        {
+            if (null == textInfos)
+            {
+                return;
+            }
+
+            SetBounds(position);
+            var Tags = new List<string>();
+            string WrappedText = string.Empty;
+
+            foreach (var TextInfo in textInfos)
+            {
+                var CurrentWrappedText = WordWrapText(TextInfo.Text);
+                var LinesCount = CurrentWrappedText.Count(x => x == NL) + 1;
+                Tags.AddRange(Enumerable.Repeat(TextInfo.Tag, LinesCount));
+                WrappedText += CurrentWrappedText + NL;
+            }
+
+            WrappedText = WrappedText.TrimEnd(NL);
+
+            Duration = TextDuration.Default(WrappedText, duration);
+
+            if (Duration >= 0)
+            {
+                Duration += 2 * FadeDuration;
+                AlphaPercentage = 0;
+            }
+
+            CreateLines(position, WrappedText, Tags);
             _ConstrainOffset = ConstrainBounds();
         }
 
@@ -192,7 +229,7 @@ namespace STACK
         /// </summary>
         private string WordWrapText(string text)
         {
-            const char SPACE = ' ';
+
             if (string.IsNullOrEmpty(text) || !WordWrap || MeasureStringFn == null)
             {
                 return text;
@@ -206,7 +243,7 @@ namespace STACK
             {
                 if (MeasureStringFn(Line + Word).X > Bounds.Width)
                 {
-                    Result = Result + Line + '\n';
+                    Result = Result + Line + NL;
                     Line = string.Empty;
                 }
 
@@ -216,7 +253,7 @@ namespace STACK
             return Result + Line.TrimEnd(SPACE);
         }
 
-        void CreateLines(Vector2 position, string wrappedText)
+        void CreateLines(Vector2 position, string wrappedText, List<string> tags = null)
         {
             TextBounds = MeasureStringFn(wrappedText);
             var TextPosition = position;
@@ -232,7 +269,7 @@ namespace STACK
                 Origin.Y -= Bounds.Height / 2f - TextBounds.Y / 2f;
             }
 
-            string[] TextLines = wrappedText.Split('\n');
+            string[] TextLines = wrappedText.Split(NL);
 
             Lines.Clear();
 
@@ -253,7 +290,13 @@ namespace STACK
 
                 var LinePosition = TextPosition + LineOffset;
                 var Hitbox = new Rectangle((int)(LinePosition.X - Origin.X), (int)(LinePosition.Y - Origin.Y), (int)LineSize.X, (int)LineSize.Y);
-                var NewLine = new TextLine(TextLines[i], LinePosition, Origin, Hitbox, Color);
+                string Tag = null;
+                if (tags != null && i < tags.Count)
+                {
+                    Tag = tags[i];
+                }
+
+                var NewLine = new TextLine(TextLines[i], LinePosition, Origin, Hitbox, Color, Tag);
 
                 Lines.Add(NewLine);
             }

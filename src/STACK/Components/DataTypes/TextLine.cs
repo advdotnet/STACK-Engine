@@ -4,6 +4,19 @@ using System;
 namespace STACK
 {
     [Serializable]
+    public struct TextInfo
+    {
+        public string Text;
+        public string Tag;
+
+        public TextInfo(string text, string tag = null)
+        {
+            Text = text;
+            Tag = tag;
+        }
+    }
+
+    [Serializable]
     public struct TextLine
     {
         string _Text, _Tag;

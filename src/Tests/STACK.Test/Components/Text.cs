@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Xna.Framework;
 using STACK.Components;
+using System.Collections.Generic;
 
 namespace STACK.Test
 {
@@ -16,8 +17,6 @@ namespace STACK.Test
 
             return Result;
         }
-
-
 
         [TestMethod]
         public void WordWrapTest()
@@ -78,6 +77,52 @@ namespace STACK.Test
 
             Assert.IsNotNull(TextComponent.Transform);
             Assert.AreEqual(TransformComponent, TextComponent.Transform);
+        }
+
+        [TestMethod]
+        public void UseTextInfoNoWordWrapTest()
+        {
+            const string FirstTag = "1";
+            const string SecondTag = "2";
+            var Entity = new Entity();
+            var TextComponent = Text.Create(Entity).SetWidth(100).SetWordWrap(false);
+            TextComponent.MeasureStringFn = MeasureString;
+
+            var TextInfos = new List<TextInfo>()
+            {
+                new TextInfo("Lorem", FirstTag),
+                new TextInfo("Ipsum", SecondTag),
+            };
+
+            TextComponent.Set(TextInfos, 0, Vector2.Zero);
+
+            Assert.AreEqual(2, TextComponent.Lines.Count);
+            Assert.AreEqual(FirstTag, TextComponent.Lines[0].Tag);
+            Assert.AreEqual(SecondTag, TextComponent.Lines[1].Tag);
+        }
+
+        [TestMethod]
+        public void UseTextInfoWordWrapTest()
+        {
+            const string FirstTag = "1";
+            const string SecondTag = "2";
+            var Entity = new Entity();
+            var TextComponent = Text.Create(Entity).SetWidth(30).SetWordWrap(true);
+            TextComponent.MeasureStringFn = MeasureString;
+
+            var TextInfos = new List<TextInfo>()
+            {
+                new TextInfo("Lor em", FirstTag),
+                new TextInfo("Ips um", SecondTag),
+            };
+
+            TextComponent.Set(TextInfos, 0, Vector2.Zero);
+
+            Assert.AreEqual(4, TextComponent.Lines.Count);
+            Assert.AreEqual(FirstTag, TextComponent.Lines[0].Tag);
+            Assert.AreEqual(FirstTag, TextComponent.Lines[1].Tag);
+            Assert.AreEqual(SecondTag, TextComponent.Lines[2].Tag);
+            Assert.AreEqual(SecondTag, TextComponent.Lines[3].Tag);
         }
 
         [TestMethod]
