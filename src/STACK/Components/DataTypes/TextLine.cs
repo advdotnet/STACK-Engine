@@ -6,7 +6,7 @@ namespace STACK
     [Serializable]
     public struct TextLine
     {
-        string _Text;
+        string _Text, _Tag;
         Vector2 _Position, _Origin;
         Rectangle _Hitbox;
         Color _Color;
@@ -16,14 +16,16 @@ namespace STACK
         public Vector2 Origin { get { return _Origin; } }
         public Rectangle Hitbox { get { return _Hitbox; } }
         public Color Color { get { return _Color; } }
+        public string Tag { get { return _Tag; } }
 
-        public TextLine(string text, Vector2 position, Vector2 origin, Rectangle hitbox, Color color)
+        public TextLine(string text, Vector2 position, Vector2 origin, Rectangle hitbox, Color color, string tag = null)
         {
             _Text = text;
             _Position = position;
             _Origin = origin;
             _Hitbox = hitbox;
             _Color = color;
+            _Tag = tag;
         }
 
         public TextLine ChangeColor(Color value)
