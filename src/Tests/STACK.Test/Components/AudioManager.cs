@@ -16,7 +16,7 @@ namespace STACK.Test
             MediaPlayer.Volume = 1;
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("GPU")]
         public void SetMaxMusicVolumeFirst()
         {
             Manager.MaxMusicVolume = 1f;
@@ -25,7 +25,7 @@ namespace STACK.Test
             Assert.AreEqual(0.5f, MediaPlayer.Volume);
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("GPU")]
         public void SetMaxMusicVolumeLast()
         {
             Manager.MusicVolume = 1f;
@@ -34,7 +34,7 @@ namespace STACK.Test
             Assert.AreEqual(0.5f, MediaPlayer.Volume);
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("GPU")]
         public void SetMusicEffectiveVolume()
         {
             Manager.MaxMusicVolume = 0.5f;
@@ -43,7 +43,7 @@ namespace STACK.Test
             Assert.AreEqual(0.25f, MediaPlayer.Volume);
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("GPU")]
         public void SetMusicVolumeClamp()
         {
             Manager.MaxMusicVolume = 1.5f;
@@ -52,7 +52,7 @@ namespace STACK.Test
             Assert.AreEqual(1f, MediaPlayer.Volume);
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("GPU")]
         public void SetMaxSoundEffectVolumeFirst()
         {
             Manager.MaxSoundEffectVolume = 1f;
@@ -61,7 +61,7 @@ namespace STACK.Test
             Assert.AreEqual(0.5f, Manager.SoundEffectVolume);
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("GPU")]
         public void SetMaxSoundEffectVolumeLast()
         {
             Manager.SoundEffectVolume = 1f;
@@ -70,7 +70,7 @@ namespace STACK.Test
             Assert.AreEqual(0.5f, Manager.EffectiveSoundEffectVolume);
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("GPU")]
         public void SetSoundEffectEffectiveVolume()
         {
             Manager.MaxSoundEffectVolume = 0.5f;
@@ -79,7 +79,7 @@ namespace STACK.Test
             Assert.AreEqual(0.25f, Manager.EffectiveSoundEffectVolume);
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("GPU")]
         public void SetSoundEffectEffectiveVolumeTwice()
         {
             Manager.MaxSoundEffectVolume = 0.5f;
@@ -92,7 +92,7 @@ namespace STACK.Test
             Assert.AreEqual(0.125f, Manager.EffectiveSoundEffectVolume);
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory("GPU")]
         public void SetSoundEffectVolumeClamp()
         {
             Manager.MaxSoundEffectVolume = 1.5f;
