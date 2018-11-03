@@ -46,32 +46,12 @@
     <Compile Include="pathfinding\Scene.cs" />
     <Compile Include="PathFindingGame.cs" />
     <Compile Include="Program.cs" />
-    <Content Include="..\..\..\lib\libjpeg-9.dll">
-      <Link>libjpeg-9.dll</Link>
+    <Content Include="..\..\..\lib\FAudio.dll">
+      <Link>FAudio.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\..\..\lib\libogg.dll">
-      <Link>libogg.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\..\..\lib\libpng16-16.dll">
-      <Link>libpng16-16.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\..\..\lib\libtheora.dll">
-      <Link>libtheora.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\..\..\lib\libtheoraplay.dll">
-      <Link>libtheoraplay.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\..\..\lib\libvorbis.dll">
-      <Link>libvorbis.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\..\..\lib\libvorbisfile.dll">
-      <Link>libvorbisfile.dll</Link>
+    <Content Include="..\..\..\lib\libtheorafile.dll">
+      <Link>libtheorafile.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="..\..\..\lib\MojoShader.dll">
@@ -84,14 +64,6 @@
     </Content>
     <Content Include="..\..\..\lib\SDL2_image.dll">
       <Link>SDL2_image.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\..\..\lib\soft_oal.dll">
-      <Link>soft_oal.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\..\..\lib\zlib1.dll">
-      <Link>zlib1.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="content\**\*.*">
