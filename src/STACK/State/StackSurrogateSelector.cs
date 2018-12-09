@@ -20,7 +20,10 @@ namespace STACK.Surrogates
             typeof(Microsoft.Xna.Framework.Matrix),
             typeof(Microsoft.Xna.Framework.Color),
             typeof(Microsoft.Xna.Framework.Audio.AudioListener),
-            typeof(Microsoft.Xna.Framework.Audio.AudioEmitter)
+            typeof(Microsoft.Xna.Framework.Audio.AudioEmitter),
+            typeof(FAudio.F3DAUDIO_LISTENER),
+            typeof(FAudio.F3DAUDIO_VECTOR),
+            typeof(FAudio.F3DAUDIO_EMITTER)
         };
 
         public void ChainSelector(ISurrogateSelector selector)
