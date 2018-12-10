@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SDL2;
+using STACK.Components;
 using System;
 
 namespace STACK.TestBase
@@ -29,7 +30,7 @@ namespace STACK.TestBase
                 IsFullScreen = false
             };
 
-            Environment.SetEnvironmentVariable("FNA_AUDIO_DISABLE_SOUND", "1");
+            AudioManager.DisableSound();
             FrameworkDispatcher.Update();
 
             _GraphicsDevice = new GraphicsDevice(GraphicsAdapter.DefaultAdapter, GraphicsProfile.HiDef, Parameters);
