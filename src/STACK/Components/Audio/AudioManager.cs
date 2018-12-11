@@ -230,7 +230,14 @@ namespace STACK.Components
 
         public void EnqueueSong(string song)
         {
-            NextSongName = song;
+            if (string.IsNullOrEmpty(CurrentSongName))
+            {
+                PlaySong(song);
+            }
+            else
+            {
+                NextSongName = song;
+            }
         }
 
         private void LoadSong(string song)
