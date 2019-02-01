@@ -7,17 +7,17 @@ namespace StarFinder
     /// A* based pathfinding on a generic structure which implements IMapPosition.
     /// </summary>    
     public class AStar<T> : IComparer<AStarNode<T>> where T : IMapPosition
-    {        
+    {
         PriorityQueue<AStarNode<T>> Open;
-        List<AStarNode<T>> Closed = new List<AStarNode<T>>();        
-        Func<T, IEnumerable<T>> GetNeighbors;        
+        List<AStarNode<T>> Closed = new List<AStarNode<T>>();
+        Func<T, IEnumerable<T>> GetNeighbors;
 
         public AStar(Func<T, IEnumerable<T>> getNeighbours)
         {
-            GetNeighbors = getNeighbours;                       
+            GetNeighbors = getNeighbours;
             Open = new PriorityQueue<AStarNode<T>>(this);
         }
-        
+
         /// <summary>
         /// Searches a path between the given 'start' and 'end' nodes.
         /// </summary>
@@ -30,15 +30,15 @@ namespace StarFinder
             results.Clear();
 
             if (GetNeighbors == null)
-            {                
+            {
                 return;
             }
 
             var H = HeuristicResult(heuristic, start, end);
-            var ParentNode = new AStarNode<T>(0, H, start, start);            
+            var ParentNode = new AStarNode<T>(0, H, start, start);
 
             Open.Clear();
-            Closed.Clear();            
+            Closed.Clear();
 
             Open.Push(ParentNode);
             while (Open.Count > 0)
@@ -52,10 +52,10 @@ namespace StarFinder
                     PrepareResult(ref results);
                     return;
                 }
-                                
+
                 foreach (T Next in GetNeighbors(ParentNode.Pos))
                 {
-                    bool ClosedExists = false;
+                    var ClosedExists = false;
 
                     foreach (var Item in Closed)
                     {
@@ -66,23 +66,23 @@ namespace StarFinder
                         }
                     }
 
-                    if (ClosedExists) 
+                    if (ClosedExists)
                     {
                         continue;
                     }
 
                     var NewG = ParentNode.G + Next.Cost(ParentNode.Pos);
 
-                    int Index = -1;
+                    var Index = -1;
 
-                    for(int i = 0; i < Open.Count; i++)
+                    for (int i = 0; i < Open.Count; i++)
                     {
                         if (Open[i].Pos.Equals(Next))
                         {
                             Index = i;
                             break;
                         }
-                    }                    
+                    }
 
                     if (Index == -1 || (Index > -1 && NewG < Open[Index].G))
                     {
@@ -97,10 +97,10 @@ namespace StarFinder
                         {
                             Open[Index] = NewNode;
                         }
-                    }                    
-                }                
+                    }
+                }
             }
-                        
+
             return;
         }
 
@@ -110,8 +110,8 @@ namespace StarFinder
         }
 
         private void PrepareResult(ref List<T> results)
-        {            
-            AStarNode<T> Goal = Closed[Closed.Count - 1];
+        {
+            var Goal = Closed[Closed.Count - 1];
 
             for (int i = Closed.Count - 1; i >= 0; i--)
             {
@@ -123,12 +123,12 @@ namespace StarFinder
                 {
                     Closed.RemoveAt(i);
                 }
-            }            
+            }
 
             for (int i = 0; i < Closed.Count; i++)
             {
                 results.Add(Closed[i].Pos);
-            }            
+            }
         }
 
         public int Compare(AStarNode<T> a, AStarNode<T> b)

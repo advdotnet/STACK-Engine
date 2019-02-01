@@ -1,5 +1,5 @@
-﻿using System;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
+using System;
 using System.Diagnostics;
 
 namespace StarFinder
@@ -12,7 +12,7 @@ namespace StarFinder
     [DebuggerDisplay("{A.Point}, {B.Point}, {C.Point}")]
     public class Triangle<T> where T : IScalable<T>
     {
-        public int ID { get; private set; }        
+        public int ID { get; private set; }
 
         public DataVertex<T> A { get; private set; }
         public DataVertex<T> B { get; private set; }
@@ -37,24 +37,24 @@ namespace StarFinder
 
         }
 
-        public Triangle(DataVertex<T> a, DataVertex<T> b, DataVertex<T> c, int id = -1)            
+        public Triangle(DataVertex<T> a, DataVertex<T> b, DataVertex<T> c, int id = -1)
         {
             A = a;
             B = b;
             C = c;
 
-            ID = id;                        
-            
+            ID = id;
+
             Cache();
         }
 
-        public Triangle(Vector2 a, Vector2 b, Vector2 c, int id = -1)            
+        public Triangle(Vector2 a, Vector2 b, Vector2 c, int id = -1)
         {
             A = new DataVertex<T>(a);
             B = new DataVertex<T>(b);
             C = new DataVertex<T>(c);
 
-            ID = id;                        
+            ID = id;
 
             Cache();
         }
@@ -63,7 +63,7 @@ namespace StarFinder
         float TriangleArea;
         Vector2 BoundsLT, BoundsRB;
 
-        public bool HasEdge(LineSegment edge) 
+        public bool HasEdge(LineSegment edge)
         {
             return AB == edge || BC == edge || CA == edge;
         }
@@ -77,7 +77,7 @@ namespace StarFinder
             if (HasEdge(other.BC)) return other.BC;
             if (HasEdge(other.CA)) return other.CA;
 
-            return null;            
+            return null;
         }
 
         /// <summary>
@@ -88,14 +88,14 @@ namespace StarFinder
             AB = new LineSegment(A, B);
             BC = new LineSegment(B, C);
             CA = new LineSegment(C, A);
-            
+
             s1 = (B.Point.Y - C.Point.Y);
             s2 = (A.Point.X - C.Point.X);
             s3 = (C.Point.X - B.Point.X);
             s4 = (C.Point.Y - A.Point.Y);
 
             Denominator = (s1 * s2 + s3 * (A.Point.Y - C.Point.Y));
-            TriangleArea = 0.5f * (float)Math.Abs(s2 * (B.Point.Y - A.Point.Y) - (A.Point.X - B.Point.X) * s4);
+            TriangleArea = 0.5f * Math.Abs(s2 * (B.Point.Y - A.Point.Y) - (A.Point.X - B.Point.X) * s4);
             _Edges = new LineSegment[] { AB, BC, CA };
 
             BoundsLT.X = Math.Min(Math.Min(A.Point.X, B.Point.X), C.Point.X);
@@ -103,14 +103,14 @@ namespace StarFinder
 
             BoundsRB.X = Math.Max(Math.Max(A.Point.X, B.Point.X), C.Point.X);
             BoundsRB.Y = Math.Max(Math.Max(A.Point.Y, B.Point.Y), C.Point.Y);
-        }        
+        }
 
         /// <summary>
         /// Returns the area of the triangle given by the vertices a,b and c.
         /// </summary>
-        public static float Area(Vector2 a, Vector2 b, Vector2 c) 
+        public static float Area(Vector2 a, Vector2 b, Vector2 c)
         {
-            return 0.5f * (float)Math.Abs((a.X - c.X) * (b.Y - a.Y) - (a.X - b.X) * (c.Y - a.Y));
+            return 0.5f * Math.Abs((a.X - c.X) * (b.Y - a.Y) - (a.X - b.X) * (c.Y - a.Y));
         }
 
         public T GetVertexData(Vector2 p)
@@ -120,17 +120,20 @@ namespace StarFinder
                 throw new ArgumentException("Point outside of triangle.");
             }
 
-            float a = (float)Triangle<T>.Area(B.Point, p, C.Point);
-            float b = (float)Triangle<T>.Area(C.Point, p, A.Point);
-            float c = (float)Triangle<T>.Area(A.Point, p, B.Point);
+            var a = (float)Area(B.Point, p, C.Point);
+            var b = (float)Area(C.Point, p, A.Point);
+            var c = (float)Area(A.Point, p, B.Point);
 
-            return A.Data.Multiply(a / TriangleArea).Add(B.Data.Multiply(b / TriangleArea).Add(C.Data.Multiply(c / TriangleArea)));
+            return A.Data
+                .Multiply(a / TriangleArea)
+                .Add(B.Data.Multiply(b / TriangleArea)
+                .Add(C.Data.Multiply(c / TriangleArea)));
         }
 
-        public bool HasVertex(Vector2 p)
+        public bool HasVertex(Vector2 point)
         {
-            return (A.Point == p || B.Point == p || C.Point == p);
-        }        
+            return (A.Point == point || B.Point == point || C.Point == point);
+        }
 
         /// <summary>
         /// Checks if a point lies within this triangle.
@@ -142,15 +145,21 @@ namespace StarFinder
                 return false;
             }
 
+            // Point lies on a vertex
+            if (HasVertex(point))
+            {
+                return true;
+            }
+
             // Triangle having zero area -> two points equal
             if (Denominator == 0)
             {
                 return AB.Contains(point) || BC.Contains(point);
             }
 
-            float a = LineSegment.EpsilonUnitInterval((s1 * (point.X - C.Point.X) + s3 * (point.Y - C.Point.Y)) / Denominator);
-            float b = LineSegment.EpsilonUnitInterval((s4 * (point.X - C.Point.X) + s2 * (point.Y - C.Point.Y)) / Denominator);
-            float c = LineSegment.EpsilonUnitInterval(1 - a - b);
+            var a = LineSegment.EpsilonUnitInterval((s1 * (point.X - C.Point.X) + s3 * (point.Y - C.Point.Y)) / Denominator);
+            var b = LineSegment.EpsilonUnitInterval((s4 * (point.X - C.Point.X) + s2 * (point.Y - C.Point.Y)) / Denominator);
+            var c = LineSegment.EpsilonUnitInterval(1 - a - b);
 
             return (0 <= a && a <= 1 && 0 <= b && b <= 1 && 0 <= c && c <= 1);
         }
@@ -161,25 +170,25 @@ namespace StarFinder
         /// </summary>
         public Vector2 GetClosestPoint(Vector2 point)
         {
-            float ResultDistance = -1;
-            Vector2 ResultPoint = Vector2.Zero;
+            var ResultDistance = -1f;
+            var ResultPoint = Vector2.Zero;
 
             if (Encloses(point))
             {
                 return point;
             }
 
-            for (int i = 0; i < 3; i++)                
+            for (int i = 0; i < 3; i++)
             {
-                Vector2 ClosestPoint = Edges[i].GetClosestPoint(point);
-                float Distance = (ClosestPoint - point).LengthSquared();
+                var ClosestPoint = Edges[i].GetClosestPoint(point);
+                var Distance = (ClosestPoint - point).LengthSquared();
 
                 if (ResultDistance == -1 || Distance < ResultDistance)
                 {
                     ResultPoint = ClosestPoint;
                     ResultDistance = Distance;
                 }
-            }                
+            }
 
             return ResultPoint;
         }
