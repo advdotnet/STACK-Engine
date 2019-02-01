@@ -54,7 +54,7 @@
     <Compile Include="Path.cs" />
     <Compile Include="PriorityQueue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TriangleVertex.cs" />
+    <Compile Include="TriangleVertexData.cs" />
     <Compile Include="Triangle.cs" />
     <Compile Include="Vertex.cs" />
   </ItemGroup>

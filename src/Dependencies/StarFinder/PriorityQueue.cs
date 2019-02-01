@@ -63,14 +63,14 @@ namespace StarFinder
 
         public int Push(T item)
         {
-            InnerList.Add(item); 
+            InnerList.Add(item);
 
             return BubbleUp(InnerList.Count - 1);
         }
 
         public T Pop()
         {
-            T result = InnerList[0];
+            var result = InnerList[0];
             InnerList[0] = InnerList[InnerList.Count - 1];
             InnerList.RemoveAt(InnerList.Count - 1);
             BubbleDown();
@@ -116,7 +116,7 @@ namespace StarFinder
             }
 
             BubbleDown();
-        }        
+        }
 
         public void Clear()
         {
@@ -125,17 +125,17 @@ namespace StarFinder
 
         public int Count
         {
-            get 
-            { 
-                return InnerList.Count; 
+            get
+            {
+                return InnerList.Count;
             }
         }
 
         public T this[int index]
         {
-            get 
-            { 
-                return InnerList[index]; 
+            get
+            {
+                return InnerList[index];
             }
             set
             {
@@ -148,13 +148,13 @@ namespace StarFinder
         /// Finds an item in the queue satisfying the predicate.
         /// </summary>        
         /// <returns>The index of the item or -1.</returns>
-        public int Find(Func<T, bool> predicate) 
+        public int Find(Func<T, bool> predicate)
         {
             for (int i = 0; i < this.Count; i++)
             {
                 if (predicate(this[i]))
                 {
-                    return i;                    
+                    return i;
                 }
             }
 
