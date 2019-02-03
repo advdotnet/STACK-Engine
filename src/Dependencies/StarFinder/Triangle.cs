@@ -117,15 +117,14 @@ namespace StarFinder
         {
             if (!Encloses(p))
             {
-                throw new ArgumentException("Point outside of triangle.");
+                throw new InvalidOperationException("Point outside of triangle.");
             }
 
-            var a = (float)Area(B.Point, p, C.Point);
-            var b = (float)Area(C.Point, p, A.Point);
-            var c = (float)Area(A.Point, p, B.Point);
+            var a = Area(B.Point, p, C.Point);
+            var b = Area(C.Point, p, A.Point);
+            var c = Area(A.Point, p, B.Point);
 
-            return A.Data
-                .Multiply(a / TriangleArea)
+            return A.Data.Multiply(a / TriangleArea)
                 .Add(B.Data.Multiply(b / TriangleArea)
                 .Add(C.Data.Multiply(c / TriangleArea)));
         }

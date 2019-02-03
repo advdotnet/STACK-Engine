@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections;
+﻿using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework;
-
-using StarFinder;
 
 namespace StarFinder
 {
@@ -18,12 +12,14 @@ namespace StarFinder
     public class NodeCollection
     {
         HashSet<Vertex> Nodes = new HashSet<Vertex>();
+        List<Vertex> DynamicNodes = new List<Vertex>();
         NodeLinks StaticLinks = new NodeLinks();
         NodeLinks DynamicLinks = new NodeLinks();
+        HashSet<Vertex> GetLinksResult = new HashSet<Vertex>();
 
         public void Add(Vertex node)
-        {            
-            Nodes.Add(node);            
+        {
+            Nodes.Add(node);
         }
 
         /// <summary>
@@ -31,7 +27,7 @@ namespace StarFinder
         /// </summary>        
         public void CalculateStaticLinks(Func<Vector2, Vector2, bool> predicate)
         {
-            CalculateLinks(predicate, Nodes, StaticLinks);            
+            CalculateLinks(predicate, Nodes, StaticLinks);
         }
 
         /// <summary>
@@ -39,35 +35,46 @@ namespace StarFinder
         /// </summary>
         public void CalculateDynamicLinks(Vertex start, Vertex end, Func<Vector2, Vector2, bool> predicate)
         {
-            List<Vertex> NewNodes = new List<Vertex>();
-
             if (!StaticLinks.Contains(start))
             {
-                NewNodes.Add(start);
+                DynamicNodes.Add(start);
             }
 
             if (!StaticLinks.Contains(end) && start != end)
             {
-                NewNodes.Add(end);
+                DynamicNodes.Add(end);
             }
 
-            CalculateLinks(predicate, NewNodes, DynamicLinks);            
+            CalculateLinks(predicate, DynamicNodes, DynamicLinks);
         }
 
         /// <summary>
         /// Returns all nodes linked to the given node.
         /// </summary>
         public IEnumerable<Vertex> GetLinks(Vertex point)
-        {            
-            var Dynamic = DynamicLinks.GetLinks(point);
-            var Result = new HashSet<Vertex>(StaticLinks.GetLinks(point));
+        {
+            GetLinksResult.Clear();
 
-            for (int i = 0; i < Dynamic.Count; i++) 
+            var Dynamic = DynamicLinks.GetLinks(point);
+            var Static = StaticLinks.GetLinks(point);
+
+            if (null != Dynamic)
             {
-                Result.Add(Dynamic[i]);
+                for (int i = 0; i < Dynamic.Count; i++)
+                {
+                    GetLinksResult.Add(Dynamic[i]);
+                }
             }
 
-            return Result;
+            if (null != Static)
+            {
+                for (int i = 0; i < Static.Count; i++)
+                {
+                    GetLinksResult.Add(Static[i]);
+                }
+            }
+
+            return GetLinksResult;
         }
 
         void CalculateLinks(Func<Vector2, Vector2, bool> predicate, IEnumerable<Vertex> nodes, NodeLinks links)
@@ -86,5 +93,5 @@ namespace StarFinder
             }
         }
     }
-   
+
 }

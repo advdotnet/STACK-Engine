@@ -40,6 +40,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="readme.md" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="actors\ShadowEgo.cs" />
