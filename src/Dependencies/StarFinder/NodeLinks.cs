@@ -1,13 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework;
-
-using StarFinder;
 
 namespace StarFinder
 {
@@ -15,7 +8,7 @@ namespace StarFinder
     /// Keeps track of links between nodes.
     /// </summary>
     [Serializable]
-    public class NodeLinks 
+    public class NodeLinks
     {
         Dictionary<Vertex, List<Vertex>> Links = new Dictionary<Vertex, List<Vertex>>();
 
@@ -48,20 +41,20 @@ namespace StarFinder
         }
 
         public List<Vertex> GetLinks(Vertex from)
-        {                
-            var Result = Links.Where(l => l.Key == from).FirstOrDefault();
+        {
+            var Result = Links.FirstOrDefault(l => l.Key == from);
 
             if (Result.Equals(default(KeyValuePair<Vertex, List<Vertex>>)))
             {
-                return new List<Vertex>();
+                return null;
             }
 
-            return Result.Value;                
+            return Result.Value;
         }
 
         public void Clear()
         {
             Links.Clear();
         }
-    }        
+    }
 }

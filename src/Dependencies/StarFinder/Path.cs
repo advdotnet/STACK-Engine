@@ -90,7 +90,7 @@ namespace StarFinder
                 return false;
             }
 
-            for (int i = 0; i < ObstructingEdges.Count; i++)
+            for (var i = 0; i < ObstructingEdges.Count; i++)
             {
                 if (ObstructingEdges[i].Equals(a, b))
                 {
@@ -198,7 +198,8 @@ namespace StarFinder
                 return MinScale;
             }
 
-            float m = (MaxScale - MinScale) / (Mesh.MaxY - Mesh.MinY);
+            var m = (MaxScale - MinScale) / (Mesh.MaxY - Mesh.MinY);
+
             return (y - Mesh.MinY) * m + MinScale;
         }
 
@@ -236,7 +237,7 @@ namespace StarFinder
             var Points = new List<Vector2>();
             Vector2 Intersection;
 
-            for (int i = 0; i < ObstructingEdges.Count; i++)
+            for (var i = 0; i < ObstructingEdges.Count; i++)
             {
                 if (ObstructingEdges[i].Equals(from, to))
                 {
@@ -254,12 +255,12 @@ namespace StarFinder
                 return false;
             }
 
-            int SmallestIndex = -1;
-            float SmallestDistance = float.MaxValue;
+            var SmallestIndex = -1;
+            var SmallestDistance = float.MaxValue;
 
-            for (int i = 0; i < Points.Count; i++)
+            for (var i = 0; i < Points.Count; i++)
             {
-                float Distance = (Points[i] - from).LengthSquared();
+                var Distance = (Points[i] - from).LengthSquared();
                 if (SmallestDistance > Distance)
                 {
                     SmallestDistance = Distance;
@@ -275,7 +276,7 @@ namespace StarFinder
         /// <summary>
         /// Returns a path between given points. If the points are
         /// not contained in the mesh, the closest points inside
-        /// the collections are used.
+        /// the mesh are used.
         /// </summary>
         public void FindPath(Vector2 from, Vector2 to, ref List<Vector2> result)
         {
@@ -297,6 +298,7 @@ namespace StarFinder
             if (First == Last)
             {
                 result.Add(First);
+
                 return;
             }
 
@@ -305,6 +307,7 @@ namespace StarFinder
             {
                 result.Add(First);
                 result.Add(Last);
+
                 return;
             }
 
@@ -317,7 +320,7 @@ namespace StarFinder
                 return;
             }
 
-            for (int i = 0; i < SearchResult.Count; i++)
+            for (var i = 0; i < SearchResult.Count; i++)
             {
                 result.Add(SearchResult[i].Point);
             }
@@ -366,7 +369,7 @@ namespace StarFinder
                 return;
             }
 
-            for (int i = 0; i < Mesh.Triangles.Length; i++)
+            for (var i = 0; i < Mesh.Triangles.Length; i++)
             {
                 var Color = (Mesh.Triangles[i] == GetClosestTriangle(mouse)) ? new Color(255, 100, 100, 50) : new Color(255, 255, 255, 50);
 

@@ -53,7 +53,7 @@ namespace StarFinder
                     return;
                 }
 
-                foreach (T Next in GetNeighbors(ParentNode.Pos))
+                foreach (var Next in GetNeighbors(ParentNode.Pos))
                 {
                     var ClosedExists = false;
 
@@ -72,7 +72,6 @@ namespace StarFinder
                     }
 
                     var NewG = ParentNode.G + Next.Cost(ParentNode.Pos);
-
                     var Index = -1;
 
                     for (int i = 0; i < Open.Count; i++)
@@ -113,7 +112,7 @@ namespace StarFinder
         {
             var Goal = Closed[Closed.Count - 1];
 
-            for (int i = Closed.Count - 1; i >= 0; i--)
+            for (var i = Closed.Count - 1; i >= 0; i--)
             {
                 if (Goal.ParentPos.Equals(Closed[i].Pos) || i == Closed.Count - 1)
                 {
@@ -125,7 +124,7 @@ namespace StarFinder
                 }
             }
 
-            for (int i = 0; i < Closed.Count; i++)
+            for (var i = 0; i < Closed.Count; i++)
             {
                 results.Add(Closed[i].Pos);
             }
