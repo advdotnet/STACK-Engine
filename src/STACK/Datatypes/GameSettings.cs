@@ -84,6 +84,7 @@ namespace STACK
             get
             {
                 var GA = GraphicsAdapter.Adapters.ElementAtOrDefault(Adapter);
+
                 if (null != GA)
                 {
                     return GA;
@@ -152,30 +153,41 @@ namespace STACK
         {
             try
             {
-                var FileName = System.IO.Path.Combine(SaveGame.UserStorageFolder(directory), CONFIGFILENAME);
+                GameSettings InstallationDirectoryGameSettings;
+                using (var Stream = TitleContainer.OpenStream(CONFIGFILENAME))
+                {
+                    InstallationDirectoryGameSettings = DeserializeFromStream(Stream);
+                }
+
+                var FileName = GetUserStorageSettingsFileName(directory);
                 if (File.Exists(FileName))
                 {
                     using (var Stream = File.Open(FileName, FileMode.Open))
                     {
-                        return DeserializeFromStream(Stream);
+                        var UserStorageGameSettings = DeserializeFromStream(Stream);
+                        UserStorageGameSettings.Culture = InstallationDirectoryGameSettings.Culture;
                     }
                 }
 
-                using (var Stream = TitleContainer.OpenStream(CONFIGFILENAME))
-                {
-                    return DeserializeFromStream(Stream);
-                }
+                return InstallationDirectoryGameSettings;
             }
-            catch
+            catch (Exception e)
             {
+                Logging.Log.WriteLine("Could not load game settings: " + e.Message, Logging.LogLevel.Error);
                 return new GameSettings();
             }
+        }
+
+        private static string GetUserStorageSettingsFileName(string directory)
+        {
+            return System.IO.Path.Combine(SaveGame.UserStorageFolder(directory), CONFIGFILENAME);
         }
 
         public void Save(string directory)
         {
             SaveGame.EnsureStorageFolderExists(directory);
-            var FileName = System.IO.Path.Combine(SaveGame.UserStorageFolder(directory), CONFIGFILENAME);
+            var FileName = GetUserStorageSettingsFileName(directory);
+
             using (var Writer = new StreamWriter(FileName))
             {
                 var Serializer = new XmlSerializer(GetType());
