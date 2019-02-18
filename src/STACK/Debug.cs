@@ -67,9 +67,20 @@ namespace STACK
                 StackEngine.Game.World.Get<RenderSettings>().BloomEnabled = !StackEngine.Game.World.Get<RenderSettings>().BloomEnabled;
             }
 
-            if (input.IsKeyPress(Keys.F1)) SetSpeed(GameSpeed.Default);
-            if (input.IsKeyPress(Keys.F2)) SetSpeed(GameSpeed.Double);
-            if (input.IsKeyPress(Keys.F3)) SetSpeed(GameSpeed.Half);
+            if (input.IsKeyPress(Keys.F1))
+            {
+                SetSpeed(GameSpeed.Default);
+            }
+
+            if (input.IsKeyPress(Keys.F2))
+            {
+                SetSpeed(GameSpeed.Double);
+            }
+
+            if (input.IsKeyPress(Keys.F3))
+            {
+                SetSpeed(GameSpeed.Half);
+            }
         }
     }
 }

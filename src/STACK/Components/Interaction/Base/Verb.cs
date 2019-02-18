@@ -33,9 +33,37 @@ namespace STACK
             return (Id == item.Id);
         }
 
+        public static bool operator ==(Verb obj1, Verb obj2)
+        {
+            if (ReferenceEquals(obj1, obj2))
+            {
+                return true;
+            }
+
+            if (ReferenceEquals(obj1, null) || ReferenceEquals(obj2, null))
+            {
+                return false;
+            }
+
+            return obj1.Equals(obj2);
+        }
+
+        public static bool operator !=(Verb obj1, Verb obj2)
+        {
+            return !(obj1 == obj2);
+        }
+
         public override int GetHashCode()
         {
-            return Text.GetHashCode() ^ Preposition.GetHashCode() ^ Ditransitive.GetHashCode();
+            unchecked
+            {
+                var hashCode = Text.GetHashCode();
+
+                hashCode = (hashCode * 397) ^ Preposition.GetHashCode();
+                hashCode = (hashCode * 397) ^ Ditransitive.GetHashCode();
+
+                return hashCode;
+            }
         }
 
         protected Verb(string text, string preposition, bool ditransitive)
