@@ -319,7 +319,14 @@ namespace STACK.Components
             Instance.IsLooped = looped;
             if (null != emitter && null != listener)
             {
-                Instance.Apply3D(listener.Listener, emitter.Emitter);
+                try
+                {
+                    Instance.Apply3D(listener.Listener, emitter.Emitter);
+                }
+                catch (AccessViolationException)
+                {
+
+                }
             }
 
 
