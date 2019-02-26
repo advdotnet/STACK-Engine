@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Media;
 using System;
 using System.Collections.Generic;
+using System.Runtime.ExceptionServices;
 
 namespace STACK.Components
 {
@@ -303,6 +304,7 @@ namespace STACK.Components
         /// </summary>
         /// <param name="soundEffect"></param>
         /// <returns>SoundEffectInstance, or null if in fast forward mode</returns>
+        [HandleProcessCorruptedStateExceptions]
         public SoundEffectInstance PlaySoundEffect(string soundEffect, bool looped = false, AudioEmitter emitter = null, AudioListener listener = null)
         {
             if (null != SkipContent.SkipCutscene && SkipContent.SkipCutscene.Enabled)
@@ -312,8 +314,6 @@ namespace STACK.Components
 
             LoadSoundEffect(soundEffect);
             var Instance = SoundEffects[soundEffect].CreateInstance();
-
-            PlayingInstances.Add(Instance);
 
             Instance.Volume = EffectiveSoundEffectVolume;
             Instance.IsLooped = looped;
@@ -329,6 +329,7 @@ namespace STACK.Components
                 }
             }
 
+            PlayingInstances.Add(Instance);
 
             if (!SoundDisabled)
             {
