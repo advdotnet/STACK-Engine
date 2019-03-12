@@ -6,7 +6,7 @@
   </Resolution>
   <Culture>en-US</Culture>
   <Adapter>0</Adapter>
-  <DisplayMode>WindowMaxInteger</DisplayMode>
+  <DisplayMode>BorderlessScale</DisplayMode>
   <MultiSampling>false</MultiSampling>
   <Bloom>true</Bloom>
   <VSync>true</VSync>

@@ -166,6 +166,8 @@ namespace STACK
                     {
                         var UserStorageGameSettings = DeserializeFromStream(Stream);
                         UserStorageGameSettings.Culture = InstallationDirectoryGameSettings.Culture;
+
+                        return UserStorageGameSettings;
                     }
                 }
 
