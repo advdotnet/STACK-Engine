@@ -1,6 +1,6 @@
 # STACK Engine
 
-The STACK Engine is a free and open .NET framework dedicated to create 2D point & click graphic adventure games for desktop PCs. It is used to develop [Session Seven](https://github.com/advdotnet/Session-Seven) which is also open source and which will be released for free.
+The STACK Engine is a free and open .NET framework dedicated to create 2D point & click graphic adventure games for desktop PCs. It is used to develop [Session Seven](https://github.com/advdotnet/Session-Seven) which is also open source and has been released for free.
 
 ## Build Status
 
