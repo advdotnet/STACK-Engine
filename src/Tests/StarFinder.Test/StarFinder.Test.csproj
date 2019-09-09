@@ -54,6 +54,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="AStar.cs" />
+    <Compile Include="NodeCollection.cs" />
     <Compile Include="LineSegment.cs" />
     <Compile Include="Path.cs" />
     <Compile Include="PriorityQueue.cs" />

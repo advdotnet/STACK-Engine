@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<GraphicSettings>
+<GameSettings>
   <Resolution>
     <X>1280</X>
     <Y>800</Y>
   </Resolution>
+  <Culture>en-US</Culture>
   <Adapter>0</Adapter>
   <DisplayMode>Window</DisplayMode>
   <MultiSampling>false</MultiSampling>
+  <Bloom>false</Bloom>
   <VSync>true</VSync>
-</GraphicSettings>
+  <Debug>true</Debug>
+</GameSettings>

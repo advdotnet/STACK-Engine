@@ -35,6 +35,8 @@ namespace StarFinder
         /// </summary>
         public void CalculateDynamicLinks(Vertex start, Vertex end, Func<Vector2, Vector2, bool> predicate)
         {
+            DynamicNodes.Clear();
+
             if (!StaticLinks.Contains(start))
             {
                 DynamicNodes.Add(start);

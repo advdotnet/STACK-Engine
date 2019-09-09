@@ -1,43 +1,40 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
+using System;
 using System.Diagnostics;
 
 namespace StarFinder
 {
     [Serializable]
     [DebuggerDisplay("{Point}")]
-    public class Vertex : StarFinder.IMapPosition
+    public class Vertex : IMapPosition
     {
         public Vector2 Point;
 
-        public float Cost(StarFinder.IMapPosition position) 
+        public float Cost(IMapPosition position)
         {
             if (position == null)
             {
                 return 0;
-            }            
+            }
 
             return Heuristic(this, (Vertex)position);
         }
 
         private Vertex()
-        {            
+        {
         }
 
         public Vertex(Vector2 point) : this()
         {
-            Point = point;            
+            Point = point;
         }
 
         public Vertex(float x, float y) : this()
         {
-            Point = new Vector2(x, y);            
+            Point = new Vector2(x, y);
         }
 
-        public bool Equals(StarFinder.IMapPosition b)
+        public bool Equals(IMapPosition b)
         {
             if (!(b is Vertex))
             {
@@ -101,17 +98,17 @@ namespace StarFinder
     [Serializable]
     [DebuggerDisplay("{Point}")]
     public class DataVertex<T> : Vertex where T : IScalable<T>
-    {        
-        public T Data;        
+    {
+        public T Data;
 
         public DataVertex(Vector2 point) : base(point)
-        {            
-            Data = default(T).Default();            
+        {
+            Data = default(T).Default();
         }
 
         public DataVertex(Vector2 point, T data) : base(point)
-        {            
-            Data = data;            
+        {
+            Data = data;
         }
 
         public DataVertex(float x, float y) : base(x, y)
@@ -128,7 +125,7 @@ namespace StarFinder
         public static implicit operator Vector2(DataVertex<T> vertex)
         {
             return vertex.Point;
-        }       
-    }    
-    
+        }
+    }
+
 }

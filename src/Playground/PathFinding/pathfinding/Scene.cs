@@ -6,7 +6,6 @@ using STACK.Graphics;
 using StarFinder;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace PathFinding
 {
@@ -44,21 +43,21 @@ namespace PathFinding
         private Path CreatePath()
         {
             var Points = new PathVertex[9 + 5 + 1];
-            Points[0] = new PathVertex(new Vector2(10, 10));
-            Points[1] = new PathVertex(new Vector2(50, 10));
-            Points[2] = new PathVertex(new Vector2(10, 50));
-            Points[3] = new PathVertex(new Vector2(50, 55));
-            Points[4] = new PathVertex(new Vector2(25, 75));
-            Points[5] = new PathVertex(new Vector2(125, 125));
-            Points[6] = new PathVertex(new Vector2(250, 250));
-            Points[7] = new PathVertex(new Vector2(125, 10));
-            Points[8] = new PathVertex(new Vector2(250, 10));
-            Points[9] = new PathVertex(new Vector2(300, 50));
-            Points[10] = new PathVertex(new Vector2(350, 10));
-            Points[11] = new PathVertex(new Vector2(450, 200));
-            Points[12] = new PathVertex(new Vector2(301, 200));
-            Points[13] = new PathVertex(new Vector2(350, 350));
-            Points[14] = new PathVertex(new Vector2(250, 350));
+            Points[0] = new PathVertex(10, 10);
+            Points[1] = new PathVertex(50, 10);
+            Points[2] = new PathVertex(10, 50);
+            Points[3] = new PathVertex(50, 55);
+            Points[4] = new PathVertex(25, 75);
+            Points[5] = new PathVertex(125, 125);
+            Points[6] = new PathVertex(250, 250);
+            Points[7] = new PathVertex(200, 35);
+            Points[8] = new PathVertex(250, 10);
+            Points[9] = new PathVertex(300, 50);
+            Points[10] = new PathVertex(350, 10);
+            Points[11] = new PathVertex(450, 200);
+            Points[12] = new PathVertex(301, 200);
+            Points[13] = new PathVertex(350, 350);
+            Points[14] = new PathVertex(250, 350);
 
 
             int[] Indices = new int[45];
@@ -79,18 +78,17 @@ namespace PathFinding
             Indices[42] = 12; Indices[43] = 6; Indices[44] = 13;
 
             var Collection = new Mesh<TriangleVertexData>(Points, Indices);
-            var Triangles = Collection.Triangles.ToList();
 
             return new Path(Points, Indices);
         }
 
         public override void OnDraw(Renderer renderer)
         {
-            renderer.SpriteBatch.DrawString(renderer.DefaultFont, "Press mouse button to set source.", new Vector2(135, 370), Color.Black);
+            renderer.SpriteBatch.DrawString(renderer.DefaultFont, "Press mouse button to set source.", new Vector2(135, 370), Color.White);
 
             if (renderer.Stage != RenderStage.PostBloom)
             {
-                renderer.PrimitivesRenderer.DrawRectangle(new Rectangle(0, 0, PathFindingGame.VIRTUAL_WIDTH, PathFindingGame.VIRTUAL_HEIGHT), Color.BlanchedAlmond);
+                renderer.PrimitivesRenderer.DrawRectangle(new Rectangle(0, 0, PathFindingGame.VIRTUAL_WIDTH, PathFindingGame.VIRTUAL_HEIGHT), Color.Black);
                 renderer.PrimitivesRenderer.DrawRectangle(new Rectangle((int)LastClickPosition.X - 1, (int)LastClickPosition.Y - 1, 2, 2), Color.Red);
                 for (int i = 0; i < Waypoints.Count - 1; i++)
                 {
