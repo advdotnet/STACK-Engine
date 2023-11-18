@@ -1,9 +1,10 @@
 version: 1.0.{build}
 install:  
+  - echo installing
   - git submodule update --init --recursive
 build:
   project: src/STACK.sln
-  verbosity: minimal
+  verbosity: detailed
 test:
   categories:
     except:
