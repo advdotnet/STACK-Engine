@@ -1,6 +1,6 @@
 version: 1.0.{build}
-install:
-  - cmd: git submodule update --init --recursive
+install:  
+  - git submodule update --init --recursive
 build:
   project: src/STACK.sln
   verbosity: minimal
