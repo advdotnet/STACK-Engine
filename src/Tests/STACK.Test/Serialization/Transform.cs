@@ -4,37 +4,35 @@ using System.IO;
 
 namespace STACK.Test
 {
+	[TestClass]
+	public class TransformState
+	{
+		[TestMethod]
+		public void SerializePath()
+		{
+			var list = new ComponentList();
+			// 327
+			//List.Add<CameraLocked>();
+			var bytes = State.Serialization.SaveState(list);
 
+			var deserializedList = State.Serialization.LoadState<ComponentList>(bytes);
+			Assert.IsNotNull(deserializedList.Components);
+			//File.WriteAllBytes("list.state", Bytes);
+		}
 
-    [TestClass]
-    public class TransformState
-    {
-        [TestMethod]
-        public void SerializePath()
-        {
-            var List = new ComponentList();
-            // 327
-            //List.Add<CameraLocked>();
-            var Bytes = State.Serialization.SaveState(List);
+		[Serializable]
+		private class MyEntity : Entity
+		{
 
-            var DeserializedList = State.Serialization.LoadState<ComponentList>(Bytes);
-            Assert.IsNotNull(DeserializedList.Components);
-            //File.WriteAllBytes("list.state", Bytes);
-        }
+		}
 
-        [Serializable]
-        class MyEntity : Entity
-        {
+		[TestMethod]
+		public void SerializeBaseentity()
+		{
+			var cam = new Text();
 
-        }
-
-        [TestMethod]
-        public void SerializeBaseentity()
-        {
-            var Cam = new Text();
-
-            var Bytes = State.Serialization.SaveState(Cam);
-            File.WriteAllBytes("Text.state", Bytes);
-        }
-    }
+			var bytes = State.Serialization.SaveState(cam);
+			File.WriteAllBytes("Text.state", bytes);
+		}
+	}
 }

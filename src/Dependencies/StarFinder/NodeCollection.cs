@@ -5,95 +5,95 @@ using System.Linq;
 
 namespace StarFinder
 {
-    /// <summary>
-    /// Stores a collection of nodes and their links which can be searched on.
-    /// </summary>
-    [Serializable]
-    public class NodeCollection
-    {
-        HashSet<Vertex> Nodes = new HashSet<Vertex>();
-        List<Vertex> DynamicNodes = new List<Vertex>();
-        NodeLinks StaticLinks = new NodeLinks();
-        NodeLinks DynamicLinks = new NodeLinks();
-        HashSet<Vertex> GetLinksResult = new HashSet<Vertex>();
+	/// <summary>
+	/// Stores a collection of nodes and their links which can be searched on.
+	/// </summary>
+	[Serializable]
+	public class NodeCollection
+	{
+		private readonly HashSet<Vertex> _nodes = new HashSet<Vertex>();
+		private readonly List<Vertex> _dynamicNodes = new List<Vertex>();
+		private readonly NodeLinks _staticLinks = new NodeLinks();
+		private readonly NodeLinks _dynamicLinks = new NodeLinks();
+		private readonly HashSet<Vertex> _getLinksResult = new HashSet<Vertex>();
 
-        public void Add(Vertex node)
-        {
-            Nodes.Add(node);
-        }
+		public void Add(Vertex node)
+		{
+			_nodes.Add(node);
+		}
 
-        /// <summary>
-        /// Calculates and stores the links of static nodes.
-        /// </summary>        
-        public void CalculateStaticLinks(Func<Vector2, Vector2, bool> predicate)
-        {
-            CalculateLinks(predicate, Nodes, StaticLinks);
-        }
+		/// <summary>
+		/// Calculates and stores the links of static nodes.
+		/// </summary>        
+		public void CalculateStaticLinks(Func<Vector2, Vector2, bool> predicate)
+		{
+			CalculateLinks(predicate, _nodes, _staticLinks);
+		}
 
-        /// <summary>
-        /// Calculates and stores the links of the dynamic nodes given by start and end.
-        /// </summary>
-        public void CalculateDynamicLinks(Vertex start, Vertex end, Func<Vector2, Vector2, bool> predicate)
-        {
-            DynamicNodes.Clear();
+		/// <summary>
+		/// Calculates and stores the links of the dynamic nodes given by start and end.
+		/// </summary>
+		public void CalculateDynamicLinks(Vertex start, Vertex end, Func<Vector2, Vector2, bool> predicate)
+		{
+			_dynamicNodes.Clear();
 
-            if (!StaticLinks.Contains(start))
-            {
-                DynamicNodes.Add(start);
-            }
+			if (!_staticLinks.Contains(start))
+			{
+				_dynamicNodes.Add(start);
+			}
 
-            if (!StaticLinks.Contains(end) && start != end)
-            {
-                DynamicNodes.Add(end);
-            }
+			if (!_staticLinks.Contains(end) && start != end)
+			{
+				_dynamicNodes.Add(end);
+			}
 
-            CalculateLinks(predicate, DynamicNodes, DynamicLinks);
-        }
+			CalculateLinks(predicate, _dynamicNodes, _dynamicLinks);
+		}
 
-        /// <summary>
-        /// Returns all nodes linked to the given node.
-        /// </summary>
-        public IEnumerable<Vertex> GetLinks(Vertex point)
-        {
-            GetLinksResult.Clear();
+		/// <summary>
+		/// Returns all nodes linked to the given node.
+		/// </summary>
+		public IEnumerable<Vertex> GetLinks(Vertex point)
+		{
+			_getLinksResult.Clear();
 
-            var Dynamic = DynamicLinks.GetLinks(point);
-            var Static = StaticLinks.GetLinks(point);
+			var dynamic = _dynamicLinks.GetLinks(point);
+			var @static = _staticLinks.GetLinks(point);
 
-            if (null != Dynamic)
-            {
-                for (int i = 0; i < Dynamic.Count; i++)
-                {
-                    GetLinksResult.Add(Dynamic[i]);
-                }
-            }
+			if (null != dynamic)
+			{
+				for (var i = 0; i < dynamic.Count; i++)
+				{
+					_getLinksResult.Add(dynamic[i]);
+				}
+			}
 
-            if (null != Static)
-            {
-                for (int i = 0; i < Static.Count; i++)
-                {
-                    GetLinksResult.Add(Static[i]);
-                }
-            }
+			if (null != @static)
+			{
+				for (var i = 0; i < @static.Count; i++)
+				{
+					_getLinksResult.Add(@static[i]);
+				}
+			}
 
-            return GetLinksResult;
-        }
+			return _getLinksResult;
+		}
 
-        void CalculateLinks(Func<Vector2, Vector2, bool> predicate, IEnumerable<Vertex> nodes, NodeLinks links)
-        {
-            links.Clear();
+		private void CalculateLinks(Func<Vector2, Vector2, bool> predicate, IEnumerable<Vertex> nodes, NodeLinks links)
+		{
+			links.Clear();
 
-            foreach (var Outer in Nodes)
-            {
-                foreach (var Inner in nodes.Where(n => n != Outer))
-                {
-                    if (predicate(Outer, Inner))
-                    {
-                        links.AddLink(Outer, Inner);
-                    }
-                }
-            }
-        }
-    }
+			foreach (var outer in _nodes)
+			{
+				foreach (var inner in nodes.Where(n => n != outer))
+				{
+					if (predicate(outer, inner))
+					{
+						links.AddLink(outer, inner);
+					}
+				}
+			}
+		}
+	}
 
 }

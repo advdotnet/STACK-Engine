@@ -5,25 +5,16 @@ namespace STACK.TestBase
 {
     public class Mock
     {
-        public static GraphicsDeviceServiceMock CreateGraphicsDevice()
+		public static GraphicsDeviceServiceMock CreateGraphicsDevice() => new GraphicsDeviceServiceMock();
+
+		public static IServiceProvider Wrap(IGraphicsDeviceService instance)
         {
-            return new GraphicsDeviceServiceMock();
+            var provider = new TestServiceProvider();
+            provider.AddService(typeof(IGraphicsDeviceService), instance);
+            provider.AddService(typeof(ISkipContent), null);
+            return provider;
         }
 
-        public static IServiceProvider Wrap(IGraphicsDeviceService instance)
-        {
-            var Provider = new TestServiceProvider();
-            Provider.AddService(typeof(IGraphicsDeviceService), instance);
-            Provider.AddService(typeof(ISkipContent), null);
-            return Provider;
-        }
-
-        public static TestInputProvider Input
-        {
-            get
-            {
-                return new TestInputProvider();
-            }
-        }
-    }
+		public static TestInputProvider Input => new TestInputProvider();
+	}
 }

@@ -4,267 +4,264 @@ using System.Collections.Generic;
 
 namespace STACK
 {
-    /// <summary>
-    /// Stores several lists of game objects for performance reasons.
-    /// </summary>   
-    [Serializable]
-    public class GameObjectCache
-    {
-        private Scene Scene { get; set; }
-        [NonSerialized]
-        List<Entity> _VisibleObjects = null;
-        [NonSerialized]
-        List<Exit> _Exits = null;
-        [NonSerialized]
-        List<IDraw> _ObjectsToDraw = null;
-        [NonSerialized]
-        List<Entity> _Entities = null;
-        [NonSerialized]
-        List<Component> _Components = null;
+	/// <summary>
+	/// Stores several lists of game objects for performance reasons.
+	/// </summary>   
+	[Serializable]
+	public class GameObjectCache
+	{
+		private Scene Scene { get; set; }
+		[NonSerialized]
+		private List<Entity> _visibleObjects = null;
+		[NonSerialized]
+		private List<Exit> _exits = null;
+		[NonSerialized]
+		private List<IDraw> _objectsToDraw = null;
+		[NonSerialized]
+		private List<Entity> _entities = null;
+		[NonSerialized]
+		private List<Component> _components = null;
 
-        public GameObjectCache(Scene scene)
-        {
-            Scene = scene;
-        }
+		public GameObjectCache(Scene scene)
+		{
+			Scene = scene;
+		}
 
-        public void CacheAll()
-        {
-            CacheEntities();
-            CacheVisibleObjects();
-            CacheObjectsToDraw();
-            CacheExits();
-        }
+		public void CacheAll()
+		{
+			CacheEntities();
+			CacheVisibleObjects();
+			CacheObjectsToDraw();
+			CacheExits();
+		}
 
-        /// <summary>
-        /// List of visible
-        /// </summary>
-        public List<Entity> VisibleObjects
-        {
-            get
-            {
-                if (_VisibleObjects == null)
-                {
-                    CacheVisibleObjects();
-                }
+		/// <summary>
+		/// List of visible
+		/// </summary>
+		public List<Entity> VisibleObjects
+		{
+			get
+			{
+				if (_visibleObjects == null)
+				{
+					CacheVisibleObjects();
+				}
 
-                return _VisibleObjects;
-            }
-        }
+				return _visibleObjects;
+			}
+		}
 
-        public void CacheVisibleObjects()
-        {
-            if (_VisibleObjects == null)
-            {
-                _VisibleObjects = new List<Entity>(20);
-            }
+		public void CacheVisibleObjects()
+		{
+			if (_visibleObjects == null)
+			{
+				_visibleObjects = new List<Entity>(20);
+			}
 
-            _VisibleObjects.Clear();
+			_visibleObjects.Clear();
 
-            if (Scene.World != null)
-            {
-                for (int i = 0; i < Scene.World.Scenes.Count; i++)
-                {
-                    var CurrentScene = Scene.World.Scenes[i];
+			if (Scene.World != null)
+			{
+				for (var i = 0; i < Scene.World.Scenes.Count; i++)
+				{
+					var currentScene = Scene.World.Scenes[i];
 
-                    for (int j = 0; j < CurrentScene.GameObjectCache.Entities.Count; j++)
-                    {
-                        var Entity = CurrentScene.GameObjectCache.Entities[j];
-                        if (Entity.DrawScene == Scene && Entity.Visible) // || (Entity.DrawScene == null && Entity.UpdateScene == this)
-                        {
-                            _VisibleObjects.Add(Entity);
-                        }
-                    }
-                }
-            }
-            else
-            {
-                for (int i = 0; i < Entities.Count; i++)
-                {
-                    var entity = Entities[i];
+					for (var j = 0; j < currentScene.GameObjectCache.Entities.Count; j++)
+					{
+						var entity = currentScene.GameObjectCache.Entities[j];
+						if (entity.DrawScene == Scene && entity.Visible) // || (Entity.DrawScene == null && Entity.UpdateScene == this)
+						{
+							_visibleObjects.Add(entity);
+						}
+					}
+				}
+			}
+			else
+			{
+				for (var i = 0; i < Entities.Count; i++)
+				{
+					var entity = Entities[i];
 
-                    if (entity.Visible && (entity.DrawScene == null || entity.DrawScene == Scene))
-                    {
-                        _VisibleObjects.Add(entity);
-                    }
-                }
-            }
+					if (entity.Visible && (entity.DrawScene == null || entity.DrawScene == Scene))
+					{
+						_visibleObjects.Add(entity);
+					}
+				}
+			}
 
-            _VisibleObjects.Sort(BaseEntityCollection.PrioritySorter);
-        }
+			_visibleObjects.Sort(BaseEntityCollection.PrioritySorter);
+		}
 
-        /// <summary>
-        /// List of entities with an Exit component.
-        /// </summary>
-        public List<Exit> Exits
-        {
-            get
-            {
-                if (_Exits == null)
-                {
-                    CacheExits();
-                }
+		/// <summary>
+		/// List of entities with an Exit component.
+		/// </summary>
+		public List<Exit> Exits
+		{
+			get
+			{
+				if (_exits == null)
+				{
+					CacheExits();
+				}
 
-                return _Exits;
-            }
-        }
+				return _exits;
+			}
+		}
 
-        public void CacheExits()
-        {
-            if (_Exits == null)
-            {
-                _Exits = new List<Exit>(3);
-            }
+		public void CacheExits()
+		{
+			if (_exits == null)
+			{
+				_exits = new List<Exit>(3);
+			}
 
-            _Exits.Clear();
+			_exits.Clear();
 
-            for (int i = 0; i < Entities.Count; i++)
-            {
-                var Exit = Entities[i].Get<Exit>();
-                if (Exit != null)
-                {
-                    _Exits.Add(Exit);
-                }
-            }
-        }
+			for (var i = 0; i < Entities.Count; i++)
+			{
+				var exit = Entities[i].Get<Exit>();
+				if (exit != null)
+				{
+					_exits.Add(exit);
+				}
+			}
+		}
 
-        /// <summary>
-        /// List of Entities / Components to draw.
-        /// </summary>
-        public List<IDraw> ObjectsToDraw
-        {
-            get
-            {
-                if (_ObjectsToDraw == null)
-                {
-                    CacheObjectsToDraw();
-                }
+		/// <summary>
+		/// List of Entities / Components to draw.
+		/// </summary>
+		public List<IDraw> ObjectsToDraw
+		{
+			get
+			{
+				if (_objectsToDraw == null)
+				{
+					CacheObjectsToDraw();
+				}
 
-                return _ObjectsToDraw;
-            }
-        }
+				return _objectsToDraw;
+			}
+		}
 
-        public void CacheObjectsToDraw(bool onlySort = false)
-        {
-            if (_ObjectsToDraw == null)
-            {
-                _ObjectsToDraw = new List<IDraw>(15);
-            }
+		public void CacheObjectsToDraw(bool onlySort = false)
+		{
+			if (_objectsToDraw == null)
+			{
+				_objectsToDraw = new List<IDraw>(15);
+			}
 
-            if (!onlySort)
-            {
-                ObjectsToDraw.Clear();
+			if (!onlySort)
+			{
+				ObjectsToDraw.Clear();
 
-                // VisibleObjects list is priority sorted - add in reverse
-                for (int i = VisibleObjects.Count - 1; i >= 0; i--)
-                {
-                    ObjectsToDraw.Add(VisibleObjects[i]);
-                }
+				// VisibleObjects list is priority sorted - add in reverse
+				for (var i = VisibleObjects.Count - 1; i >= 0; i--)
+				{
+					ObjectsToDraw.Add(VisibleObjects[i]);
+				}
 
-                for (int i = 0; i < Components.Count; i++)
-                {
-                    var DrawableComponent = Components[i] as IDraw;
-                    if (null != DrawableComponent)
-                    {
-                        ObjectsToDraw.Add(DrawableComponent);
-                    }
-                }
-            }
+				for (var i = 0; i < Components.Count; i++)
+				{
+					if (Components[i] is IDraw drawableComponent)
+					{
+						ObjectsToDraw.Add(drawableComponent);
+					}
+				}
+			}
 
-            ObjectsToDraw.Sort(BaseEntityCollection.ReversePrioritySorter);
-        }
+			ObjectsToDraw.Sort(BaseEntityCollection.ReversePrioritySorter);
+		}
 
-        /// <summary>
-        /// List of Entities of this Scene.
-        /// </summary>
-        public List<Entity> Entities
-        {
-            get
-            {
-                if (_Entities == null)
-                {
-                    CacheEntities();
-                }
+		/// <summary>
+		/// List of Entities of this Scene.
+		/// </summary>
+		public List<Entity> Entities
+		{
+			get
+			{
+				if (_entities == null)
+				{
+					CacheEntities();
+				}
 
-                return _Entities;
-            }
-        }
+				return _entities;
+			}
+		}
 
-        public void CacheEntities()
-        {
-            if (_Entities == null)
-            {
-                _Entities = new List<Entity>(15);
-            }
+		public void CacheEntities()
+		{
+			if (_entities == null)
+			{
+				_entities = new List<Entity>(15);
+			}
 
-            _Entities.Clear();
+			_entities.Clear();
 
-            for (int i = 0; i < Scene.Items.Count; i++)
-            {
-                var Entity = Scene.Items[i] as Entity;
-                if (Entity != null)
-                {
-                    _Entities.Add(Entity);
-                }
-            }
-        }
+			for (var i = 0; i < Scene.Items.Count; i++)
+			{
+				if (Scene.Items[i] is Entity entity)
+				{
+					_entities.Add(entity);
+				}
+			}
+		}
 
-        /// <summary>
-        /// List of Components of this Scene.
-        /// </summary>
-        public List<Component> Components
-        {
-            get
-            {
-                if (_Components == null)
-                {
-                    CacheComponents();
-                }
+		/// <summary>
+		/// List of Components of this Scene.
+		/// </summary>
+		public List<Component> Components
+		{
+			get
+			{
+				if (_components == null)
+				{
+					CacheComponents();
+				}
 
-                return _Components;
-            }
-        }
+				return _components;
+			}
+		}
 
-        public void CacheComponents()
-        {
-            if (_Components == null)
-            {
-                _Components = new List<Component>(5);
-            }
+		public void CacheComponents()
+		{
+			if (_components == null)
+			{
+				_components = new List<Component>(5);
+			}
 
-            _Components.Clear();
+			_components.Clear();
 
-            for (int i = 0; i < Scene.Components.Count; i++)
-            {
-                var Component = Scene.Components[i];
-                _Components.Add(Component);
-            }
-        }
+			for (var i = 0; i < Scene.Components.Count; i++)
+			{
+				var component = Scene.Components[i];
+				_components.Add(component);
+			}
+		}
 
-        public Entity GetEntityById(string id, bool initialized)
-        {
-            if (initialized)
-            {
-                for (int i = 0; i < Entities.Count; i++)
-                {
-                    if (Entities[i].ID.Equals(id))
-                    {
-                        return Entities[i];
-                    }
-                }
-            }
-            else
-            {
-                for (int i = 0; i < Scene.Items.Count; i++)
-                {
-                    var Entity = Scene.Items[i] as Entity;
-                    if (Entity != null && Entity.ID.Equals(id))
-                    {
-                        return Entity;
-                    }
-                }
-            }
+		public Entity GetEntityById(string id, bool initialized)
+		{
+			if (initialized)
+			{
+				for (var i = 0; i < Entities.Count; i++)
+				{
+					if (Entities[i].ID.Equals(id))
+					{
+						return Entities[i];
+					}
+				}
+			}
+			else
+			{
+				for (var i = 0; i < Scene.Items.Count; i++)
+				{
+					if (Scene.Items[i] is Entity entity && entity.ID.Equals(id))
+					{
+						return entity;
+					}
+				}
+			}
 
-            return null;
-        }
-    }
+			return null;
+		}
+	}
 }

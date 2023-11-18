@@ -1,42 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.Xna.Framework;
-
-namespace STACK.Debug
+﻿namespace STACK.Debug
 {
-    /// <summary>
-    /// Exits the game.
-    /// </summary>
-    class ExitCommand : IConsoleCommand
-    {
-        public string Name
-        {
-            get
-            {
-                return "exit";
-            }
-        }
+	/// <summary>
+	/// Exits the game.
+	/// </summary>
+	internal class ExitCommand : IConsoleCommand
+	{
+		public string Name => "exit";
 
-        public string Description
-        {
-            get
-            {
-                return "Exits the game.";
-            }
-        }
+		public string Description => "Exits the game.";
 
-        private readonly StackEngine Engine;
+		private readonly StackEngine _engine;
 
-        public ExitCommand(StackEngine game)
-        {
-            Engine = game;
-        }
+		public ExitCommand(StackEngine game)
+		{
+			_engine = game;
+		}
 
-        public void Execute(Console console, string[] arguments)
-        {
-            Engine.Exit();            
-        }
-    }
+		public void Execute(Console console, string[] arguments)
+		{
+			_engine.Exit();
+		}
+	}
 }

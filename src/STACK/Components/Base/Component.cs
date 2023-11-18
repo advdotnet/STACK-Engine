@@ -3,75 +3,54 @@ using System.Runtime.Serialization;
 
 namespace STACK
 {
-    [Serializable]
-    public abstract class Component
-    {
-        private BaseEntityCollection _Parent;
-        [NonSerialized]
-        Entity CastedEntity = null;
-        [NonSerialized]
-        Scene CastedScene = null;
-        [NonSerialized]
-        World ParentWorld = null;
+	[Serializable]
+	public abstract class Component
+	{
+		private BaseEntityCollection _parent;
+		[NonSerialized]
+		private Entity _castedEntity = null;
+		[NonSerialized]
+		private Scene _castedScene = null;
+		[NonSerialized]
+		private World _parentWorld = null;
 
-        public BaseEntityCollection Parent
-        {
-            get
-            {
-                return _Parent;
-            }
-            internal set
-            {
-                _Parent = value;
-                CacheTransients();
-            }
-        }
+		public BaseEntityCollection Parent
+		{
+			get => _parent;
+			internal set
+			{
+				_parent = value;
+				CacheTransients();
+			}
+		}
 
-        [OnDeserialized]
-        void OnDeserialized(StreamingContext c)
-        {
-            CacheTransients();
-        }
+		[OnDeserialized]
+		private void OnDeserialized(StreamingContext c)
+		{
+			CacheTransients();
+		}
 
-        private void CacheTransients()
-        {
-            CastedEntity = _Parent as Entity;
-            CastedScene = _Parent as Scene;
-            ParentWorld = _Parent as World;
-        }
+		private void CacheTransients()
+		{
+			_castedEntity = _parent as Entity;
+			_castedScene = _parent as Scene;
+			_parentWorld = _parent as World;
+		}
 
-        public Entity Entity
-        {
-            get
-            {
-                return CastedEntity;
-            }
-        }
+		public Entity Entity => _castedEntity;
 
-        public Scene Scene
-        {
-            get
-            {
-                return CastedScene;
-            }
-        }
+		public Scene Scene => _castedScene;
 
-        public World World
-        {
-            get
-            {
-                return ParentWorld;
-            }
-        }
+		public World World => _parentWorld;
 
-        public T Get<T>() where T : Component
-        {
-            return Entity.Get<T>();
-        }
+		public T Get<T>() where T : Component
+		{
+			return Entity.Get<T>();
+		}
 
-        public T GetInterface<T>()
-        {
-            return Entity.GetInterface<T>();
-        }
-    }
+		public T GetInterface<T>()
+		{
+			return Entity.GetInterface<T>();
+		}
+	}
 }

@@ -3,141 +3,141 @@ using System;
 
 namespace STACK.Components
 {
-    /// <summary>
-    /// When an entity with this component changes its DrawScene it is made sure that 
-    /// the new Scene is visible and the old Scene set to invisible.
-    /// 
-    /// Also the DrawScene's camera will scroll to ensure the entity is in the visible region.
-    /// </summary>
-    [Serializable]
-    public class CameraLocked : Component, INotify, IUpdate, IInitialize
-    {
-        public bool Enabled { get; set; }
-        public float Acceleration { get; set; }
-        public float Damping { get; set; }
-        public bool Scroll { get; set; }
-        public bool CenterCharacter { get; set; }
-        public float UpdateOrder { get; set; }
+	/// <summary>
+	/// When an entity with this component changes its DrawScene it is made sure that 
+	/// the new Scene is visible and the old Scene set to invisible.
+	/// 
+	/// Also the DrawScene's camera will scroll to ensure the entity is in the visible region.
+	/// </summary>
+	[Serializable]
+	public class CameraLocked : Component, INotify, IUpdate, IInitialize
+	{
+		public bool Enabled { get; set; }
+		public float Acceleration { get; set; }
+		public float Damping { get; set; }
+		public bool Scroll { get; set; }
+		public bool CenterCharacter { get; set; }
+		public float UpdateOrder { get; set; }
 
-        private bool NewSceneEntered = false;
+		private bool _newSceneEntered = false;
 
-        public CameraLocked()
-        {
-            Acceleration = 8f;
-            Damping = 3.0f;
-            Scroll = true;
-            CenterCharacter = true;
-            Enabled = true;
-        }
+		public CameraLocked()
+		{
+			Acceleration = 8f;
+			Damping = 3.0f;
+			Scroll = true;
+			CenterCharacter = true;
+			Enabled = true;
+		}
 
-        public void Initialize(bool restore)
-        {
-            CacheTransients();
-        }
+		public void Initialize(bool restore)
+		{
+			CacheTransients();
+		}
 
-        public void Notify<T>(string message, T data)
-        {
-            if (!Enabled)
-            {
-                return;
-            }
+		public void Notify<T>(string message, T data)
+		{
+			if (!Enabled)
+			{
+				return;
+			}
 
-            if (message == Messages.SceneEnter)
-            {
-                Scene Scene = (Scene)(object)data;
+			if (message == Messages.SceneEnter)
+			{
+				var scene = (Scene)(object)data;
 
-                Entity.DrawScene.Visible = false;
-                Entity.DrawScene.Enabled = false;
+				Entity.DrawScene.Visible = false;
+				Entity.DrawScene.Enabled = false;
 
-                Scene.Visible = true;
-                Scene.Enabled = true;
+				scene.Visible = true;
+				scene.Enabled = true;
 
-                NewSceneEntered = true;
-            }
+				_newSceneEntered = true;
+			}
 
-            if (Messages.SceneEntered == message)
-            {
-                CacheTransients();
-            }
-        }
+			if (Messages.SceneEntered == message)
+			{
+				CacheTransients();
+			}
+		}
 
-        private void CacheTransients()
-        {
-            Resolution = Entity.World.Get<RenderSettings>().VirtualResolution;
-            Transform = Get<Transform>();
-            var BackgroundObject = Entity.DrawScene.GetObject(Location.BACKGROUND_ENTITY_ID);
-            HasBackground = (null != BackgroundObject);
-            if (HasBackground)
-            {
-                var BackgroundSprite = BackgroundObject.Get<Sprite>();
-                BackgroundWidth = BackgroundSprite.Texture.Width / BackgroundSprite.Columns;
-                BackgroundHeight = BackgroundSprite.Texture.Height / BackgroundSprite.Rows;
-            }
-            Camera = Entity.DrawScene.Get<Camera>();
-        }
+		private void CacheTransients()
+		{
+			_resolution = Entity.World.Get<RenderSettings>().VirtualResolution;
+			_transform = Get<Transform>();
+			var backgroundObject = Entity.DrawScene.GetObject(Location.BACKGROUND_ENTITY_ID);
+			_hasBackground = (null != backgroundObject);
+			if (_hasBackground)
+			{
+				var backgroundSprite = backgroundObject.Get<Sprite>();
+				_backgroundWidth = backgroundSprite.Texture.Width / backgroundSprite.Columns;
+				_backgroundHeight = backgroundSprite.Texture.Height / backgroundSprite.Rows;
+			}
+			_camera = Entity.DrawScene.Get<Camera>();
+		}
 
-        [NonSerialized]
-        Point Resolution;
-        [NonSerialized]
-        Transform Transform;
-        [NonSerialized]
-        int BackgroundWidth, BackgroundHeight;
-        [NonSerialized]
-        bool HasBackground;
-        [NonSerialized]
-        Camera Camera;
+		[NonSerialized]
+		private Point _resolution;
+		[NonSerialized]
+		private Transform _transform;
+		[NonSerialized]
+		private int _backgroundWidth, _backgroundHeight;
+		[NonSerialized]
+		private bool _hasBackground;
+		[NonSerialized]
+		private Camera _camera;
 
-        public void Update()
-        {
-            if (!Scroll || !HasBackground)
-            {
-                return;
-            }
+		public void Update()
+		{
+			if (!Scroll || !_hasBackground)
+			{
+				return;
+			}
 
-            var TransformedPosition = Camera.Transform(Transform.Position);
-            var Delta = Vector2.Zero;
+			var transformedPosition = _camera.Transform(_transform.Position);
+			var delta = Vector2.Zero;
 
-            if (NewSceneEntered && CenterCharacter)
-            {
-                var NewX = Transform.Position.X - Resolution.X / 2;
-                NewX = Math.Max(0, NewX);
-                NewX = Math.Min(BackgroundWidth - Resolution.X, NewX);
+			if (_newSceneEntered && CenterCharacter)
+			{
+				var newX = _transform.Position.X - _resolution.X / 2;
+				newX = Math.Max(0, newX);
+				newX = Math.Min(_backgroundWidth - _resolution.X, newX);
 
-                var NewY = Transform.Position.Y - Resolution.Y / 2;
-                NewY = Math.Max(0, NewY);
-                NewY = Math.Min(BackgroundHeight - Resolution.Y, NewY);
+				var newY = _transform.Position.Y - _resolution.Y / 2;
+				newY = Math.Max(0, newY);
+				newY = Math.Min(_backgroundHeight - _resolution.Y, newY);
 
-                Camera.Position = new Vector2(NewX, NewY);
+				_camera.Position = new Vector2(newX, newY);
 
-                NewSceneEntered = false;
-            }
+				_newSceneEntered = false;
+			}
 
-            var ShouldScrollLeft = Camera.Position.X > 0 && TransformedPosition.X < Resolution.X / 2f - (Resolution.X / 15f);
-            var ShouldScrollRight = Camera.Position.X < BackgroundWidth - Resolution.X && TransformedPosition.X > Resolution.X - Resolution.X / 2f + (Resolution.X / 15f);
+			var shouldScrollLeft = _camera.Position.X > 0 && transformedPosition.X < _resolution.X / 2f - (_resolution.X / 15f);
+			var shouldScrollRight = _camera.Position.X < _backgroundWidth - _resolution.X && transformedPosition.X > _resolution.X - _resolution.X / 2f + (_resolution.X / 15f);
 
-            if (ShouldScrollLeft || ShouldScrollRight)
-            {
-                Delta = new Vector2((TransformedPosition.X / (Resolution.X / 2f) - 1) * Acceleration, 0);
-                float Damp = (ShouldScrollLeft ? Camera.Position.X : BackgroundWidth - Resolution.X - Camera.Position.X) / (Resolution.X / 2f);
-                Delta *= Math.Min(1, Damp * Damping);
-            }
-            else
-            {
-                Camera.Position = Camera.Position.ToInt();
-            }
+			if (shouldScrollLeft || shouldScrollRight)
+			{
+				delta = new Vector2((transformedPosition.X / (_resolution.X / 2f) - 1) * Acceleration, 0);
+				var damp = (shouldScrollLeft ? _camera.Position.X : _backgroundWidth - _resolution.X - _camera.Position.X) / (_resolution.X / 2f);
+				delta *= Math.Min(1, damp * Damping);
+			}
+			else
+			{
+				_camera.Position = _camera.Position.ToInt();
+			}
 
-            Camera.Move(Delta);
-        }
+			_camera.Move(delta);
+		}
 
-        public static CameraLocked Create(Entity addTo)
-        {
-            return addTo.Add<CameraLocked>();
-        }
+		public static CameraLocked Create(Entity addTo)
+		{
+			return addTo.Add<CameraLocked>();
+		}
 
-        public CameraLocked SetAcceleration(float value) { Acceleration = value; return this; }
-        public CameraLocked SetDamping(float value) { Damping = value; return this; }
-        public CameraLocked SetScroll(bool value) { Scroll = value; return this; }
-        public CameraLocked SetCenterCharacter(bool value) { CenterCharacter = value; return this; }
-        public CameraLocked SetEnabled(bool value) { Enabled = value; return this; }
-    }
+		public CameraLocked SetAcceleration(float value) { Acceleration = value; return this; }
+		public CameraLocked SetDamping(float value) { Damping = value; return this; }
+		public CameraLocked SetScroll(bool value) { Scroll = value; return this; }
+		public CameraLocked SetCenterCharacter(bool value) { CenterCharacter = value; return this; }
+		public CameraLocked SetEnabled(bool value) { Enabled = value; return this; }
+	}
 }

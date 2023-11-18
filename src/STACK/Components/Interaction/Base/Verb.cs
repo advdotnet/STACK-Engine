@@ -5,141 +5,139 @@ using System.Text;
 
 namespace STACK
 {
-    [Serializable]
-    public class Verb
-    {
-        public string Id { get; protected set; }
-        public string Text { get; protected set; }
-        public string Preposition { get; protected set; }
-        public bool Ditransitive { get; protected set; }
-        [NonSerialized]
-        StringBuilder StringBuilder = new StringBuilder();
+	[Serializable]
+	public class Verb
+	{
+		public string Id { get; protected set; }
+		public string Text { get; protected set; }
+		public string Preposition { get; protected set; }
+		public bool Ditransitive { get; protected set; }
+		[NonSerialized]
+		private StringBuilder _stringBuilder = new StringBuilder();
 
-        [OnDeserializing]
-        void OnDeserializing(StreamingContext c)
-        {
-            StringBuilder = new StringBuilder();
-        }
+		[OnDeserializing]
+		private void OnDeserializing(StreamingContext c)
+		{
+			_stringBuilder = new StringBuilder();
+		}
 
-        public override bool Equals(object obj)
-        {
-            var item = obj as Verb;
+		public override bool Equals(object obj)
+		{
+			var item = obj as Verb;
 
-            if (item == null)
-            {
-                return false;
-            }
+			if (item == null)
+			{
+				return false;
+			}
 
-            return (Id == item.Id);
-        }
+			return (Id == item.Id);
+		}
 
-        public static bool operator ==(Verb obj1, Verb obj2)
-        {
-            if (ReferenceEquals(obj1, obj2))
-            {
-                return true;
-            }
+		public static bool operator ==(Verb obj1, Verb obj2)
+		{
+			if (ReferenceEquals(obj1, obj2))
+			{
+				return true;
+			}
 
-            if (ReferenceEquals(obj1, null) || ReferenceEquals(obj2, null))
-            {
-                return false;
-            }
+			if (obj1 is null || obj2 is null)
+			{
+				return false;
+			}
 
-            return obj1.Equals(obj2);
-        }
+			return obj1.Equals(obj2);
+		}
 
-        public static bool operator !=(Verb obj1, Verb obj2)
-        {
-            return !(obj1 == obj2);
-        }
+		public static bool operator !=(Verb obj1, Verb obj2)
+		{
+			return !(obj1 == obj2);
+		}
 
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                var hashCode = Text.GetHashCode();
+		public override int GetHashCode()
+		{
+			unchecked
+			{
+				var hashCode = Text.GetHashCode();
 
-                hashCode = (hashCode * 397) ^ Preposition.GetHashCode();
-                hashCode = (hashCode * 397) ^ Ditransitive.GetHashCode();
+				hashCode = (hashCode * 397) ^ Preposition.GetHashCode();
+				hashCode = (hashCode * 397) ^ Ditransitive.GetHashCode();
 
-                return hashCode;
-            }
-        }
+				return hashCode;
+			}
+		}
 
-        protected Verb(string text, string preposition, bool ditransitive)
-        {
-            Text = text;
-            Preposition = preposition;
-            Ditransitive = ditransitive;
-        }
+		protected Verb(string text, string preposition, bool ditransitive)
+		{
+			Text = text;
+			Preposition = preposition;
+			Ditransitive = ditransitive;
+		}
 
-        public override string ToString()
-        {
-            return Text;
-        }
+		public override string ToString()
+		{
+			return Text;
+		}
 
-        const string SPACE = " ";
+		private const string _space = " ";
 
-        [NonSerialized]
-        string LastPrimaryCaption;
-        [NonSerialized]
-        bool LastPrimarySelected;
-        [NonSerialized]
-        string LastSecondaryCaption;
-        [NonSerialized]
-        string LastResult;
+		[NonSerialized]
+		private string _lastPrimaryCaption;
+		[NonSerialized]
+		private bool _lastPrimarySelected;
+		[NonSerialized]
+		private string _lastSecondaryCaption;
+		[NonSerialized]
+		private string _lastResult;
 
-        public string CreateActionString(Entity primary = null, bool primarySelected = false, Entity secondary = null)
-        {
-            var pri = string.Empty;
-            pri = primary?.Get<Hotspot>()?.Caption;
-            var sec = string.Empty;
-            sec = secondary?.Get<Hotspot>()?.Caption;
+		public string CreateActionString(Entity primary = null, bool primarySelected = false, Entity secondary = null)
+		{
+			var pri = primary?.Get<Hotspot>()?.Caption;
+			var sec = secondary?.Get<Hotspot>()?.Caption;
 
-            if (string.IsNullOrEmpty(pri))
-            {
-                return Text;
-            }
-            else
-            {
-                if (LastPrimaryCaption == pri && LastPrimarySelected == primarySelected && LastSecondaryCaption == sec && null != LastResult)
-                {
-                    return LastResult;
-                }
+			if (string.IsNullOrEmpty(pri))
+			{
+				return Text;
+			}
+			else
+			{
+				if (_lastPrimaryCaption == pri && _lastPrimarySelected == primarySelected && _lastSecondaryCaption == sec && null != _lastResult)
+				{
+					return _lastResult;
+				}
 
-                LastPrimaryCaption = pri;
-                LastSecondaryCaption = sec;
-                LastPrimarySelected = primarySelected;
+				_lastPrimaryCaption = pri;
+				_lastSecondaryCaption = sec;
+				_lastPrimarySelected = primarySelected;
 
-                StringBuilder.Clear();
+				_stringBuilder.Clear();
 
-                StringBuilder.Append(Text);
-                StringBuilder.Append(SPACE);
-                StringBuilder.Append(pri);
+				_stringBuilder.Append(Text);
+				_stringBuilder.Append(_space);
+				_stringBuilder.Append(pri);
 
-                if (!Ditransitive || !primarySelected)
-                {
-                    return LastResult = StringBuilder.ToString();
-                }
+				if (!Ditransitive || !primarySelected)
+				{
+					return _lastResult = _stringBuilder.ToString();
+				}
 
-                StringBuilder.Append(SPACE);
-                StringBuilder.Append(Preposition);
+				_stringBuilder.Append(_space);
+				_stringBuilder.Append(Preposition);
 
-                if (string.IsNullOrEmpty(sec))
-                {
-                    return LastResult = StringBuilder.ToString();
-                }
+				if (string.IsNullOrEmpty(sec))
+				{
+					return _lastResult = _stringBuilder.ToString();
+				}
 
-                StringBuilder.Append(SPACE);
-                StringBuilder.Append(sec);
+				_stringBuilder.Append(_space);
+				_stringBuilder.Append(sec);
 
-                return LastResult = StringBuilder.ToString();
-            }
-        }
+				return _lastResult = _stringBuilder.ToString();
+			}
+		}
 
-        public static Verb Create(string name, string preposition = "", bool ditransitive = false)
-        {
-            return new Verb(name, preposition, ditransitive);
-        }
-    }
+		public static Verb Create(string name, string preposition = "", bool ditransitive = false)
+		{
+			return new Verb(name, preposition, ditransitive);
+		}
+	}
 }

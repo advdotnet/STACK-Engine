@@ -4,125 +4,113 @@ using STACK.Graphics;
 
 namespace STACK.Input
 {
-    /// <summary>
-    /// Captures input events send by the OS to the application using XNA Input methods.
-    /// </summary>
-    public class UserInputProvider : InputProvider
-    {
-        KeyboardState _KeyboardState, OldKeyboardState;
-        MouseState _MouseState, OldMouseState;
-        int _ScrollValue, OldScrollValue;
-        long TimeStamp;
-        InputQueue Queue = new InputQueue();
+	/// <summary>
+	/// Captures input events send by the OS to the application using XNA Input methods.
+	/// </summary>
+	public class UserInputProvider : InputProvider
+	{
+		private KeyboardState _keyboardState, _oldKeyboardState;
+		private MouseState _mouseState, _oldMouseState;
+		private int _scrollValue, _oldScrollValue;
+		private long _timeStamp;
+		private readonly InputQueue _queue = new InputQueue();
 
-        public override KeyboardState KeyboardState
-        {
-            get
-            {
-                return _KeyboardState;
-            }
-        }
+		public override KeyboardState KeyboardState => _keyboardState;
 
-        public override MouseState MouseState
-        {
-            get
-            {
-                return _MouseState;
-            }
-        }
+		public override MouseState MouseState => _mouseState;
 
-        bool IsInsideWindow(int x, int y)
-        {
-            return DisplaySettings.Viewport.Bounds.Contains(x, y);
-        }
+		private bool IsInsideWindow(int x, int y)
+		{
+			return DisplaySettings.Viewport.Bounds.Contains(x, y);
+		}
 
-        public override void Dispatch(bool paused)
-        {
-            Update();
+		public override void Dispatch(bool paused)
+		{
+			Update();
 
-            while (Queue.Count > 0)
-            {
-                var Event = Queue.Dequeue();
-                Event.Paused = paused;
-                Notify(Event);
-            }
-        }
+			while (_queue.Count > 0)
+			{
+				var @event = _queue.Dequeue();
+				@event.Paused = paused;
+				Notify(@event);
+			}
+		}
 
-        void Update()
-        {
-            if (Queue == null)
-            {
-                return;
-            }
+		private void Update()
+		{
+			if (_queue == null)
+			{
+				return;
+			}
 
-            TimeStamp += (long)(GameSpeed.TickDuration);
+			_timeStamp += (long)(GameSpeed.TickDuration);
 
-            OldKeyboardState = _KeyboardState;
-            OldMouseState = _MouseState;
-            OldScrollValue = _ScrollValue;
+			_oldKeyboardState = _keyboardState;
+			_oldMouseState = _mouseState;
+			_oldScrollValue = _scrollValue;
 
-            _KeyboardState = Keyboard.GetState();
-            _MouseState = Mouse.GetState();
-            _ScrollValue = _MouseState.ScrollWheelValue;
+			_keyboardState = Keyboard.GetState();
+			_mouseState = Mouse.GetState();
+			_scrollValue = _mouseState.ScrollWheelValue;
 
-            var ScreenCoordinates = new Vector2(_MouseState.X, _MouseState.Y);
-            var WorldCoordinates = DisplaySettings.TransformPoint(_MouseState.X, _MouseState.Y);
+			var screenCoordinates = new Vector2(_mouseState.X, _mouseState.Y);
+			var worldCoordinates = DisplaySettings.TransformPoint(_mouseState.X, _mouseState.Y);
 
-            _MouseState = _MouseState.UpdatePosition((int)WorldCoordinates.X, (int)WorldCoordinates.Y);
+			_mouseState = _mouseState.UpdatePosition((int)worldCoordinates.X, (int)worldCoordinates.Y);
 
-            // mouse move
-            if (IsInsideWindow((int)ScreenCoordinates.X, (int)ScreenCoordinates.Y))
-            {
-                if (OldScrollValue != _ScrollValue)
-                {
-                    Queue.Enqueue(InputEvent.MouseScroll(TimeStamp, _ScrollValue - OldScrollValue));
-                }
+			// mouse move
+			if (IsInsideWindow((int)screenCoordinates.X, (int)screenCoordinates.Y))
+			{
+				if (_oldScrollValue != _scrollValue)
+				{
+					_queue.Enqueue(InputEvent.MouseScroll(_timeStamp, _scrollValue - _oldScrollValue));
+				}
 
-                if (OldMouseState.X != _MouseState.X || OldMouseState.Y != _MouseState.Y)
-                {
-                    Queue.Enqueue(InputEvent.MouseMove(TimeStamp, _MouseState.X, _MouseState.Y));
-                }
+				if (_oldMouseState.X != _mouseState.X || _oldMouseState.Y != _mouseState.Y)
+				{
+					_queue.Enqueue(InputEvent.MouseMove(_timeStamp, _mouseState.X, _mouseState.Y));
+				}
 
-                // mouse click left
-                if (_MouseState.LeftButton == ButtonState.Pressed && OldMouseState.LeftButton == ButtonState.Released)
-                {
-                    Queue.Enqueue(InputEvent.MouseClick(ButtonState.Pressed, TimeStamp, MouseButton.Left));
-                }
+				// mouse click left
+				if (_mouseState.LeftButton == ButtonState.Pressed && _oldMouseState.LeftButton == ButtonState.Released)
+				{
+					_queue.Enqueue(InputEvent.MouseClick(ButtonState.Pressed, _timeStamp, MouseButton.Left));
+				}
 
-                if (_MouseState.LeftButton == ButtonState.Released && OldMouseState.LeftButton == ButtonState.Pressed)
-                {
-                    Queue.Enqueue(InputEvent.MouseClick(ButtonState.Released, TimeStamp, MouseButton.Left));
-                }
+				if (_mouseState.LeftButton == ButtonState.Released && _oldMouseState.LeftButton == ButtonState.Pressed)
+				{
+					_queue.Enqueue(InputEvent.MouseClick(ButtonState.Released, _timeStamp, MouseButton.Left));
+				}
 
-                // mouse click right
-                if (_MouseState.RightButton == ButtonState.Pressed && OldMouseState.RightButton == ButtonState.Released)
-                {
-                    Queue.Enqueue(InputEvent.MouseClick(ButtonState.Pressed, TimeStamp, MouseButton.Right));
-                }
+				// mouse click right
+				if (_mouseState.RightButton == ButtonState.Pressed && _oldMouseState.RightButton == ButtonState.Released)
+				{
+					_queue.Enqueue(InputEvent.MouseClick(ButtonState.Pressed, _timeStamp, MouseButton.Right));
+				}
 
-                if (_MouseState.RightButton == ButtonState.Released && OldMouseState.RightButton == ButtonState.Pressed)
-                {
-                    Queue.Enqueue(InputEvent.MouseClick(ButtonState.Released, TimeStamp, MouseButton.Right));
-                }
-            }
+				if (_mouseState.RightButton == ButtonState.Released && _oldMouseState.RightButton == ButtonState.Pressed)
+				{
+					_queue.Enqueue(InputEvent.MouseClick(ButtonState.Released, _timeStamp, MouseButton.Right));
+				}
+			}
 
-            // key down
-            foreach (var Key in _KeyboardState.GetPressedKeys())
-            {
-                if (!OldKeyboardState.IsKeyDown(Key))
-                {
-                    Queue.Enqueue(InputEvent.KeyPress(KeyState.Down, TimeStamp, Key));
-                }
-            }
+			// key down
+			foreach (var key in _keyboardState.GetPressedKeys())
+			{
+				if (!_oldKeyboardState.IsKeyDown(key))
+				{
+					_queue.Enqueue(InputEvent.KeyPress(KeyState.Down, _timeStamp, key));
+				}
+			}
 
-            // key up
-            foreach (var Key in OldKeyboardState.GetPressedKeys())
-            {
-                if (!_KeyboardState.IsKeyDown(Key))
-                {
-                    Queue.Enqueue(InputEvent.KeyPress(KeyState.Up, TimeStamp, Key));
-                }
-            }
-        }
-    }
+			// key up
+			foreach (var key in _oldKeyboardState.GetPressedKeys())
+			{
+				if (!_keyboardState.IsKeyDown(key))
+				{
+					_queue.Enqueue(InputEvent.KeyPress(KeyState.Up, _timeStamp, key));
+				}
+			}
+		}
+	}
 }

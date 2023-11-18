@@ -9,252 +9,251 @@ using System.Reflection;
 
 namespace STACK.Test
 {
-    [TestClass]
-    public class ComponentsTest
-    {
+	[TestClass]
+	public class ComponentsTest
+	{
+		[TestMethod]
+		public void AddComponent()
+		{
+			var test = new Entity();
+			test.Add<Transform>();
+			Assert.IsNotNull(test.Get<Transform>());
+		}
 
-        [TestMethod]
-        public void AddComponent()
-        {
-            Entity Test = new Entity();
-            Test.Add<Transform>();
-            Assert.IsNotNull(Test.Get<Transform>());
-        }
+		[TestMethod]
+		public void AddComponentSetsEntity()
+		{
+			var test = new Entity();
+			var transform = test.Add<Transform>();
+			Assert.AreEqual(test, transform.Entity);
+		}
 
-        [TestMethod]
-        public void AddComponentSetsEntity()
-        {
-            Entity Test = new Entity();
-            var Transform = Test.Add<Transform>();
-            Assert.AreEqual(Test, Transform.Entity);
-        }
+		[TestMethod]
+		public void RemoveComponent()
+		{
+			var test = new Entity();
+			Assert.IsNull(test.Get<Transform>());
+			test.Add<Transform>();
+			Assert.AreEqual(0, test.Items.Count);
+			Assert.AreEqual(1, test.Components.Count);
+			test.Remove<Transform>();
+			Assert.IsNull(test.Get<Transform>());
+			Assert.AreEqual(0, test.Items.Count);
+			Assert.AreEqual(0, test.Components.Count);
+		}
 
-        [TestMethod]
-        public void RemoveComponent()
-        {
-            Entity Test = new Entity();
-            Assert.IsNull(Test.Get<Transform>());
-            Test.Add<Transform>();
-            Assert.AreEqual(0, Test.Items.Count);
-            Assert.AreEqual(1, Test.Components.Count);
-            Test.Remove<Transform>();
-            Assert.IsNull(Test.Get<Transform>());
-            Assert.AreEqual(0, Test.Items.Count);
-            Assert.AreEqual(0, Test.Components.Count);
-        }
+		[TestMethod]
+		public void ModifyComponent()
+		{
+			var test = new Entity();
+			test.Add<Transform>();
+			test.Get<Transform>().Z = 7;
+			Assert.AreEqual(7, test.Get<Transform>().Z);
+		}
 
-        [TestMethod]
-        public void ModifyComponent()
-        {
-            Entity Test = new Entity();
-            Test.Add<Transform>();
-            Test.Get<Transform>().Z = 7;
-            Assert.AreEqual(7, Test.Get<Transform>().Z);
-        }
+		[TestMethod]
+		public void RectangleHotspotAsHotspot()
+		{
+			var test = new Entity();
+			test.Add<HotspotRectangle>();
 
-        [TestMethod]
-        public void RectangleHotspotAsHotspot()
-        {
-            Entity Test = new Entity();
-            Test.Add<HotspotRectangle>();
+			Assert.IsNotNull(test.Get<Hotspot>());
+		}
 
-            Assert.IsNotNull(Test.Get<Hotspot>());
-        }
+		[TestMethod]
+		public void GetsInterface()
+		{
+			var test = new Entity();
+			var spriteCustomAnimation = test.Add<SpriteCustomAnimation>();
+			var gotInterface = test.GetInterface<IPlayAnimation>();
 
-        [TestMethod]
-        public void GetsInterface()
-        {
-            var Test = new Entity();
-            var SpriteCustomAnimation = Test.Add<SpriteCustomAnimation>();
-            var GotInterface = Test.GetInterface<IPlayAnimation>();
+			Assert.AreEqual(gotInterface, spriteCustomAnimation);
+		}
 
-            Assert.AreEqual(GotInterface, SpriteCustomAnimation);
-        }
+		[TestMethod]
+		public void NotifyDoesNotThrowWithoutEntity()
+		{
+			new Transform().Position = new Vector2(1, 1);
+		}
 
-        [TestMethod]
-        public void NotifyDoesNotThrowWithoutEntity()
-        {
-            new Transform().Position = new Vector2(1, 1);
-        }
+		[TestMethod]
+		public void NoNotificationBeforeInitialization()
+		{
+			var test = new Entity();
+			test.Add<SpriteData>();
+			test.Notify(Messages.ColorChanged, Color.Aqua);
 
-        [TestMethod]
-        public void NoNotificationBeforeInitialization()
-        {
-            Entity Test = new Entity();
-            Test.Add<SpriteData>();
-            Test.Notify(Messages.ColorChanged, Color.Aqua);
+			Assert.AreNotEqual(Color.Aqua, test.Get<SpriteData>().Color);
+		}
 
-            Assert.AreNotEqual(Color.Aqua, Test.Get<SpriteData>().Color);
-        }
+		[TestMethod]
+		public void NotificationAfterInitialization()
+		{
+			var test = new Entity();
+			test.Add<SpriteData>();
 
-        [TestMethod]
-        public void NotificationAfterInitialization()
-        {
-            Entity Test = new Entity();
-            Test.Add<SpriteData>();
+			test.Initialize(false);
 
-            Test.Initialize(false);
+			test.Notify(Messages.ColorChanged, Color.Aqua);
 
-            Test.Notify(Messages.ColorChanged, Color.Aqua);
+			Assert.AreEqual(Color.Aqua, test.Get<SpriteData>().Color);
+		}
 
-            Assert.AreEqual(Color.Aqua, Test.Get<SpriteData>().Color);
-        }
+		private class CustomComponent : Component, IUpdate, IDraw, IInitialize, IContent, IInteractive, INotify
+		{
+			public bool Enabled { get; set; }
+			public float UpdateOrder { get; set; }
+			public bool UpdateCalled { get; private set; }
+			public void Update()
+			{
+				UpdateCalled = true;
+			}
 
-        class CustomComponent : Component, IUpdate, IDraw, IInitialize, IContent, IInteractive, INotify
-        {
-            public bool Enabled { get; set; }
-            public float UpdateOrder { get; set; }
-            public bool UpdateCalled { get; private set; }
-            public void Update()
-            {
-                UpdateCalled = true;
-            }
+			public bool Visible { get; set; }
+			public float DrawOrder { get; set; }
+			public bool DrawCalled { get; private set; }
 
-            public bool Visible { get; set; }
-            public float DrawOrder { get; set; }
-            public bool DrawCalled { get; private set; }
+			public void Draw(Renderer renderer)
+			{
+				DrawCalled = true;
+			}
 
-            public void Draw(Renderer renderer)
-            {
-                DrawCalled = true;
-            }
+			public bool InitializeCalled { get; private set; }
+			public void Initialize(bool restore)
+			{
+				InitializeCalled = true;
+			}
 
-            public bool InitializeCalled { get; private set; }
-            public void Initialize(bool restore)
-            {
-                InitializeCalled = true;
-            }
+			public bool LoadContentCalled { get; private set; }
+			public void LoadContent(ContentLoader content)
+			{
+				LoadContentCalled = true;
+			}
 
-            public bool LoadContentCalled { get; private set; }
-            public void LoadContent(ContentLoader content)
-            {
-                LoadContentCalled = true;
-            }
+			public bool UnloadContentCalled { get; private set; }
+			public void UnloadContent()
+			{
+				UnloadContentCalled = true;
+			}
 
-            public bool UnloadContentCalled { get; private set; }
-            public void UnloadContent()
-            {
-                UnloadContentCalled = true;
-            }
+			public bool HandleInputEventCalled { get; private set; }
+			public void HandleInputEvent(Vector2 mouse, InputEvent inputEvent)
+			{
+				HandleInputEventCalled = true;
+			}
 
-            public bool HandleInputEventCalled { get; private set; }
-            public void HandleInputEvent(Vector2 mouse, InputEvent inputEvent)
-            {
-                HandleInputEventCalled = true;
-            }
+			public bool NotifyCalled { get; private set; }
+			public void Notify<T>(string message, T data)
+			{
+				NotifyCalled = true;
+			}
+		}
 
-            public bool NotifyCalled { get; private set; }
-            public void Notify<T>(string message, T data)
-            {
-                NotifyCalled = true;
-            }
-        }
+		[TestMethod]
+		public void ComponentUpdateTest()
+		{
+			var test = new Entity();
+			var component = test.Add<CustomComponent>();
 
-        [TestMethod]
-        public void ComponentUpdateTest()
-        {
-            Entity Test = new Entity();
-            var Component = Test.Add<CustomComponent>();
+			component.Enabled = false;
+			test.Update();
+			Assert.IsFalse(component.UpdateCalled);
 
-            Component.Enabled = false;
-            Test.Update();
-            Assert.IsFalse(Component.UpdateCalled);
+			component.Enabled = true;
+			test.Update();
+			Assert.IsTrue(component.UpdateCalled);
+		}
 
-            Component.Enabled = true;
-            Test.Update();
-            Assert.IsTrue(Component.UpdateCalled);
-        }
+		[TestMethod]
+		public void ComponentDrawTest()
+		{
+			var test = new Entity();
+			var component = test.Add<CustomComponent>();
 
-        [TestMethod]
-        public void ComponentDrawTest()
-        {
-            Entity Test = new Entity();
-            var Component = Test.Add<CustomComponent>();
+			component.Visible = false;
+			test.Draw(null);
+			Assert.IsFalse(component.DrawCalled);
 
-            Component.Visible = false;
-            Test.Draw(null);
-            Assert.IsFalse(Component.DrawCalled);
+			component.Visible = true;
+			test.Draw(null);
+			Assert.IsTrue(component.DrawCalled);
+		}
 
-            Component.Visible = true;
-            Test.Draw(null);
-            Assert.IsTrue(Component.DrawCalled);
-        }
+		[TestMethod]
+		public void ComponentInitializeTest()
+		{
+			var test = new Entity();
+			var component = test.Add<CustomComponent>();
 
-        [TestMethod]
-        public void ComponentInitializeTest()
-        {
-            Entity Test = new Entity();
-            var Component = Test.Add<CustomComponent>();
+			test.Initialize(false);
+			Assert.IsTrue(component.InitializeCalled);
+		}
 
-            Test.Initialize(false);
-            Assert.IsTrue(Component.InitializeCalled);
-        }
+		[TestMethod]
+		public void ComponentContentTest()
+		{
+			var test = new Entity();
+			var component = test.Add<CustomComponent>();
 
-        [TestMethod]
-        public void ComponentContentTest()
-        {
-            Entity Test = new Entity();
-            var Component = Test.Add<CustomComponent>();
+			test.LoadContent(null);
+			Assert.IsTrue(component.LoadContentCalled);
 
-            Test.LoadContent(null);
-            Assert.IsTrue(Component.LoadContentCalled);
+			test.UnloadContent();
+			Assert.IsTrue(component.UnloadContentCalled);
+		}
 
-            Test.UnloadContent();
-            Assert.IsTrue(Component.UnloadContentCalled);
-        }
+		[TestMethod]
+		public void ComponentInteractiveTest()
+		{
+			var test = new Entity();
+			var component = test.Add<CustomComponent>();
 
-        [TestMethod]
-        public void ComponentInteractiveTest()
-        {
-            Entity Test = new Entity();
-            var Component = Test.Add<CustomComponent>();
+			test.HandleInputEvent(default, default);
+			Assert.IsTrue(component.HandleInputEventCalled);
+		}
 
-            Test.HandleInputEvent(default(Vector2), default(InputEvent));
-            Assert.IsTrue(Component.HandleInputEventCalled);
-        }
+		[TestMethod]
+		public void ComponentNotifyTest()
+		{
+			var test = new Entity();
+			var component = test.Add<CustomComponent>();
+			test.Initialize(false);
+			test.Notify(default, 1);
+			Assert.IsTrue(component.NotifyCalled);
+		}
 
-        [TestMethod]
-        public void ComponentNotifyTest()
-        {
-            Entity Test = new Entity();
-            var Component = Test.Add<CustomComponent>();
-            Test.Initialize(false);
-            Test.Notify<int>(default(string), 1);
-            Assert.IsTrue(Component.NotifyCalled);
-        }
+		[TestMethod]
+		public void IUpdateComponentEnabledAfterConstructing()
+		{
+			var q = from t in Assembly.GetAssembly(typeof(Component)).GetTypes()
+					where t.IsClass && typeof(IUpdate).IsAssignableFrom(t) &&
+						typeof(Component).IsAssignableFrom(t) &&
+						!t.IsAbstract
+					select t;
 
-        [TestMethod]
-        public void IUpdateComponentEnabledAfterConstructing()
-        {
-            var q = from t in Assembly.GetAssembly(typeof(Component)).GetTypes()
-                    where t.IsClass && typeof(IUpdate).IsAssignableFrom(t) &&
-                        typeof(Component).IsAssignableFrom(t) &&
-                        !t.IsAbstract
-                    select t;
+			foreach (var componentType in q)
+			{
+				var entity = new Entity();
+				var instance = (IUpdate)Activator.CreateInstance(componentType);
+				Assert.IsTrue(instance.Enabled, componentType.ToString() + " not default enabled.");
+			}
+		}
 
-            foreach (var ComponentType in q)
-            {
-                var Entity = new Entity();
-                var Instance = (IUpdate)Activator.CreateInstance(ComponentType);
-                Assert.IsTrue(Instance.Enabled, ComponentType.ToString() + " not default enabled.");
-            }
-        }
+		[TestMethod]
+		public void IDrawComponentVisibleAfterConstructing()
+		{
+			var q = from t in Assembly.GetAssembly(typeof(Component)).GetTypes()
+					where t.IsClass && typeof(IDraw).IsAssignableFrom(t) &&
+						typeof(Component).IsAssignableFrom(t) &&
+						!t.IsAbstract
+					select t;
 
-        [TestMethod]
-        public void IDrawComponentVisibleAfterConstructing()
-        {
-            var q = from t in Assembly.GetAssembly(typeof(Component)).GetTypes()
-                    where t.IsClass && typeof(IDraw).IsAssignableFrom(t) &&
-                        typeof(Component).IsAssignableFrom(t) &&
-                        !t.IsAbstract
-                    select t;
-
-            foreach (var ComponentType in q)
-            {
-                var Entity = new Entity();
-                var Instance = (IDraw)Activator.CreateInstance(ComponentType);
-                Assert.IsTrue(Instance.Visible, ComponentType.ToString() + " not default enabled.");
-            }
-        }
-    }
+			foreach (var componentType in q)
+			{
+				var entity = new Entity();
+				var instance = (IDraw)Activator.CreateInstance(componentType);
+				Assert.IsTrue(instance.Visible, $"{componentType} not default enabled.");
+			}
+		}
+	}
 }

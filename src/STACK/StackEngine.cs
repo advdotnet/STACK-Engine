@@ -10,178 +10,168 @@ using Renderer = STACK.Graphics.Renderer;
 namespace STACK
 {
 
-    public class StackEngine : IDisposable
-    {
-        public GameSettings GameSettings { get; private set; }
-        public Renderer Renderer { get; private set; }
-        public StackGame Game { get; private set; }
-        public ContentLoader EngineContent { get; private set; }
-        public IServiceProvider Services { get; private set; }
-        public Console Console { get; private set; }
-        public InputProvider InputProvider { get; private set; }
-        public event Action OnExit;
-        ContentLoader WorldContent { get; set; }
-        bool _Paused = true;
+	public class StackEngine : IDisposable
+	{
+		public GameSettings GameSettings { get; private set; }
+		public Renderer Renderer { get; private set; }
+		public StackGame Game { get; private set; }
+		public ContentLoader EngineContent { get; private set; }
+		public IServiceProvider Services { get; private set; }
+		public Console Console { get; private set; }
+		public InputProvider InputProvider { get; private set; }
+		public event Action OnExit;
 
-        public StackEngine(StackGame game, IServiceProvider services, InputProvider input, GameSettings gameSettings)
-        {
-            GameSettings = gameSettings;
-            Services = services;
-            gameSettings.SetCulture();
+		private ContentLoader WorldContent { get; set; }
 
-            var ConsoleLogHandler = new ConsoleLogHandler(Console);
-            EngineContent = new ContentLoader(Services);
-            Renderer = new Renderer(Services, EngineContent, game.VirtualResolution, gameSettings.GetTargetResolution(game.VirtualResolution), gameSettings.Bloom);
+		private bool _paused = true;
 
-            Game = game;
+		public StackEngine(StackGame game, IServiceProvider services, InputProvider input, GameSettings gameSettings)
+		{
+			GameSettings = gameSettings;
+			Services = services;
+			gameSettings.SetCulture();
 
-            Console = new Console(this);
-            ConsoleLogHandler.Console = Console;
-            _Paused = true;
+			var consoleLogHandler = new ConsoleLogHandler(Console);
+			EngineContent = new ContentLoader(Services);
+			Renderer = new Renderer(Services, EngineContent, game.VirtualResolution, gameSettings.GetTargetResolution(game.VirtualResolution), gameSettings.Bloom);
 
-            InputProvider = input;
+			Game = game;
 
-            if (InputProvider != null)
-            {
-                InputProvider.DisplaySettings = Renderer.DisplaySettings;
-            }
+			Console = new Console(this);
+			consoleLogHandler.Console = Console;
+			_paused = true;
 
-            EngineVariables.EnableGUI = true;
-            Game.Start(this);
-        }
+			InputProvider = input;
 
-        public ContentLoader GetWorldContent()
-        {
-            if (null != WorldContent)
-            {
-                WorldContent.Dispose();
-            }
+			if (InputProvider != null)
+			{
+				InputProvider.DisplaySettings = Renderer.DisplaySettings;
+			}
 
-            WorldContent = new ContentLoader(Services);
+			EngineVariables.EnableGUI = true;
+			Game.Start(this);
+		}
 
-            return WorldContent;
-        }
+		public ContentLoader GetWorldContent()
+		{
+			WorldContent?.Dispose();
 
-        protected StackEngine() { }
+			WorldContent = new ContentLoader(Services);
 
-        public void Draw()
-        {
-            Renderer.Draw(Game?.World);
-        }
+			return WorldContent;
+		}
 
-        public void Update()
-        {
-            InputProvider.Dispatch(Paused);
+		protected StackEngine() { }
 
-            Renderer.Update(InputProvider.KeyboardState, InputProvider.MouseState);
+		public void Draw()
+		{
+			Renderer.Draw(Game?.World);
+		}
 
-            if (Game != null && Game.World != null && !Paused)
-            {
-                Game.World.Update();
-            }
-        }
+		public void Update()
+		{
+			InputProvider.Dispatch(Paused);
 
-        public void Dispose()
-        {
-            Game.World?.UnloadContent();
-            Renderer.Dispose();
-            WorldContent?.Dispose();
-            EngineContent.Dispose();
-        }
+			Renderer.Update(InputProvider.KeyboardState, InputProvider.MouseState);
 
-        public void StartGame()
-        {
-            Game.StartWorld();
-            Resume();
-        }
+			if (Game != null && Game.World != null && !Paused)
+			{
+				Game.World.Update();
+			}
+		}
 
-        public bool Paused
-        {
-            get
-            {
-                return _Paused;
-            }
-            private set
-            {
-                if (value == _Paused)
-                {
-                    return;
-                }
+		public void Dispose()
+		{
+			Game.World?.UnloadContent();
+			Renderer.Dispose();
+			WorldContent?.Dispose();
+			EngineContent.Dispose();
+		}
 
-                _Paused = value;
+		public void StartGame()
+		{
+			Game.StartWorld();
+			Resume();
+		}
 
-                if (null != Game.World)
-                {
-                    Game.World.Get<AudioManager>().IsEnginePaused = value;
-                }
+		public bool Paused
+		{
+			get => _paused;
+			private set
+			{
+				if (value == _paused)
+				{
+					return;
+				}
 
-                if (_Paused)
-                {
-                    MediaPlayer.Pause();
-                }
-                else
-                {
-                    MediaPlayer.Resume();
-                }
-            }
-        }
+				_paused = value;
 
-        public void Pause(bool paused = true)
-        {
-            Paused = paused;
-        }
+				if (null != Game.World)
+				{
+					Game.World.Get<AudioManager>().IsEnginePaused = value;
+				}
 
-        public void Resume()
-        {
-            Paused = false;
-        }
+				if (_paused)
+				{
+					MediaPlayer.Pause();
+				}
+				else
+				{
+					MediaPlayer.Resume();
+				}
+			}
+		}
 
-        public void Exit()
-        {
-            if (null != Game)
-            {
-                Game.OnExit();
-            }
+		public void Pause(bool paused = true)
+		{
+			Paused = paused;
+		}
 
-            Dispose();
+		public void Resume()
+		{
+			Paused = false;
+		}
 
-            OnExit?.Invoke();
-        }
+		public void Exit()
+		{
+			Game?.OnExit();
 
-        public void ApplyGameSettingsVolume()
-        {
-            if (null != Game.World)
-            {
-                Game.World.Get<AudioManager>().ApplyGameSettingsVolume(GameSettings);
-            }
-        }
+			Dispose();
 
-        public SaveGame SaveState(string name = "game1")
-        {
-            var ScreenshotData = Renderer.GetScreenshotPNGData(Game.World);
+			OnExit?.Invoke();
+		}
 
-            return SaveGame.SaveToFile(Game.SaveGameFolder, name, Game.World, ScreenshotData);
-        }
+		public void ApplyGameSettingsVolume()
+		{
+			Game.World?.Get<AudioManager>().ApplyGameSettingsVolume(GameSettings);
+		}
 
-        public void LoadState(SaveGame state)
-        {
-            Game.RestoreState(state);
-        }
+		public SaveGame SaveState(string name = "game1")
+		{
+			var screenshotData = Renderer.GetScreenshotPNGData(Game.World);
 
-        public void LoadState(string fileName = "game1")
-        {
-            var State = SaveGame.LoadFromFile(Game.SaveGameFolder, fileName);
-            LoadState(State);
-        }
+			return SaveGame.SaveToFile(Game.SaveGameFolder, name, Game.World, screenshotData);
+		}
 
-        public string ExistsStateByName(string name)
-        {
-            return SaveGame.ExistsStateByName(Game.SaveGameFolder, name);
-        }
+		public void LoadState(SaveGame state)
+		{
+			Game.RestoreState(state);
+		}
 
-        public Dictionary<string, SaveGame> GetSaveGames()
-        {
-            return SaveGame.GetSaveGames(Game.SaveGameFolder);
-        }
-    }
+		public void LoadState(string fileName = "game1")
+		{
+			var state = SaveGame.LoadFromFile(Game.SaveGameFolder, fileName);
+			LoadState(state);
+		}
+
+		public string ExistsStateByName(string name)
+		{
+			return SaveGame.ExistsStateByName(Game.SaveGameFolder, name);
+		}
+
+		public Dictionary<string, SaveGame> GetSaveGames()
+		{
+			return SaveGame.GetSaveGames(Game.SaveGameFolder);
+		}
+	}
 }

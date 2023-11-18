@@ -2,37 +2,31 @@
 
 namespace STACK.Input
 {
-    /// <summary>
-    /// Queue of InputEvents.
-    /// </summary>
-    public class InputQueue : Queue<InputEvent>
-    {
-        private InputEventFileLogger Logger;
+	/// <summary>
+	/// Queue of InputEvents.
+	/// </summary>
+	public class InputQueue : Queue<InputEvent>
+	{
+		private readonly InputEventFileLogger _logger;
 
-        public InputQueue(bool record = false) : base(5)
-        {
-            if (record)
-            {
-                Logger = new InputEventFileLogger("demo.dat");
-            }
-        }
+		public InputQueue(bool record = false) : base(5)
+		{
+			if (record)
+			{
+				_logger = new InputEventFileLogger("demo.dat");
+			}
+		}
 
-        public new void Enqueue(InputEvent item)
-        {
-            if (Logger != null)
-            {
-                Logger.Log(item);
-            }
+		public new void Enqueue(InputEvent item)
+		{
+			_logger?.Log(item);
 
-            base.Enqueue(item);
-        }
+			base.Enqueue(item);
+		}
 
-        public void OnUnload()
-        {
-            if (Logger != null)
-            {
-                Logger.Flush();
-            }
-        }
-    }
+		public void OnUnload()
+		{
+			_logger?.Flush();
+		}
+	}
 }

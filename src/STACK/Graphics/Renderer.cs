@@ -11,323 +11,315 @@ using TomShane.Neoforce.Controls;
 
 namespace STACK.Graphics
 {
-    /// <summary>
-    /// Provides classes and methods for rendering.
-    /// </summary>
-    public class Renderer
-    {
-        public Matrix TransformationMatrix = Matrix.Identity;
-        public Matrix Projection = Matrix.Identity;
-        public bool BloomEnabled = true;
+	/// <summary>
+	/// Provides classes and methods for rendering.
+	/// </summary>
+	public class Renderer
+	{
+		public Matrix TransformationMatrix = Matrix.Identity;
+		public Matrix Projection = Matrix.Identity;
+		public bool BloomEnabled = true;
 
-        public DisplaySettings DisplaySettings;
+		public DisplaySettings DisplaySettings;
 
-        public RenderStage Stage = RenderStage.PreBloom;
-        public SpriteBatch SpriteBatch;
-        public PrimitivesRenderer PrimitivesRenderer;
-        public GraphicsDevice GraphicsDevice;
-        public Effect NormalmapEffect;
-        public BloomComponent BloomEffect;
-        public Texture2D WhitePixelTexture;
+		public RenderStage Stage = RenderStage.PreBloom;
+		public SpriteBatch SpriteBatch;
+		public PrimitivesRenderer PrimitivesRenderer;
+		public GraphicsDevice GraphicsDevice;
+		public Effect NormalmapEffect;
+		public BloomComponent BloomEffect;
+		public Texture2D WhitePixelTexture;
+		private Manager _neoManager;
+		private RenderTarget2D _currentRenderTarget;
+		private RenderTarget2D _drawBuffer;
+		private RenderTarget2D _guiBuffer;
 
-        Manager _NeoManager;
+		public Renderer(IServiceProvider services, ContentManager content, Point virtualResolution, Point? targetResolution = null, bool bloom = true)
+		{
+			Log.WriteLine("Constructing renderer");
+			GraphicsDevice = ((IGraphicsDeviceService)services.GetService(typeof(IGraphicsDeviceService))).GraphicsDevice;
+			var realResolution = new Point(GraphicsDevice.PresentationParameters.BackBufferWidth, GraphicsDevice.PresentationParameters.BackBufferHeight);
+			DisplaySettings = new DisplaySettings(virtualResolution, realResolution, targetResolution);
+			BloomEnabled = bloom;
+			PrimitivesRenderer = new PrimitivesRenderer(GraphicsDevice);
+			SpriteBatch = new SpriteBatch(GraphicsDevice);
+			BloomEffect = new BloomComponent(GraphicsDevice);
 
-        RenderTarget2D CurrentRenderTarget;
-        RenderTarget2D DrawBuffer;
-        RenderTarget2D GUIBuffer;
+			_neoManager = new Manager(services, GraphicsDevice, "Default")
+			{
+				AutoCreateRenderTarget = true,
+				TargetFrames = 60,
+				LogUnhandledExceptions = false,
+				ShowSoftwareCursor = false
+			};
 
-        public Renderer(IServiceProvider services, ContentManager content, Point virtualResolution, Point? targetResolution = null, bool bloom = true)
-        {
-            Log.WriteLine("Constructing renderer");
-            GraphicsDevice = ((IGraphicsDeviceService)services.GetService(typeof(IGraphicsDeviceService))).GraphicsDevice;
-            var RealResolution = new Point(GraphicsDevice.PresentationParameters.BackBufferWidth, GraphicsDevice.PresentationParameters.BackBufferHeight);
-            DisplaySettings = new DisplaySettings(virtualResolution, RealResolution, targetResolution);
-            BloomEnabled = bloom;
-            PrimitivesRenderer = new PrimitivesRenderer(GraphicsDevice);
-            SpriteBatch = new SpriteBatch(GraphicsDevice);
-            BloomEffect = new BloomComponent(GraphicsDevice);
+			if ("de-DE" == Thread.CurrentThread.CurrentUICulture.Name)
+			{
+				GUIManager.KeyboardLayout = new GermanKeyboardLayout();
+			}
 
-            _NeoManager = new Manager(services, GraphicsDevice, "Default")
-            {
-                AutoCreateRenderTarget = true,
-                TargetFrames = 60,
-                LogUnhandledExceptions = false,
-                ShowSoftwareCursor = false
-            };
+			LoadContent(content);
+		}
 
-            if ("de-DE" == Thread.CurrentThread.CurrentUICulture.Name)
-            {
-                GUIManager.KeyboardLayout = new GermanKeyboardLayout();
-            }
+		public Manager GUIManager
+		{
+			get => _neoManager;
 
-            LoadContent(content);
-        }
+			set => _neoManager = value;
+		}
 
-        public Manager GUIManager
-        {
-            get
-            {
-                return _NeoManager;
-            }
+		/// <summary>
+		/// Used for SpriteBatch vertex shaders.
+		/// </summary>
+		public Matrix SpriteBatchProjection
+		{
+			get
+			{
+				var projection = new Matrix(
+					(float)(2.0 / GraphicsDevice.Viewport.Width),
+					0.0f,
+					0.0f,
+					0.0f,
+					0.0f,
+					(float)(-2.0 / GraphicsDevice.Viewport.Height),
+					0.0f,
+					0.0f,
+					0.0f,
+					0.0f,
+					1.0f,
+					0.0f,
+					-1.0f,
+					1.0f,
+					0.0f,
+					1.0f
+				);
 
-            set
-            {
-                _NeoManager = value;
-            }
-        }
+				return Matrix.Multiply(Projection, projection);
+			}
+		}
 
-        /// <summary>
-        /// Used for SpriteBatch vertex shaders.
-        /// </summary>
-        public Matrix SpriteBatchProjection
-        {
-            get
-            {
-                Matrix projection = new Matrix(
-                    (float)(2.0 / GraphicsDevice.Viewport.Width),
-                    0.0f,
-                    0.0f,
-                    0.0f,
-                    0.0f,
-                    (float)(-2.0 / GraphicsDevice.Viewport.Height),
-                    0.0f,
-                    0.0f,
-                    0.0f,
-                    0.0f,
-                    1.0f,
-                    0.0f,
-                    -1.0f,
-                    1.0f,
-                    0.0f,
-                    1.0f
-                );
+		public SpriteFont DefaultFont;
 
-                return Matrix.Multiply(Projection, projection);
-            }
-        }
+		private void LoadContent(ContentManager content)
+		{
+			Log.WriteLine("Loading renderer content");
+			NormalmapEffect = content.Load<Effect>(STACK.content.shaders.Normalmap);
 
-        public SpriteFont DefaultFont;
+			BloomEffect.LoadContent(content);
 
-        void LoadContent(ContentManager content)
-        {
-            Log.WriteLine("Loading renderer content");
-            NormalmapEffect = content.Load<Effect>(STACK.content.shaders.Normalmap);
+			_drawBuffer = new RenderTarget2D(GraphicsDevice,
+									DisplaySettings.VirtualResolution.X, DisplaySettings.VirtualResolution.Y,
+									true, SurfaceFormat.Color,
+									DepthFormat.Depth24Stencil8, GraphicsDevice.PresentationParameters.MultiSampleCount,
+									RenderTargetUsage.DiscardContents);
 
-            BloomEffect.LoadContent(content);
+			_guiBuffer = new RenderTarget2D(GraphicsDevice,
+									DisplaySettings.VirtualResolution.X, DisplaySettings.VirtualResolution.Y,
+									true, SurfaceFormat.Color,
+									DepthFormat.Depth24Stencil8, GraphicsDevice.PresentationParameters.MultiSampleCount,
+									RenderTargetUsage.DiscardContents);
 
-            DrawBuffer = new RenderTarget2D(GraphicsDevice,
-                                    DisplaySettings.VirtualResolution.X, DisplaySettings.VirtualResolution.Y,
-                                    true, SurfaceFormat.Color,
-                                    DepthFormat.Depth24Stencil8, GraphicsDevice.PresentationParameters.MultiSampleCount,
-                                    RenderTargetUsage.DiscardContents);
+			_currentRenderTarget = _drawBuffer;
 
-            GUIBuffer = new RenderTarget2D(GraphicsDevice,
-                                    DisplaySettings.VirtualResolution.X, DisplaySettings.VirtualResolution.Y,
-                                    true, SurfaceFormat.Color,
-                                    DepthFormat.Depth24Stencil8, GraphicsDevice.PresentationParameters.MultiSampleCount,
-                                    RenderTargetUsage.DiscardContents);
+			WhitePixelTexture = new Texture2D(GraphicsDevice, 1, 1);
+			WhitePixelTexture.SetData(new[] { Color.White });
 
-            CurrentRenderTarget = DrawBuffer;
+			DefaultFont = content.Load<SpriteFont>(STACK.content.fonts.stack);
 
-            WhitePixelTexture = new Texture2D(GraphicsDevice, 1, 1);
-            WhitePixelTexture.SetData<Color>(new[] { Color.White });
+			_neoManager.AutoCreateRenderTarget = false;
+			_neoManager.RenderTarget = _guiBuffer;
+			_neoManager.Initialize();
+		}
 
-            DefaultFont = content.Load<SpriteFont>(STACK.content.fonts.stack);
+		public void Dispose()
+		{
+			NormalmapEffect.Dispose();
+			BloomEffect.UnloadContent();
+			SpriteBatch.Dispose();
+			PrimitivesRenderer.Dispose();
+			WhitePixelTexture.Dispose();
 
-            _NeoManager.AutoCreateRenderTarget = false;
-            _NeoManager.RenderTarget = GUIBuffer;
-            _NeoManager.Initialize();
-        }
+			if (_drawBuffer != null)
+			{
+				_drawBuffer.Dispose();
+				_drawBuffer = null;
+			}
 
-        public void Dispose()
-        {
-            NormalmapEffect.Dispose();
-            BloomEffect.UnloadContent();
-            SpriteBatch.Dispose();
-            PrimitivesRenderer.Dispose();
-            WhitePixelTexture.Dispose();
+			if (_currentRenderTarget != null)
+			{
+				_currentRenderTarget.Dispose();
+				_currentRenderTarget = null;
+			}
+			_neoManager.Dispose(true);
+		}
 
-            if (DrawBuffer != null)
-            {
-                DrawBuffer.Dispose();
-                DrawBuffer = null;
-            }
+		public void ApplyNormalmapEffectParameter(Lightning settings, Texture2D normalMap)
+		{
+			NormalmapEffect.Parameters["MatrixTransform"].SetValue(Projection * TransformationMatrix);
+			NormalmapEffect.Parameters["LightPosition"].SetValue(settings.LightPosition);
+			NormalmapEffect.Parameters["LightColor"].SetValue(settings.LightColor);
+			NormalmapEffect.Parameters["AmbientColor"].SetValue(settings.AmbientColor);
+			NormalmapEffect.Parameters["DrawNormals"].SetValue(settings.DrawNormals);
 
-            if (CurrentRenderTarget != null)
-            {
-                CurrentRenderTarget.Dispose();
-                CurrentRenderTarget = null;
-            }
-            _NeoManager.Dispose(true);
-        }
+			if (EngineVariables.DrawNormals)
+			{
+				NormalmapEffect.Parameters["DrawNormals"].SetValue(1f);
+			}
 
-        public void ApplyNormalmapEffectParameter(Lightning settings, Texture2D normalMap)
-        {
-            NormalmapEffect.Parameters["MatrixTransform"].SetValue(Projection * TransformationMatrix);
-            NormalmapEffect.Parameters["LightPosition"].SetValue(settings.LightPosition);
-            NormalmapEffect.Parameters["LightColor"].SetValue(settings.LightColor);
-            NormalmapEffect.Parameters["AmbientColor"].SetValue(settings.AmbientColor);
-            NormalmapEffect.Parameters["DrawNormals"].SetValue(settings.DrawNormals);
+			NormalmapEffect.Parameters["CellShading"].SetValue(settings.CellShading);
+			//NormalmapEffect.Parameters["EnableRotation"].SetValue(settings.EnableRotation);			
 
-            if (EngineVariables.DrawNormals)
-            {
-                NormalmapEffect.Parameters["DrawNormals"].SetValue(1f);
-            }
+			// FNA
+			//NormalmapEffect.Parameters["NormalSampler"].SetValue(normalMap);            
+			GraphicsDevice.Textures[1] = normalMap;
+		}
 
-            NormalmapEffect.Parameters["CellShading"].SetValue(settings.CellShading);
-            //NormalmapEffect.Parameters["EnableRotation"].SetValue(settings.EnableRotation);			
+		private readonly GameTime _neoManagerGameTime = new GameTime(TimeSpan.Zero, TimeSpan.FromSeconds(GameSpeed.TickDuration), false);
 
-            // FNA
-            //NormalmapEffect.Parameters["NormalSampler"].SetValue(normalMap);            
-            GraphicsDevice.Textures[1] = normalMap;
-        }
+		public void Update(KeyboardState ks, MouseState ms)
+		{
+			if (!_neoManager.Disposing && _neoManager.ShowSoftwareCursor && EngineVariables.EnableGUI)
+			{
+				// FNA
+				//_NeoManagerGameTime.ElapsedGameTime = TimeSpan.FromSeconds(GameSpeed.TickDuration);
+				_neoManager.Update(_neoManagerGameTime, ks, ms);
+			}
+		}
 
-        private GameTime _NeoManagerGameTime = new GameTime(TimeSpan.Zero, TimeSpan.FromSeconds(GameSpeed.TickDuration), false);
+		private readonly GameTime _defaultGameTime = new GameTime(TimeSpan.Zero, TimeSpan.FromSeconds(GameSpeed.TickDuration));
 
-        public void Update(KeyboardState ks, MouseState ms)
-        {
-            if (!_NeoManager.Disposing && _NeoManager.ShowSoftwareCursor && EngineVariables.EnableGUI)
-            {
-                // FNA
-                //_NeoManagerGameTime.ElapsedGameTime = TimeSpan.FromSeconds(GameSpeed.TickDuration);
-                _NeoManager.Update(_NeoManagerGameTime, ks, ms);
-            }
-        }
+		public void Draw(World world)
+		{
+			if ((_currentRenderTarget == null || _currentRenderTarget == _drawBuffer) && _neoManager.ShowSoftwareCursor && EngineVariables.EnableGUI)
+			{
+				_neoManager.BeginDraw(_defaultGameTime);
+				GraphicsDevice.SetRenderTarget(_currentRenderTarget);
+			}
 
-        private GameTime DefaultGameTime = new GameTime(TimeSpan.Zero, TimeSpan.FromSeconds(GameSpeed.TickDuration));
+			if (world != null)
+			{
+				BloomEffect.Visible = (BloomEnabled && world.Get<RenderSettings>().BloomEnabled);
 
-        public void Draw(World world)
-        {
-            if ((CurrentRenderTarget == null || CurrentRenderTarget == DrawBuffer) && _NeoManager.ShowSoftwareCursor && EngineVariables.EnableGUI)
-            {
-                _NeoManager.BeginDraw(DefaultGameTime);
-                GraphicsDevice.SetRenderTarget(CurrentRenderTarget);
-            }
+				if (BloomEffect.Visible)
+				{
+					BloomEffect.BeginDraw();
+					GraphicsDevice.Clear(Color.Black);
+					Stage = RenderStage.Bloom;
 
-            if (world != null)
-            {
-                BloomEffect.Visible = (BloomEnabled && world.Get<RenderSettings>().BloomEnabled);
+					world.Draw(this);
 
-                if (BloomEffect.Visible)
-                {
-                    BloomEffect.BeginDraw();
-                    GraphicsDevice.Clear(Color.Black);
-                    Stage = RenderStage.Bloom;
+					BloomEffect.Draw(world.Get<RenderSettings>().BloomSettings);
+				}
 
-                    world.Draw(this);
+				GraphicsDevice.SetRenderTarget(_currentRenderTarget);
 
-                    BloomEffect.Draw(world.Get<RenderSettings>().BloomSettings);
-                }
+				Stage = RenderStage.PreBloom;
 
-                GraphicsDevice.SetRenderTarget(CurrentRenderTarget);
+				world.Draw(this);
 
-                Stage = RenderStage.PreBloom;
+				if (!BloomEffect.Visible)
+				{
+					Stage = RenderStage.Bloom;
 
-                world.Draw(this);
+					world.Draw(this);
+				}
+				else
+				{
+					BloomEffect.Flush();
+				}
 
-                if (!BloomEffect.Visible)
-                {
-                    Stage = RenderStage.Bloom;
+				Stage = RenderStage.PostBloom;
+				world.Draw(this);
+			}
 
-                    world.Draw(this);
-                }
-                else
-                {
-                    BloomEffect.Flush();
-                }
+			if ((_currentRenderTarget == null || _currentRenderTarget == _drawBuffer) && _neoManager.ShowSoftwareCursor && EngineVariables.EnableGUI)
+			{
+				_neoManager.EndDraw();
+			}
 
-                Stage = RenderStage.PostBloom;
-                world.Draw(this);
-            }
+			GraphicsDevice.SetRenderTarget(null);
+			GraphicsDevice.Clear(Color.Black);
 
-            if ((CurrentRenderTarget == null || CurrentRenderTarget == DrawBuffer) && _NeoManager.ShowSoftwareCursor && EngineVariables.EnableGUI)
-            {
-                _NeoManager.EndDraw();
-            }
+			SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Opaque, SamplerState.PointClamp, null, null, null, DisplaySettings.ScaleMatrix);
+			GraphicsDevice.Viewport = DisplaySettings.Viewport;
+			SpriteBatch.Draw(_drawBuffer, Vector2.Zero, Color.White);
+			SpriteBatch.End();
+		}
 
-            GraphicsDevice.SetRenderTarget(null);
-            GraphicsDevice.Clear(Color.Black);
+		/// <summary>
+		/// Begins the SpriteBatch using the given projection matrix.
+		/// </summary>        
+		public void Begin(Matrix projection, BlendState blendState = null, SamplerState samplerState = null, Effect effect = null)
+		{
+			SpriteBatch.Begin(SpriteSortMode.Immediate, blendState ?? BlendState.NonPremultiplied, samplerState ?? SamplerState.PointClamp, null, null, effect, projection * TransformationMatrix);
+			PrimitivesRenderer.SetTransformation(projection * DisplaySettings.ScaleMatrix);
+			Projection = projection;
+		}
 
-            SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Opaque, SamplerState.PointClamp, null, null, null, DisplaySettings.ScaleMatrix);
-            GraphicsDevice.Viewport = DisplaySettings.Viewport;
-            SpriteBatch.Draw(DrawBuffer, Vector2.Zero, Color.White);
-            SpriteBatch.End();
-        }
+		/// <summary>
+		/// Flushes the SpriteBatch.
+		/// </summary>
+		public void End()
+		{
+			SpriteBatch.End();
+		}
 
-        /// <summary>
-        /// Begins the SpriteBatch using the given projection matrix.
-        /// </summary>        
-        public void Begin(Matrix projection, BlendState blendState = null, SamplerState samplerState = null, Effect effect = null)
-        {
-            SpriteBatch.Begin(SpriteSortMode.Immediate, blendState ?? BlendState.NonPremultiplied, samplerState ?? SamplerState.PointClamp, null, null, effect, projection * TransformationMatrix);
-            PrimitivesRenderer.SetTransformation(projection * DisplaySettings.ScaleMatrix);
-            Projection = projection;
-        }
+		private Texture2D GetScreenshot(World world)
+		{
+			var screenShot = new RenderTarget2D(GraphicsDevice,
+				GraphicsDevice.PresentationParameters.BackBufferWidth,
+				GraphicsDevice.PresentationParameters.BackBufferHeight);
 
-        /// <summary>
-        /// Flushes the SpriteBatch.
-        /// </summary>
-        public void End()
-        {
-            SpriteBatch.End();
-        }
+			GraphicsDevice.SetRenderTarget(screenShot);
+			_currentRenderTarget = screenShot;
 
-        private Texture2D GetScreenshot(World world)
-        {
-            RenderTarget2D ScreenShot = new RenderTarget2D(GraphicsDevice,
-                GraphicsDevice.PresentationParameters.BackBufferWidth,
-                GraphicsDevice.PresentationParameters.BackBufferHeight);
+			Draw(world);
 
-            GraphicsDevice.SetRenderTarget(ScreenShot);
-            CurrentRenderTarget = ScreenShot;
+			GraphicsDevice.SetRenderTarget(null);
+			_currentRenderTarget = _drawBuffer;
 
-            Draw(world);
+			return screenShot;
+		}
 
-            GraphicsDevice.SetRenderTarget(null);
-            CurrentRenderTarget = DrawBuffer;
+		private byte[] GetTexturePNGData(Texture2D screenshot)
+		{
+			using (var writer = new MemoryStream())
+			{
+				screenshot.SaveAsPng(writer, screenshot.Width, screenshot.Height);
 
-            return ScreenShot;
-        }
+				return writer.ToArray();
+			}
+		}
 
-        private byte[] GetTexturePNGData(Texture2D screenshot)
-        {
-            using (var Writer = new MemoryStream())
-            {
-                screenshot.SaveAsPng(Writer, screenshot.Width, screenshot.Height);
+		public byte[] GetScreenshotPNGData(World world)
+		{
+			using (var screenShot = GetScreenshot(world))
+			{
+				return GetTexturePNGData(screenShot);
+			}
+		}
 
-                return Writer.ToArray();
-            }
-        }
+		public void SaveScreenShot(World world)
+		{
+			var index = 0;
 
-        public byte[] GetScreenshotPNGData(World world)
-        {
-            using (var ScreenShot = GetScreenshot(world))
-            {
-                return GetTexturePNGData(ScreenShot);
-            }
-        }
+			var name = "Screenshot" + index + ".png";
 
-        public void SaveScreenShot(World world)
-        {
-            int index = 0;
+			while (File.Exists(name))
+			{
+				index++;
+				name = "Screenshot" + index + ".png";
+			}
 
-            string name = "Screenshot" + index + ".png";
+			using (var screenShot = GetScreenshot(world))
+			{
+				using (var stream = new FileStream(name, FileMode.Create))
+				{
+					screenShot.SaveAsPng(stream, screenShot.Width, screenShot.Height);
+				}
+			}
 
-            while (File.Exists(name))
-            {
-                index++;
-                name = "Screenshot" + index + ".png";
-            }
-
-            using (var ScreenShot = GetScreenshot(world))
-            {
-                using (var Stream = new FileStream(name, FileMode.Create))
-                {
-                    ScreenShot.SaveAsPng(Stream, ScreenShot.Width, ScreenShot.Height);
-                }
-            }
-
-            Log.WriteLine("Screenshot saved to file " + name);
-        }
-    }
+			Log.WriteLine("Screenshot saved to file " + name);
+		}
+	}
 }

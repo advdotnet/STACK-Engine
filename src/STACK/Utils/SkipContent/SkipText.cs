@@ -1,4 +1,4 @@
 ﻿namespace STACK
 {
-    public class SkipText : BaseSkip { }
+	public class SkipText : BaseSkip { }
 }

@@ -4,68 +4,68 @@ using STACK.TestBase;
 
 namespace STACK.Functional.Test
 {
-    [TestClass]
-    public class Console
-    {
-        [TestMethod, TestCategory("GPU")]
-        public void ConsoleToggle()
-        {
-            using (var GraphicsDevice = Mock.CreateGraphicsDevice())
-            using (var Runner = new TestEngine(StackGame.Empty, Mock.Wrap(GraphicsDevice), Mock.Input))
-            {
-                Runner.Console.Visible = false;
-                Runner.Console.Toggle();
-                Assert.IsTrue(Runner.Console.Visible);
-                Runner.Console.Toggle();
-                Assert.IsFalse(Runner.Console.Visible);
-            }
-        }
+	[TestClass]
+	public class Console
+	{
+		[TestMethod, TestCategory("GPU")]
+		public void ConsoleToggle()
+		{
+			using (var graphicsDevice = Mock.CreateGraphicsDevice())
+			using (var runner = new TestEngine(StackGame.Empty, Mock.Wrap(graphicsDevice), Mock.Input))
+			{
+				runner.Console.Visible = false;
+				runner.Console.Toggle();
+				Assert.IsTrue(runner.Console.Visible);
+				runner.Console.Toggle();
+				Assert.IsFalse(runner.Console.Visible);
+			}
+		}
 
-        [TestMethod, TestCategory("GPU")]
-        public void ConsoleInput()
-        {
-            using (var GraphicsDevice = Mock.CreateGraphicsDevice())
-            using (var Runner = new TestEngine(StackGame.Empty, Mock.Wrap(GraphicsDevice), Mock.Input))
-            {
-                Runner.Console.Visible = true;
-                Runner.KeyPress(Keys.A);
-                Runner.KeyPress(Keys.LeftShift, Keys.A);
-                Assert.AreEqual("aA", Runner.Console.Input);
-            }
-        }
+		[TestMethod, TestCategory("GPU")]
+		public void ConsoleInput()
+		{
+			using (var graphicsDevice = Mock.CreateGraphicsDevice())
+			using (var runner = new TestEngine(StackGame.Empty, Mock.Wrap(graphicsDevice), Mock.Input))
+			{
+				runner.Console.Visible = true;
+				runner.KeyPress(Keys.A);
+				runner.KeyPress(Keys.LeftShift, Keys.A);
+				Assert.AreEqual("aA", runner.Console.Input);
+			}
+		}
 
-        [TestMethod, TestCategory("GPU")]
-        public void SetCommand()
-        {
-            var GameSettings = new GameSettings()
-            {
-                Culture = "de-DE"
-            };
+		[TestMethod, TestCategory("GPU")]
+		public void SetCommand()
+		{
+			var gameSettings = new GameSettings()
+			{
+				Culture = "de-DE"
+			};
 
-            using (var GraphicsDevice = Mock.CreateGraphicsDevice())
-            using (var Runner = new TestEngine(StackGame.Empty, Mock.Wrap(GraphicsDevice), Mock.Input, GameSettings))
-            {
-                EngineVariables.DebugPath = false;
-                Runner.Console.Visible = true;
-                Runner.EnterText("set stack.debugpath = true");
-                Assert.IsTrue(EngineVariables.DebugPath);
-            }
-        }
+			using (var graphicsDevice = Mock.CreateGraphicsDevice())
+			using (var runner = new TestEngine(StackGame.Empty, Mock.Wrap(graphicsDevice), Mock.Input, gameSettings))
+			{
+				EngineVariables.DebugPath = false;
+				runner.Console.Visible = true;
+				runner.EnterText("set stack.debugpath = true");
+				Assert.IsTrue(EngineVariables.DebugPath);
+			}
+		}
 
-        [TestMethod, TestCategory("GPU")]
-        public void ExitCommand()
-        {
-            using (var GraphicsDevice = Mock.CreateGraphicsDevice())
-            using (var Runner = new TestEngine(StackGame.Empty, Mock.Wrap(GraphicsDevice), Mock.Input))
-            {
-                bool ExitCalled = false;
-                Runner.OnExit += () => { ExitCalled = true; };
+		[TestMethod, TestCategory("GPU")]
+		public void ExitCommand()
+		{
+			using (var graphicsDevice = Mock.CreateGraphicsDevice())
+			using (var runner = new TestEngine(StackGame.Empty, Mock.Wrap(graphicsDevice), Mock.Input))
+			{
+				var exitCalled = false;
+				runner.OnExit += () => exitCalled = true;
 
-                Runner.Console.Visible = true;
-                Runner.EnterText("exit");
+				runner.Console.Visible = true;
+				runner.EnterText("exit");
 
-                Assert.IsTrue(ExitCalled);
-            }
-        }
-    }
+				Assert.IsTrue(exitCalled);
+			}
+		}
+	}
 }

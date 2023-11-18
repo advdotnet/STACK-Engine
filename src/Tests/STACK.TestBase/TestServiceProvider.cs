@@ -22,9 +22,8 @@ namespace STACK.TestBase
 
         public object GetService(Type serviceType)
         {
-            object service;
-            _services.TryGetValue(serviceType, out service);
-            return service;
+			_services.TryGetValue(serviceType, out var service);
+			return service;
         }
     }
 }

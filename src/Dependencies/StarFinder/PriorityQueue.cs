@@ -3,163 +3,154 @@ using System.Collections.Generic;
 
 namespace StarFinder
 {
-    /// <summary>
-    /// Priority queue using a binary heap.
-    /// </summary>    
-    public class PriorityQueue<T>
-    {
-        List<T> InnerList = new List<T>();
-        IComparer<T> Comparer;
+	/// <summary>
+	/// Priority queue using a binary heap.
+	/// </summary>    
+	public class PriorityQueue<T>
+	{
+		private readonly List<T> _innerList = new List<T>();
+		private readonly IComparer<T> _comparer;
 
-        public PriorityQueue()
-        {
-            Comparer = Comparer<T>.Default;
-        }
+		public PriorityQueue()
+		{
+			_comparer = Comparer<T>.Default;
+		}
 
-        public PriorityQueue(IComparer<T> comparer)
-        {
-            Comparer = comparer;
-        }
+		public PriorityQueue(IComparer<T> comparer)
+		{
+			_comparer = comparer;
+		}
 
-        void Switch(int a, int b)
-        {
-            T c = InnerList[a];
-            InnerList[a] = InnerList[b];
-            InnerList[b] = c;
-        }
+		private void Switch(int a, int b)
+		{
+			var c = _innerList[a];
+			_innerList[a] = _innerList[b];
+			_innerList[b] = c;
+		}
 
-        private int Compare(int a, int b)
-        {
-            return Comparer.Compare(InnerList[a], InnerList[b]);
-        }
+		private int Compare(int a, int b)
+		{
+			return _comparer.Compare(_innerList[a], _innerList[b]);
+		}
 
-        private int BubbleUp(int i)
-        {
-            int p = i, p2;
+		private int BubbleUp(int i)
+		{
+			int p = i, p2;
 
-            do
-            {
-                if (p == 0)
-                {
-                    break;
-                }
+			do
+			{
+				if (p == 0)
+				{
+					break;
+				}
 
-                p2 = (p - 1) / 2;
+				p2 = (p - 1) / 2;
 
-                if (Compare(p, p2) < 0)
-                {
-                    Switch(p, p2);
-                    p = p2;
-                }
-                else
-                {
-                    break;
-                }
+				if (Compare(p, p2) < 0)
+				{
+					Switch(p, p2);
+					p = p2;
+				}
+				else
+				{
+					break;
+				}
 
-            } while (true);
+			} while (true);
 
-            return p;
-        }
+			return p;
+		}
 
-        public int Push(T item)
-        {
-            InnerList.Add(item);
+		public int Push(T item)
+		{
+			_innerList.Add(item);
 
-            return BubbleUp(InnerList.Count - 1);
-        }
+			return BubbleUp(_innerList.Count - 1);
+		}
 
-        public T Pop()
-        {
-            var result = InnerList[0];
-            InnerList[0] = InnerList[InnerList.Count - 1];
-            InnerList.RemoveAt(InnerList.Count - 1);
-            BubbleDown();
+		public T Pop()
+		{
+			var result = _innerList[0];
+			_innerList[0] = _innerList[_innerList.Count - 1];
+			_innerList.RemoveAt(_innerList.Count - 1);
+			BubbleDown();
 
-            return result;
-        }
+			return result;
+		}
 
-        void BubbleDown()
-        {
-            int p = 0, p1, p2, pn;
+		private void BubbleDown()
+		{
+			int p = 0, p1, p2, pn;
 
-            do
-            {
-                pn = p;
-                p1 = 2 * p + 1;
-                p2 = 2 * p + 2;
+			do
+			{
+				pn = p;
+				p1 = (2 * p) + 1;
+				p2 = (2 * p) + 2;
 
-                if (InnerList.Count > p1 && Compare(p, p1) > 0)
-                {
-                    p = p1;
-                }
+				if (_innerList.Count > p1 && Compare(p, p1) > 0)
+				{
+					p = p1;
+				}
 
-                if (InnerList.Count > p2 && Compare(p, p2) > 0)
-                {
-                    p = p2;
-                }
+				if (_innerList.Count > p2 && Compare(p, p2) > 0)
+				{
+					p = p2;
+				}
 
-                if (p == pn)
-                {
-                    break;
-                }
+				if (p == pn)
+				{
+					break;
+				}
 
-                Switch(p, pn);
+				Switch(p, pn);
 
-            } while (true);
-        }
+			} while (true);
+		}
 
-        void Update(int i)
-        {
-            if (BubbleUp(i) < i)
-            {
-                return;
-            }
+		private void Update(int i)
+		{
+			if (BubbleUp(i) < i)
+			{
+				return;
+			}
 
-            BubbleDown();
-        }
+			BubbleDown();
+		}
 
-        public void Clear()
-        {
-            InnerList.Clear();
-        }
+		public void Clear()
+		{
+			_innerList.Clear();
+		}
 
-        public int Count
-        {
-            get
-            {
-                return InnerList.Count;
-            }
-        }
+		public int Count => _innerList.Count;
 
-        public T this[int index]
-        {
-            get
-            {
-                return InnerList[index];
-            }
-            set
-            {
-                InnerList[index] = value;
-                Update(index);
-            }
-        }
+		public T this[int index]
+		{
+			get => _innerList[index];
+			set
+			{
+				_innerList[index] = value;
+				Update(index);
+			}
+		}
 
-        /// <summary>
-        /// Finds an item in the queue satisfying the predicate.
-        /// </summary>        
-        /// <returns>The index of the item or -1.</returns>
-        public int Find(Func<T, bool> predicate)
-        {
-            for (int i = 0; i < this.Count; i++)
-            {
-                if (predicate(this[i]))
-                {
-                    return i;
-                }
-            }
+		/// <summary>
+		/// Finds an item in the queue satisfying the predicate.
+		/// </summary>        
+		/// <returns>The index of the item or -1.</returns>
+		public int Find(Func<T, bool> predicate)
+		{
+			for (var i = 0; i < Count; i++)
+			{
+				if (predicate(this[i]))
+				{
+					return i;
+				}
+			}
 
-            return -1;
-        }
+			return -1;
+		}
 
-    }
+	}
 }

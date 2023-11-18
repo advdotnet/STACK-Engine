@@ -4,74 +4,71 @@ using System.Collections;
 
 namespace STACK.Test
 {
-    [TestClass]
-    public class InteractionTest
-    {
-        static Verb TestVerb = Verb.Create("use");
+	[TestClass]
+	public class InteractionTest
+	{
+		private static readonly Verb _testVerb = Verb.Create("use");
 
-        public class TestEntity : Entity
-        {
-            object PlayerA, PlayerB;
+		public class TestEntity : Entity
+		{
+			private readonly object _playerA, _playerB;
 
-            public TestEntity(object playerA, object playerB)
-            {
-                Interaction
-                    .Create(this)
-                    .SetGetInteractionsFn(GetInteractions);
+			public TestEntity(object playerA, object playerB)
+			{
+				Interaction
+					.Create(this)
+					.SetGetInteractionsFn(GetInteractions);
 
-                PlayerA = playerA;
-                PlayerB = playerB;
-            }
+				_playerA = playerA;
+				_playerB = playerB;
+			}
 
-            Interactions GetInteractions()
-            {
-                return Interactions
-                    .Create()
-                    .For(PlayerA)
-                        .Add(TestVerb, PlayerScript())
-                    .For(PlayerB)
-                        .Add(TestVerb, ItemScript());
-            }
+			private Interactions GetInteractions()
+			{
+				return Interactions
+					.Create()
+					.For(_playerA)
+						.Add(_testVerb, PlayerScript())
+					.For(_playerB)
+						.Add(_testVerb, ItemScript());
+			}
 
-            IEnumerator ItemScript()
-            {
-                yield return 1;
-            }
+			private IEnumerator ItemScript()
+			{
+				yield return 1;
+			}
 
-            IEnumerator PlayerScript()
-            {
-                yield return 1;
-            }
-        }
+			private IEnumerator PlayerScript()
+			{
+				yield return 1;
+			}
+		}
 
 
-        [TestMethod]
-        public void DefaultScriptStartTestForCurrent()
-        {
-            var PlayerA = new Entity("PlayerA");
-            Scripts.Create(PlayerA);
+		[TestMethod]
+		public void DefaultScriptStartTestForCurrent()
+		{
+			var playerA = new Entity("PlayerA");
+			Scripts.Create(playerA);
 
-            var PlayerB = new Entity("PlayerB");
-            Scripts.Create(PlayerB);
+			var playerB = new Entity("PlayerB");
+			Scripts.Create(playerB);
 
-            var InteractionEntity = new TestEntity(PlayerA, PlayerB);
-            var Interaction = InteractionEntity.Get<Interaction>();
-            var InteractionsForPlayerA = Interaction.GetInteractions().GetFor(PlayerA);
-            var InteractionsForPlayerB = Interaction.GetInteractions().GetFor(PlayerB);
+			var interactionEntity = new TestEntity(playerA, playerB);
+			var interaction = interactionEntity.Get<Interaction>();
+			var interactionsForPlayerA = interaction.GetInteractions().GetFor(playerA);
+			var interactionsForPlayerB = interaction.GetInteractions().GetFor(playerB);
+			var hasInteraction = interactionsForPlayerA.TryGetValue(_testVerb, out var fn);
 
-            InteractionFn Fn;
+			Assert.IsTrue(hasInteraction);
+			fn(new InteractionContext(playerA, null, null, _testVerb));
+			Assert.IsTrue(playerA.Get<Scripts>().HasScript(Interactions.DEFAULTSCRIPTNAME));
 
-            var HasInteraction = InteractionsForPlayerA.TryGetValue(TestVerb, out Fn);
+			hasInteraction = interactionsForPlayerB.TryGetValue(_testVerb, out fn);
 
-            Assert.IsTrue(HasInteraction);
-            Fn(new InteractionContext(PlayerA, null, null, TestVerb));
-            Assert.IsTrue(PlayerA.Get<Scripts>().HasScript(Interactions.DEFAULTSCRIPTNAME));
-
-            HasInteraction = InteractionsForPlayerB.TryGetValue(TestVerb, out Fn);
-
-            Assert.IsTrue(HasInteraction);
-            Fn(new InteractionContext(PlayerB, null, null, TestVerb));
-            Assert.IsTrue(PlayerB.Get<Scripts>().HasScript(Interactions.DEFAULTSCRIPTNAME));
-        }
-    }
+			Assert.IsTrue(hasInteraction);
+			fn(new InteractionContext(playerB, null, null, _testVerb));
+			Assert.IsTrue(playerB.Get<Scripts>().HasScript(Interactions.DEFAULTSCRIPTNAME));
+		}
+	}
 }

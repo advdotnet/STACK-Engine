@@ -8,225 +8,223 @@ using System.Linq;
 
 namespace STACK.Test.Room1
 {
-    public class MyScene : Scene { }
+	public class MyScene : Scene { }
 }
 
 namespace STACK.Test
 {
-    [TestClass]
-    public class SceneTest
-    {
+	[TestClass]
+	public class SceneTest
+	{
+		[TestMethod]
+		public void EntityCacheTest()
+		{
+			var scene = new Scene();
+			var entity = new Entity();
+			scene.Initialize(false);
+			scene.Push(entity);
+			Assert.AreEqual(1, scene.GameObjectCache.Entities.Count);
+			scene.Pop(entity);
+			Assert.AreEqual(0, scene.GameObjectCache.Entities.Count);
+		}
 
-        [TestMethod]
-        public void EntityCacheTest()
-        {
-            var Scene = new Scene();
-            var Entity = new Entity();
-            Scene.Initialize(false);
-            Scene.Push(Entity);
-            Assert.AreEqual(1, Scene.GameObjectCache.Entities.Count);
-            Scene.Pop(Entity);
-            Assert.AreEqual(0, Scene.GameObjectCache.Entities.Count);
-        }
+		[TestMethod]
+		public void VisibleObjectCacheTest()
+		{
+			var scene = new Scene();
+			var visibleEntity = new Entity() { Visible = true };
+			var invisibleEntity = new Entity() { Visible = false };
+			scene.Push(visibleEntity);
+			scene.Push(invisibleEntity);
+			Assert.AreEqual(1, scene.GameObjectCache.VisibleObjects.Count);
+		}
 
-        [TestMethod]
-        public void VisibleObjectCacheTest()
-        {
-            var Scene = new Scene();
-            var VisibleEntity = new Entity() { Visible = true };
-            var InvisibleEntity = new Entity() { Visible = false };
-            Scene.Push(VisibleEntity);
-            Scene.Push(InvisibleEntity);
-            Assert.AreEqual(1, Scene.GameObjectCache.VisibleObjects.Count);
-        }
+		[TestMethod]
+		public void VisibleObjectsCacheOrderTest()
+		{
+			var scene = new Scene();
+			scene.Initialize(false);
+			var firstEntity = new Entity() { DrawOrder = 1 };
+			var secondEntity = new Entity() { DrawOrder = 2 };
+			scene.Push(firstEntity, secondEntity);
+			Assert.AreEqual(scene.GameObjectCache.VisibleObjects.First(), secondEntity);
+			Assert.AreEqual(scene.GameObjectCache.VisibleObjects[1], firstEntity);
 
-        [TestMethod]
-        public void VisibleObjectsCacheOrderTest()
-        {
-            var Scene = new Scene();
-            Scene.Initialize(false);
-            var FirstEntity = new Entity() { DrawOrder = 1 };
-            var SecondEntity = new Entity() { DrawOrder = 2 };
-            Scene.Push(FirstEntity, SecondEntity);
-            Assert.AreEqual(Scene.GameObjectCache.VisibleObjects.First(), SecondEntity);
-            Assert.AreEqual(Scene.GameObjectCache.VisibleObjects[1], FirstEntity);
+			Assert.AreEqual(scene.GameObjectCache.ObjectsToDraw[0], firstEntity);
+			Assert.AreEqual(scene.GameObjectCache.ObjectsToDraw[1], secondEntity);
 
-            Assert.AreEqual(Scene.GameObjectCache.ObjectsToDraw[0], FirstEntity);
-            Assert.AreEqual(Scene.GameObjectCache.ObjectsToDraw[1], SecondEntity);
+			firstEntity.DrawOrder = 3;
+			Assert.AreEqual(scene.GameObjectCache.VisibleObjects.First(), firstEntity);
+			Assert.AreEqual(scene.GameObjectCache.VisibleObjects[1], secondEntity);
 
-            FirstEntity.DrawOrder = 3;
-            Assert.AreEqual(Scene.GameObjectCache.VisibleObjects.First(), FirstEntity);
-            Assert.AreEqual(Scene.GameObjectCache.VisibleObjects[1], SecondEntity);
+			Assert.AreEqual(scene.GameObjectCache.ObjectsToDraw[0], secondEntity);
+			Assert.AreEqual(scene.GameObjectCache.ObjectsToDraw[1], firstEntity);
+		}
 
-            Assert.AreEqual(Scene.GameObjectCache.ObjectsToDraw[0], SecondEntity);
-            Assert.AreEqual(Scene.GameObjectCache.ObjectsToDraw[1], FirstEntity);
-        }
+		[TestMethod]
+		public void VisibleObjectsCacheOrderDifferentScenesTest()
+		{
+			var updateScene = new Scene("1");
+			var drawScene = new Scene("2");
+			var world = new World(new TestServiceProvider());
+			world.Push(updateScene, drawScene);
+			world.Initialize(false);
 
-        [TestMethod]
-        public void VisibleObjectsCacheOrderDifferentScenesTest()
-        {
-            var UpdateScene = new Scene("1");
-            var DrawScene = new Scene("2");
-            var World = new World(new TestServiceProvider());
-            World.Push(UpdateScene, DrawScene);
-            World.Initialize(false);
+			var firstEntity = new Entity() { DrawOrder = 1 };
+			var secondEntity = new Entity() { DrawOrder = 2 };
+			updateScene.Push(firstEntity, secondEntity);
 
-            var FirstEntity = new Entity() { DrawOrder = 1 };
-            var SecondEntity = new Entity() { DrawOrder = 2 };
-            UpdateScene.Push(FirstEntity, SecondEntity);
+			firstEntity.DrawScene = drawScene;
+			secondEntity.DrawScene = drawScene;
 
-            FirstEntity.DrawScene = DrawScene;
-            SecondEntity.DrawScene = DrawScene;
+			Assert.AreEqual(updateScene.GameObjectCache.VisibleObjects.Count, 0);
+			Assert.AreEqual(updateScene.GameObjectCache.ObjectsToDraw.Count, 0);
 
-            Assert.AreEqual(UpdateScene.GameObjectCache.VisibleObjects.Count, 0);
-            Assert.AreEqual(UpdateScene.GameObjectCache.ObjectsToDraw.Count, 0);
+			Assert.AreEqual(drawScene.GameObjectCache.VisibleObjects.First(), secondEntity);
+			Assert.AreEqual(drawScene.GameObjectCache.VisibleObjects[1], firstEntity);
 
-            Assert.AreEqual(DrawScene.GameObjectCache.VisibleObjects.First(), SecondEntity);
-            Assert.AreEqual(DrawScene.GameObjectCache.VisibleObjects[1], FirstEntity);
+			Assert.AreEqual(drawScene.GameObjectCache.ObjectsToDraw[0], firstEntity);
+			Assert.AreEqual(drawScene.GameObjectCache.ObjectsToDraw[1], secondEntity);
 
-            Assert.AreEqual(DrawScene.GameObjectCache.ObjectsToDraw[0], FirstEntity);
-            Assert.AreEqual(DrawScene.GameObjectCache.ObjectsToDraw[1], SecondEntity);
+			firstEntity.DrawOrder = 3;
 
-            FirstEntity.DrawOrder = 3;
+			Assert.AreEqual(updateScene.GameObjectCache.VisibleObjects.Count, 0);
+			Assert.AreEqual(updateScene.GameObjectCache.ObjectsToDraw.Count, 0);
 
-            Assert.AreEqual(UpdateScene.GameObjectCache.VisibleObjects.Count, 0);
-            Assert.AreEqual(UpdateScene.GameObjectCache.ObjectsToDraw.Count, 0);
+			Assert.AreEqual(drawScene.GameObjectCache.VisibleObjects.First(), firstEntity);
+			Assert.AreEqual(drawScene.GameObjectCache.VisibleObjects[1], secondEntity);
 
-            Assert.AreEqual(DrawScene.GameObjectCache.VisibleObjects.First(), FirstEntity);
-            Assert.AreEqual(DrawScene.GameObjectCache.VisibleObjects[1], SecondEntity);
+			Assert.AreEqual(drawScene.GameObjectCache.ObjectsToDraw[0], secondEntity);
+			Assert.AreEqual(drawScene.GameObjectCache.ObjectsToDraw[1], firstEntity);
+		}
 
-            Assert.AreEqual(DrawScene.GameObjectCache.ObjectsToDraw[0], SecondEntity);
-            Assert.AreEqual(DrawScene.GameObjectCache.ObjectsToDraw[1], FirstEntity);
-        }
+		[TestMethod]
+		public void SetsNameSpaceAsID()
+		{
+			var scene = new Room1.MyScene();
+			Assert.AreEqual("STACK.Test.Room1.MyScene", scene.ID);
+		}
 
-        [TestMethod]
-        public void SetsNameSpaceAsID()
-        {
-            Room1.MyScene Scene = new Room1.MyScene();
-            Assert.AreEqual("STACK.Test.Room1.MyScene", Scene.ID);
-        }
+		[TestMethod]
+		public void KeepsManualID()
+		{
+			var scene = new Scene("myID");
+			Assert.AreEqual("myID", scene.ID);
+		}
 
-        [TestMethod]
-        public void KeepsManualID()
-        {
-            Scene Scene = new STACK.Scene("myID");
-            Assert.AreEqual("myID", Scene.ID);
-        }
+		[TestMethod]
+		public void GetsPortalsTo()
+		{
+			var world = new World(new TestServiceProvider());
 
-        [TestMethod]
-        public void GetsPortalsTo()
-        {
-            World World = new World(new TestServiceProvider());
+			var stack1 = new Scene("s1");
+			var stack2 = new Scene("s2"); stack2.Push(new Entity("t2"));
+			var stack3 = new Scene("s3"); stack3.Push(new Entity("t3"));
 
-            Scene Stack1 = new Scene("s1");
-            Scene Stack2 = new Scene("s2"); Stack2.Push(new Entity("t2"));
-            Scene Stack3 = new Scene("s3"); Stack3.Push(new Entity("t3"));
+			var p1 = new Entity("p1"); p1.Add<Exit>().TargetEntrance = "t2";
+			var p2 = new Entity("p2"); p2.Add<Exit>().TargetEntrance = "t2";
+			var p3 = new Entity("p3"); p3.Add<Exit>().TargetEntrance = "t3";
 
-            var p1 = new Entity("p1"); p1.Add<Exit>().TargetEntrance = "t2";
-            var p2 = new Entity("p2"); p2.Add<Exit>().TargetEntrance = "t2";
-            var p3 = new Entity("p3"); p3.Add<Exit>().TargetEntrance = "t3";
+			stack1.Push(p1);
+			stack1.Push(p2);
+			stack1.Push(p3);
 
-            Stack1.Push(p1);
-            Stack1.Push(p2);
-            Stack1.Push(p3);
+			world.Push(stack1, stack2, stack3);
 
-            World.Push(Stack1, Stack2, Stack3);
+			var results = new List<Exit>();
+			stack1.GetPassagesTo(stack2, ref results);
+			CollectionAssert.AreEqual(new List<Exit>() { stack1["p1"].Get<Exit>(), stack1["p2"].Get<Exit>() }, results);
+			stack1.GetPassagesTo("s2", ref results);
+			CollectionAssert.AreEqual(new List<Exit>() { stack1["p1"].Get<Exit>(), stack1["p2"].Get<Exit>() }, results);
+			stack1.GetPassagesTo("s3", ref results);
+			CollectionAssert.AreEqual(new List<Exit>() { stack1["p3"].Get<Exit>() }, results);
+			stack1.GetPassagesTo("s4", ref results);
+			CollectionAssert.AreEqual(new List<Exit>(), results);
+		}
 
-            var Results = new List<Exit>();
-            Stack1.GetPassagesTo(Stack2, ref Results);
-            CollectionAssert.AreEqual(new List<Exit>() { Stack1["p1"].Get<Exit>(), Stack1["p2"].Get<Exit>() }, Results);
-            Stack1.GetPassagesTo("s2", ref Results);
-            CollectionAssert.AreEqual(new List<Exit>() { Stack1["p1"].Get<Exit>(), Stack1["p2"].Get<Exit>() }, Results);
-            Stack1.GetPassagesTo("s3", ref Results);
-            CollectionAssert.AreEqual(new List<Exit>() { Stack1["p3"].Get<Exit>() }, Results);
-            Stack1.GetPassagesTo("s4", ref Results);
-            CollectionAssert.AreEqual(new List<Exit>(), Results);
-        }
+		[TestMethod]
+		public void GetsObject()
+		{
+			var stack1 = new Scene("s1");
+			var object1 = new Entity("o1");
+			stack1.Push(object1);
+			Assert.AreEqual(null, stack1["o2"]);
+			Assert.AreEqual(null, stack1.GetObject("o2"));
+			Assert.AreEqual(object1, stack1["o1"]);
+			Assert.AreEqual(object1, stack1.GetObject("o1"));
+		}
 
+		[TestMethod]
+		public void GetsHitObject()
+		{
+			var stack1 = new Scene("s1");
+			var object1 = new Entity("o1");
 
-        [TestMethod]
-        public void GetsObject()
-        {
-            Scene Stack1 = new Scene("s1");
-            Entity Object1 = new Entity("o1");
-            Stack1.Push(Object1);
-            Assert.AreEqual(null, Stack1["o2"]);
-            Assert.AreEqual(null, Stack1.GetObject("o2"));
-            Assert.AreEqual(Object1, Stack1["o1"]);
-            Assert.AreEqual(Object1, Stack1.GetObject("o1"));
-        }
+			HotspotRectangle
+				.Create(object1)
+				.SetRectangle(0, 0, 10, 10);
 
-        [TestMethod]
-        public void GetsHitObject()
-        {
-            Scene Stack1 = new Scene("s1");
-            Entity Object1 = new Entity("o1");
+			stack1.Push(object1);
 
-            HotspotRectangle
-                .Create(Object1)
-                .SetRectangle(0, 0, 10, 10);
+			var hitObject = stack1.GetHitObject(new Vector2(5, 5));
+			Assert.AreEqual(object1, hitObject);
 
-            Stack1.Push(Object1);
+			var test = State.Serialization.SaveState(stack1);
+			Trace.WriteLine(test.Length); // 2917
+			Trace.WriteLine(System.Text.Encoding.Default.GetString(test));
+		}
 
-            var HitObject = Stack1.GetHitObject(new Vector2(5, 5));
-            Assert.AreEqual(Object1, HitObject);
+		[TestMethod]
+		public void PushSetsScene()
+		{
+			var entity = new Entity();
+			var scene = new Scene("s1");
+			scene.Push(entity);
+			Assert.AreEqual(scene, entity.DrawScene);
+			Assert.AreEqual(scene, entity.UpdateScene);
+		}
 
-            var Test = STACK.State.Serialization.SaveState<Scene>(Stack1);
-            Trace.WriteLine(Test.Length); // 2917
-            Trace.WriteLine(System.Text.Encoding.Default.GetString(Test));
-        }
+		[TestMethod]
+		public void UpdateScene()
+		{
+			var entity = new Entity();
+			var scene = new Scene("s1");
+			scene.Push(entity);
+			var scene2 = new Scene("s2");
+			entity.UpdateScene = scene2;
+			Assert.AreEqual(scene, entity.DrawScene);
+			Assert.AreEqual(scene2, entity.UpdateScene);
+		}
 
-        [TestMethod]
-        public void PushSetsScene()
-        {
-            Entity Entity = new Entity();
-            Scene Scene = new Scene("s1");
-            Scene.Push(Entity);
-            Assert.AreEqual(Scene, Entity.DrawScene);
-            Assert.AreEqual(Scene, Entity.UpdateScene);
-        }
+		private class NotifiedEntity : Entity
+		{
+			public bool Notified { get; private set; }
+			public override void OnNotify<T>(string message, T data)
+			{
+				if (message == "notification")
+				{
+					Notified = true;
+				}
+				base.OnNotify(message, data);
+			}
+		}
 
-        [TestMethod]
-        public void UpdateScene()
-        {
-            Entity Entity = new Entity();
-            Scene Scene = new Scene("s1");
-            Scene.Push(Entity);
-            Scene Scene2 = new Scene("s2");
-            Entity.UpdateScene = Scene2;
-            Assert.AreEqual(Scene, Entity.DrawScene);
-            Assert.AreEqual(Scene2, Entity.UpdateScene);
-        }
+		[TestMethod]
+		public void SceneNotifiesDrawnObjects()
+		{
+			var world = new World(new TestServiceProvider());
+			var entity1 = new Entity("e1");
+			var entity2 = new NotifiedEntity();
+			var scene1 = new Scene("s1");
+			var scene2 = new Scene("s2");
+			world.Push(scene1, scene2);
+			scene1.Push(entity1);
+			scene2.Push(entity2);
+			world.Initialize(false);
+			entity2.EnterScene(scene1);
+			scene1.Notify<object>("notification", null);
+			Assert.IsTrue(entity2.Notified);
+		}
 
-        class NotifiedEntity : Entity
-        {
-            public bool Notified { get; private set; }
-            public override void OnNotify<T>(string message, T data)
-            {
-                if (message == "notification")
-                {
-                    Notified = true;
-                }
-                base.OnNotify<T>(message, data);
-            }
-        }
-
-        [TestMethod]
-        public void SceneNotifiesDrawnObjects()
-        {
-            var World = new World(new TestServiceProvider());
-            var Entity1 = new Entity("e1");
-            var Entity2 = new NotifiedEntity();
-            var Scene1 = new Scene("s1");
-            var Scene2 = new Scene("s2");
-            World.Push(Scene1, Scene2);
-            Scene1.Push(Entity1);
-            Scene2.Push(Entity2);
-            World.Initialize(false);
-            Entity2.EnterScene(Scene1);
-            Scene1.Notify<object>("notification", null);
-            Assert.IsTrue(Entity2.Notified);
-        }
-
-    }
+	}
 }

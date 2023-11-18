@@ -6,53 +6,50 @@ using System;
 
 namespace STACK.TestBase
 {
-    /// <summary>
-    /// IGraphicsDeviceService mock
-    /// </summary>
-    public class GraphicsDeviceServiceMock : IGraphicsDeviceService, IDisposable
-    {
-        GraphicsDevice _GraphicsDevice;
-        IntPtr _Handle;
-        SDL.SDL_WindowFlags _WindowFlags = (SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL |
-            SDL.SDL_WindowFlags.SDL_WINDOW_HIDDEN);
+	/// <summary>
+	/// IGraphicsDeviceService mock
+	/// </summary>
+	public class GraphicsDeviceServiceMock : IGraphicsDeviceService, IDisposable
+	{
+		private GraphicsDevice _graphicsDevice;
+		private readonly IntPtr _handle;
+		private readonly SDL.SDL_WindowFlags _windowFlags = (SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL |
+			SDL.SDL_WindowFlags.SDL_WINDOW_HIDDEN);
 
-        public GraphicsDeviceServiceMock()
-        {
-            SDL.SDL_SetMainReady();
-            SDL.SDL_Init(SDL.SDL_INIT_VIDEO);
-            _Handle = SDL.SDL_CreateWindow(string.Empty, 0, 0, 1, 1, _WindowFlags);
+		public GraphicsDeviceServiceMock()
+		{
+			SDL.SDL_SetMainReady();
+			SDL.SDL_Init(SDL.SDL_INIT_VIDEO);
+			_handle = SDL.SDL_CreateWindow(string.Empty, 0, 0, 1, 1, _windowFlags);
 
-            var Parameters = new PresentationParameters()
-            {
-                BackBufferWidth = 1,
-                BackBufferHeight = 1,
-                DeviceWindowHandle = _Handle,
-                IsFullScreen = false
-            };
+			var parameters = new PresentationParameters()
+			{
+				BackBufferWidth = 1,
+				BackBufferHeight = 1,
+				DeviceWindowHandle = _handle,
+				IsFullScreen = false
+			};
 
-            AudioManager.DisableSound();
-            FrameworkDispatcher.Update();
+			AudioManager.DisableSound();
+			FrameworkDispatcher.Update();
 
-            _GraphicsDevice = new GraphicsDevice(GraphicsAdapter.DefaultAdapter, GraphicsProfile.HiDef, Parameters);
-        }
+			_graphicsDevice = new GraphicsDevice(GraphicsAdapter.DefaultAdapter, GraphicsProfile.HiDef, parameters);
+		}
 
-        public GraphicsDevice GraphicsDevice
-        {
-            get { return _GraphicsDevice; }
-        }
+		public GraphicsDevice GraphicsDevice => _graphicsDevice;
 
-        public event EventHandler<EventArgs> DeviceCreated { add { } remove { } }
-        public event EventHandler<EventArgs> DeviceDisposing { add { } remove { } }
-        public event EventHandler<EventArgs> DeviceReset { add { } remove { } }
-        public event EventHandler<EventArgs> DeviceResetting { add { } remove { } }
+		public event EventHandler<EventArgs> DeviceCreated { add { } remove { } }
+		public event EventHandler<EventArgs> DeviceDisposing { add { } remove { } }
+		public event EventHandler<EventArgs> DeviceReset { add { } remove { } }
+		public event EventHandler<EventArgs> DeviceResetting { add { } remove { } }
 
-        public void Dispose()
-        {
-            _GraphicsDevice.Dispose();
-            _GraphicsDevice = null;
+		public void Dispose()
+		{
+			_graphicsDevice.Dispose();
+			_graphicsDevice = null;
 
-            SDL.SDL_DestroyWindow(_Handle);
-            SDL.SDL_Quit();
-        }
-    }
+			SDL.SDL_DestroyWindow(_handle);
+			SDL.SDL_Quit();
+		}
+	}
 }

@@ -1,63 +1,49 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.Xna.Framework;
+﻿using System.Linq;
 
 namespace STACK.Debug
 {
-    /// <summary>
-    /// Prints information about avaiable console commands.
-    /// </summary>
-    class HelpCommand : IConsoleCommand
-    {
-        public string Name
-        {
-            get
-            {
-                return "help";
-            }
-        }
+	/// <summary>
+	/// Prints information about avaiable console commands.
+	/// </summary>
+	internal class HelpCommand : IConsoleCommand
+	{
+		public string Name => "help";
 
-        public string Description
-        {
-            get
-            {
-                return "Lists all avaiable commands. If a command name is given as a parameter, it shows help about that command.";
-            }
-        }
+		public string Description => "Lists all avaiable commands. If a command name is given as a parameter, it shows help about that command.";
 
-        private readonly StackEngine Engine;
+#pragma warning disable IDE0052 // Ungelesene private Member entfernen
+		private readonly StackEngine _engine;
+#pragma warning restore IDE0052 // Ungelesene private Member entfernen
 
-        public HelpCommand(StackEngine game)
-        {
-            Engine = game;            
-        }
+		public HelpCommand(StackEngine game)
+		{
+			_engine = game;
+		}
 
-        public void Execute(Console console, string[] arguments)
-        {
-            if (arguments.Length == 0)
-            {
-                console.WriteLine("Avaiable Commands:");
+		public void Execute(Console console, string[] arguments)
+		{
+			if (arguments.Length == 0)
+			{
+				console.WriteLine("Avaiable Commands:");
 
-                foreach (var Command in console.Commands)
-                {
-                    console.WriteLine(" " + Command.Name);
-                }
-            }            
-            else if (arguments.Length == 1)
-            {
-                var Command = console.Commands.Where(c => c.Name.ToUpperInvariant() == arguments[0].ToUpperInvariant()).FirstOrDefault();
+				foreach (var command in console.Commands)
+				{
+					console.WriteLine(" " + command.Name);
+				}
+			}
+			else if (arguments.Length == 1)
+			{
+				var command = console.Commands.Where(c => c.Name.ToUpperInvariant() == arguments[0].ToUpperInvariant()).FirstOrDefault();
 
-                if (Command == null) 
-                {
-                    console.WriteLine("Command not found.", Console.Channel.Error);
-                } 
-                else 
-                {
-                    console.WriteLine(Command.Description);
-                }                
-            }
-        }
-    }
+				if (command == null)
+				{
+					console.WriteLine("Command not found.", Console.Channel.Error);
+				}
+				else
+				{
+					console.WriteLine(command.Description);
+				}
+			}
+		}
+	}
 }

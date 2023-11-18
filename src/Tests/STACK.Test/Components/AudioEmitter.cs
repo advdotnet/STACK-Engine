@@ -3,63 +3,63 @@ using STACK.Components;
 
 namespace STACK.Test
 {
-    [TestClass]
-    public class AudioTest
-    {
-        [TestMethod]
-        public void EmitterUpdatesPositionWithTransformInitiallyTest()
-        {
-            var Entity = new Entity();
-            var AudioEmitterComponent = AudioEmitter.Create(Entity).SetUpdatePositionWithTransform(true);
-            var TransformComponent = Transform.Create(Entity).SetPosition(1, 2);
+	[TestClass]
+	public class AudioTest
+	{
+		[TestMethod]
+		public void EmitterUpdatesPositionWithTransformInitiallyTest()
+		{
+			var entity = new Entity();
+			var audioEmitterComponent = AudioEmitter.Create(entity).SetUpdatePositionWithTransform(true);
+			_ = Transform.Create(entity).SetPosition(1, 2);
 
-            Entity.Initialize(false);
+			entity.Initialize(false);
 
-            Assert.AreEqual(1 / AudioEmitterComponent.Scale, AudioEmitterComponent.Emitter.Position.X);
-            Assert.AreEqual(2 / AudioEmitterComponent.Scale, AudioEmitterComponent.Emitter.Position.Y);
-        }
+			Assert.AreEqual(1 / audioEmitterComponent.Scale, audioEmitterComponent.Emitter.Position.X);
+			Assert.AreEqual(2 / audioEmitterComponent.Scale, audioEmitterComponent.Emitter.Position.Y);
+		}
 
-        [TestMethod]
-        public void EmitterUpdatesPositionWithTransformTest()
-        {
-            var Entity = new Entity();
-            var AudioEmitterComponent = AudioEmitter.Create(Entity).SetUpdatePositionWithTransform(true);
-            var TransformComponent = Transform.Create(Entity);
+		[TestMethod]
+		public void EmitterUpdatesPositionWithTransformTest()
+		{
+			var entity = new Entity();
+			var audioEmitterComponent = AudioEmitter.Create(entity).SetUpdatePositionWithTransform(true);
+			var transformComponent = Transform.Create(entity);
 
-            Entity.Initialize(false);
+			entity.Initialize(false);
 
-            TransformComponent.Position = new Microsoft.Xna.Framework.Vector2(1, 2);
+			transformComponent.Position = new Microsoft.Xna.Framework.Vector2(1, 2);
 
-            Assert.AreEqual(1 / AudioEmitterComponent.Scale, AudioEmitterComponent.Emitter.Position.X);
-            Assert.AreEqual(2 / AudioEmitterComponent.Scale, AudioEmitterComponent.Emitter.Position.Y);
-        }
+			Assert.AreEqual(1 / audioEmitterComponent.Scale, audioEmitterComponent.Emitter.Position.X);
+			Assert.AreEqual(2 / audioEmitterComponent.Scale, audioEmitterComponent.Emitter.Position.Y);
+		}
 
-        [TestMethod]
-        public void ListenerUpdatesPositionWithTransformInitiallyTest()
-        {
-            var Entity = new Entity();
-            var AudioListenerComponent = AudioListener.Create(Entity).SetUpdatePositionWithTransform(true);
-            var TransformComponent = Transform.Create(Entity).SetPosition(1, 2);
+		[TestMethod]
+		public void ListenerUpdatesPositionWithTransformInitiallyTest()
+		{
+			var entity = new Entity();
+			var audioListenerComponent = AudioListener.Create(entity).SetUpdatePositionWithTransform(true);
+			_ = Transform.Create(entity).SetPosition(1, 2);
 
-            Entity.Initialize(false);
+			entity.Initialize(false);
 
-            Assert.AreEqual(1 / AudioListenerComponent.Scale, AudioListenerComponent.Listener.Position.X);
-            Assert.AreEqual(2 / AudioListenerComponent.Scale, AudioListenerComponent.Listener.Position.Y);
-        }
+			Assert.AreEqual(1 / audioListenerComponent.Scale, audioListenerComponent.Listener.Position.X);
+			Assert.AreEqual(2 / audioListenerComponent.Scale, audioListenerComponent.Listener.Position.Y);
+		}
 
-        [TestMethod]
-        public void ListenerUpdatesPositionWithTransformTest()
-        {
-            var Entity = new Entity();
-            var AudioListenerComponent = AudioListener.Create(Entity).SetUpdatePositionWithTransform(true);
-            var TransformComponent = Transform.Create(Entity);
+		[TestMethod]
+		public void ListenerUpdatesPositionWithTransformTest()
+		{
+			var entity = new Entity();
+			var audioListenerComponent = AudioListener.Create(entity).SetUpdatePositionWithTransform(true);
+			var transformComponent = Transform.Create(entity);
 
-            Entity.Initialize(false);
+			entity.Initialize(false);
 
-            TransformComponent.Position = new Microsoft.Xna.Framework.Vector2(1, 2);
+			transformComponent.Position = new Microsoft.Xna.Framework.Vector2(1, 2);
 
-            Assert.AreEqual(1 / AudioListenerComponent.Scale, AudioListenerComponent.Listener.Position.X);
-            Assert.AreEqual(2 / AudioListenerComponent.Scale, AudioListenerComponent.Listener.Position.Y);
-        }
-    }
+			Assert.AreEqual(1 / audioListenerComponent.Scale, audioListenerComponent.Listener.Position.X);
+			Assert.AreEqual(2 / audioListenerComponent.Scale, audioListenerComponent.Listener.Position.Y);
+		}
+	}
 }

@@ -3,47 +3,45 @@ using STACK.Components;
 
 namespace STACK.Test
 {
+	[TestClass]
+	public class SaveScriptState
+	{
+		[TestMethod]
+		public void DelayScript()
+		{
+			var testScript = new Script(Delay.Updates(2));
+			Assert.IsFalse(testScript.Done);
+			testScript.MoveNext();
+			Assert.IsFalse(testScript.Done);
+			testScript.MoveNext();
+			Assert.IsTrue(testScript.Done);
+		}
 
+		[TestMethod]
+		public void SaveScript()
+		{
+			var testClass = new EnumerableClass();
+			var testScript = new Script(testClass.Foo());
+			testScript.MoveNext();
+			testScript.MoveNext();
+			Assert.AreEqual(false, testScript.Done);
+			var check = State.Serialization.SaveState(testScript);
+			testScript = State.Serialization.LoadState<Script>(check);
+			Assert.AreEqual(false, testScript.Done);
+		}
 
-    [TestClass]
-    public class SaveScriptState
-    {
-        [TestMethod]
-        public void DelayScript()
-        {
-            var TestScript = new Script(Delay.Updates(2));
-            Assert.IsFalse(TestScript.Done);
-            TestScript.MoveNext();
-            Assert.IsFalse(TestScript.Done);
-            TestScript.MoveNext();
-            Assert.IsTrue(TestScript.Done);
-        }
+		[TestMethod]
+		public void ScriptEngineSerialize()
+		{
+			var testScriptEngine = new Scripts();
+			testScriptEngine.Start(new EnumerableClass().Foo());
+			testScriptEngine.Update();
 
-        [TestMethod]
-        public void SaveScript()
-        {
-            var TestClass = new EnumerableClass();
-            var TestScript = new Script(TestClass.Foo());
-            TestScript.MoveNext();
-            TestScript.MoveNext();
-            Assert.AreEqual(false, TestScript.Done);
-            var Check = STACK.State.Serialization.SaveState<Script>(TestScript);
-            TestScript = STACK.State.Serialization.LoadState<Script>(Check);
-            Assert.AreEqual(false, TestScript.Done);
-        }
+			var check = State.Serialization.SaveState(testScriptEngine);
+			testScriptEngine.Update();
 
-        [TestMethod]
-        public void ScriptEngineSerialize()
-        {
-            var TestScriptEngine = new Scripts();
-            TestScriptEngine.Start(new EnumerableClass().Foo());
-            TestScriptEngine.Update();
-
-            var Check = STACK.State.Serialization.SaveState<Scripts>(TestScriptEngine);
-            TestScriptEngine.Update();
-
-            TestScriptEngine = STACK.State.Serialization.LoadState<Scripts>(Check);
-            TestScriptEngine.Update();
-        }
-    }
+			testScriptEngine = State.Serialization.LoadState<Scripts>(check);
+			testScriptEngine.Update();
+		}
+	}
 }

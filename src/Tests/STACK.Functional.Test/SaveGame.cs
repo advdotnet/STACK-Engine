@@ -10,119 +10,119 @@ using System.Reflection;
 
 namespace STACK.Functional.Test
 {
-    [TestClass]
-    public class SaveGame
-    {
+	[TestClass]
+	public class SaveGame
+	{
 
-        public class Green : Entity
-        {
-            public override void OnDraw(Graphics.Renderer renderer)
-            {
-                renderer.PrimitivesRenderer.DrawRectangle(new Rectangle(0, 0, 1280, 720), Color.Green);
-            }
-        }
+		public class Green : Entity
+		{
+			public override void OnDraw(Graphics.Renderer renderer)
+			{
+				renderer.PrimitivesRenderer.DrawRectangle(new Rectangle(0, 0, 1280, 720), Color.Green);
+			}
+		}
 
-        [TestMethod, TestCategory("GPU")]
-        public void ScreenshotGreen()
-        {
-            using (var GraphicsDevice = Mock.CreateGraphicsDevice())
-            using (var Runner = new TestEngine(StackGame.Empty, Mock.Wrap(GraphicsDevice), Mock.Input))
-            {
-                Runner.StartGame();
-                var Scene = Runner.Game.World.Scenes.FirstOrDefault();
-                Scene.Push(new Green());
-                Scene.Visible = true;
-                var PNGData = Runner.Renderer.GetScreenshotPNGData(Runner.Game.World);
+		[TestMethod, TestCategory("GPU")]
+		public void ScreenshotGreen()
+		{
+			using (var graphicsDevice = Mock.CreateGraphicsDevice())
+			using (var runner = new TestEngine(StackGame.Empty, Mock.Wrap(graphicsDevice), Mock.Input))
+			{
+				runner.StartGame();
+				var scene = runner.Game.World.Scenes.FirstOrDefault();
+				scene.Push(new Green());
+				scene.Visible = true;
+				var pngData = runner.Renderer.GetScreenshotPNGData(runner.Game.World);
 
-                using (var ScreenshotStream = new MemoryStream(PNGData))
-                {
-                    using (var Screenshot = Texture2D.FromStream(Runner.Renderer.GraphicsDevice, ScreenshotStream))
-                    {
-                        Color[] Colors = new Color[Screenshot.Width * Screenshot.Height];
-                        Screenshot.GetData(Colors);
-                        for (int i = 0; i < Colors.Length; i++)
-                        {
-                            Assert.AreEqual(Color.Green, Colors[i]);
-                        }
-                    }
-                }
-            }
-        }
+				using (var screenshotStream = new MemoryStream(pngData))
+				{
+					using (var screenshot = Texture2D.FromStream(runner.Renderer.GraphicsDevice, screenshotStream))
+					{
+						var colors = new Color[screenshot.Width * screenshot.Height];
+						screenshot.GetData(colors);
+						for (var i = 0; i < colors.Length; i++)
+						{
+							Assert.AreEqual(Color.Green, colors[i]);
+						}
+					}
+				}
+			}
+		}
 
-        private int GetSubscriberCount(InputProvider input)
-        {
-            var fieldInfo = typeof(InputProvider).GetField("Handler", BindingFlags.NonPublic | BindingFlags.Instance);
-            var field = fieldInfo.GetValue(input);
-            var eventDelegate = (MulticastDelegate)field;
+		private int GetSubscriberCount(InputProvider input)
+		{
+			var fieldInfo = typeof(InputProvider).GetField("Handler", BindingFlags.NonPublic | BindingFlags.Instance);
+			var field = fieldInfo.GetValue(input);
+			var eventDelegate = (MulticastDelegate)field;
 
-            return eventDelegate.GetInvocationList().Count();
-        }
+			return eventDelegate.GetInvocationList().Count();
+		}
 
-        [TestMethod, TestCategory("GPU")]
-        public void RestartGameOneInput()
-        {
-            using (var GraphicsDevice = Mock.CreateGraphicsDevice())
-            using (var Runner = new TestEngine(StackGame.Empty, Mock.Wrap(GraphicsDevice), Mock.Input))
-            {
-                Runner.StartGame();
-                var Subscribercount = GetSubscriberCount(Runner.InputProvider);
-                Assert.AreEqual(1, Subscribercount);
+		[TestMethod, TestCategory("GPU")]
+		public void RestartGameOneInput()
+		{
+			using (var graphicsDevice = Mock.CreateGraphicsDevice())
+			using (var runner = new TestEngine(StackGame.Empty, Mock.Wrap(graphicsDevice), Mock.Input))
+			{
+				runner.StartGame();
+				var subscribercount = GetSubscriberCount(runner.InputProvider);
+				Assert.AreEqual(1, subscribercount);
 
-                // Restart Game
-                Runner.StartGame();
-                Subscribercount = GetSubscriberCount(Runner.InputProvider);
+				// Restart Game
+				runner.StartGame();
+				subscribercount = GetSubscriberCount(runner.InputProvider);
 
-                Assert.AreEqual(1, Subscribercount);
-            }
-        }
+				Assert.AreEqual(1, subscribercount);
+			}
+		}
 
-        [TestMethod, TestCategory("GPU")]
-        public void LoadSaveGameAfterWorldStart()
-        {
-            STACK.SaveGame State;
+		[TestMethod, TestCategory("GPU")]
+		public void LoadSaveGameAfterWorldStart()
+		{
+			STACK.SaveGame state;
 
-            using (var GraphicsDevice = Mock.CreateGraphicsDevice())
-            using (var Runner = new TestEngine(StackGame.Empty, Mock.Wrap(GraphicsDevice), Mock.Input))
-            {
-                Runner.StartGame();
-                Runner.Game.World.Scenes.FirstOrDefault().Push(new Entity("newobj"));
-                Runner.Game.World.Interactive = false;
-                State = new STACK.SaveGame("utest", STACK.State.Serialization.SaveState<World>(Runner.Game.World), new byte[0] { });
-            }
+			using (var graphicsDevice = Mock.CreateGraphicsDevice())
+			using (var runner = new TestEngine(StackGame.Empty, Mock.Wrap(graphicsDevice), Mock.Input))
+			{
+				runner.StartGame();
+				runner.Game.World.Scenes.FirstOrDefault().Push(new Entity("newobj"));
+				runner.Game.World.Interactive = false;
+				state = new STACK.SaveGame("utest", STACK.State.Serialization.SaveState(runner.Game.World), new byte[0] { });
+			}
 
-            using (var GraphicsDevice = Mock.CreateGraphicsDevice())
-            using (var Runner = new TestEngine(StackGame.Empty, Mock.Wrap(GraphicsDevice), Mock.Input))
-            {
-                Runner.StartGame();
-                Runner.LoadState(State);
-                Assert.AreEqual(1, Runner.Game.World.Scenes.FirstOrDefault().GameObjectCache.Entities.Count);
-                Assert.AreEqual("newobj", Runner.Game.World.Scenes.FirstOrDefault().GameObjectCache.Entities.First().ID);
-                Assert.IsFalse(Runner.Game.World.Interactive);
-            }
-        }
+			using (var graphicsDevice = Mock.CreateGraphicsDevice())
+			using (var runner = new TestEngine(StackGame.Empty, Mock.Wrap(graphicsDevice), Mock.Input))
+			{
+				runner.StartGame();
+				runner.LoadState(state);
+				Assert.AreEqual(1, runner.Game.World.Scenes.FirstOrDefault().GameObjectCache.Entities.Count);
+				Assert.AreEqual("newobj", runner.Game.World.Scenes.FirstOrDefault().GameObjectCache.Entities.First().ID);
+				Assert.IsFalse(runner.Game.World.Interactive);
+			}
+		}
 
-        [TestMethod, TestCategory("GPU")]
-        public void LoadSaveGameBeforeWorldStart()
-        {
-            STACK.SaveGame State;
+		[TestMethod, TestCategory("GPU")]
+		public void LoadSaveGameBeforeWorldStart()
+		{
+			STACK.SaveGame state;
 
-            using (var GraphicsDevice = Mock.CreateGraphicsDevice())
-            using (var Runner = new TestEngine(StackGame.Empty, Mock.Wrap(GraphicsDevice), Mock.Input))
-            {
-                Runner.StartGame();
-                Runner.Game.World.Scenes.FirstOrDefault().Push(new Entity("newobj"));
-                Runner.Game.World.Interactive = false;
-                State = new STACK.SaveGame("utest", STACK.State.Serialization.SaveState<World>(Runner.Game.World), new byte[0] { });
-            }
+			using (var graphicsDevice = Mock.CreateGraphicsDevice())
+			using (var runner = new TestEngine(StackGame.Empty, Mock.Wrap(graphicsDevice), Mock.Input))
+			{
+				runner.StartGame();
+				runner.Game.World.Scenes.FirstOrDefault().Push(new Entity("newobj"));
+				runner.Game.World.Interactive = false;
+				state = new STACK.SaveGame("utest", STACK.State.Serialization.SaveState(runner.Game.World), new byte[0] { });
+			}
 
-            using (var GraphicsDevice = Mock.CreateGraphicsDevice())
-            using (var Runner = new TestEngine(StackGame.Empty, Mock.Wrap(GraphicsDevice), Mock.Input))
-            {
-                Runner.LoadState(State);
-                Assert.AreEqual(1, Runner.Game.World.Scenes.FirstOrDefault().GameObjectCache.Entities.Count);
-                Assert.AreEqual("newobj", Runner.Game.World.Scenes.FirstOrDefault().GameObjectCache.Entities.First().ID);
-                Assert.IsFalse(Runner.Game.World.Interactive);
-            }
-        }
-    }
+			using (var graphicsDevice = Mock.CreateGraphicsDevice())
+			using (var runner = new TestEngine(StackGame.Empty, Mock.Wrap(graphicsDevice), Mock.Input))
+			{
+				runner.LoadState(state);
+				Assert.AreEqual(1, runner.Game.World.Scenes.FirstOrDefault().GameObjectCache.Entities.Count);
+				Assert.AreEqual("newobj", runner.Game.World.Scenes.FirstOrDefault().GameObjectCache.Entities.First().ID);
+				Assert.IsFalse(runner.Game.World.Interactive);
+			}
+		}
+	}
 }

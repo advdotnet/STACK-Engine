@@ -3,107 +3,98 @@ using System;
 
 namespace STACK.Components
 {
-    /// <summary>
-    /// Camera class which handles translation, rotation and scaling.
-    /// </summary>
-    [Serializable]
-    public class Camera : Component
-    {
-        float _Zoom;
-        Vector2 _Position;
-        float _Rotation;
-        Matrix _Transformation;
-        Matrix _TransformationInverse;
+	/// <summary>
+	/// Camera class which handles translation, rotation and scaling.
+	/// </summary>
+	[Serializable]
+	public class Camera : Component
+	{
+		private float _zoom;
+		private Vector2 _position;
+		private float _rotation;
+		private Matrix _transformation;
+		private Matrix _transformationInverse;
 
-        /// <summary>
-        /// The transformation matrix for the camera.
-        /// </summary>
-        public Matrix Transformation { get { return _Transformation; } }
+		/// <summary>
+		/// The transformation matrix for the camera.
+		/// </summary>
+		public Matrix Transformation => _transformation;
 
-        /// <summary>
-        /// The inverse of the transformation matrix.
-        /// </summary>
-        public Matrix TransformationInverse { get { return _TransformationInverse; } }
+		/// <summary>
+		/// The inverse of the transformation matrix.
+		/// </summary>
+		public Matrix TransformationInverse => _transformationInverse;
 
-        public Camera() : this(Vector2.Zero, 1f) { }
+		public Camera() : this(Vector2.Zero, 1f) { }
 
-        public Camera(Vector2 position, float zoom = 1.0f)
-        {
-            _Zoom = zoom;
-            _Rotation = 0.0f;
-            _Position = position;
-            UpdateTransformation();
-        }
+		public Camera(Vector2 position, float zoom = 1.0f)
+		{
+			_zoom = zoom;
+			_rotation = 0.0f;
+			_position = position;
+			UpdateTransformation();
+		}
 
-        public float Zoom
-        {
-            get
-            {
-                return _Zoom;
-            }
+		public float Zoom
+		{
+			get => _zoom;
 
-            set
-            {
-                _Zoom = value;
-                UpdateTransformation();
-            }
-        }
+			set
+			{
+				_zoom = value;
+				UpdateTransformation();
+			}
+		}
 
-        public float Rotation
-        {
-            get
-            {
-                return _Rotation;
-            }
+		public float Rotation
+		{
+			get => _rotation;
 
-            set
-            {
-                _Rotation = value;
-                UpdateTransformation();
-            }
-        }
+			set
+			{
+				_rotation = value;
+				UpdateTransformation();
+			}
+		}
 
-        public void Move(Vector2 delta)
-        {
-            Position += delta;
-        }
+		public void Move(Vector2 delta)
+		{
+			Position += delta;
+		}
 
-        public Vector2 Position
-        {
-            get
-            {
-                return _Position;
-            }
+		public Vector2 Position
+		{
+			get => _position;
 
-            set
-            {
-                _Position = value;
-                UpdateTransformation();
-            }
-        }
+			set
+			{
+				_position = value;
+				UpdateTransformation();
+			}
+		}
 
-        public Vector2 Transform(Vector2 position)
-        {
-            return Vector2.Transform(position, Transformation);
-        }
+		public Vector2 Transform(Vector2 position)
+		{
+			return Vector2.Transform(position, Transformation);
+		}
 
-        public Vector2 TransformInverse(Vector2 position)
-        {
-            return Vector2.Transform(position, TransformationInverse);
-        }
+		public Vector2 TransformInverse(Vector2 position)
+		{
+			return Vector2.Transform(position, TransformationInverse);
+		}
 
-        void UpdateTransformation()
-        {
-            _Transformation = Matrix.CreateRotationZ(Rotation)
-                * Matrix.CreateScale(new Vector3(Zoom, Zoom, 1))
-                * Matrix.CreateTranslation(new Vector3(-_Position.X, -_Position.Y, 0).ToInt());
+		private void UpdateTransformation()
+		{
+			_transformation = Matrix.CreateRotationZ(Rotation)
+				* Matrix.CreateScale(new Vector3(Zoom, Zoom, 1))
+				* Matrix.CreateTranslation(new Vector3(-_position.X, -_position.Y, 0).ToInt());
 
-            _TransformationInverse = Matrix.Invert(Transformation);
-        }
+			_transformationInverse = Matrix.Invert(Transformation);
+		}
 
-        public static Camera Create(BaseEntityCollection addTo)
-        {
-            return addTo.Add<Camera>();
-        }
-    }
+		public static Camera Create(BaseEntityCollection addTo)
+		{
+			return addTo.Add<Camera>();
+		}
+	}
 }

@@ -10,86 +10,74 @@ namespace STACK.TestBase
     /// </summary>
     public class TestInputProvider : InputProvider
     {
-        Queue<InputEvent> EventsToAdd = new Queue<InputEvent>();
-        List<Keys> PressedKeys = new List<Keys>();
-        int MouseX, MouseY;
-        ButtonState Left, Right;
+		private readonly Queue<InputEvent> _eventsToAdd = new Queue<InputEvent>();
+		private readonly List<Keys> _pressedKeys = new List<Keys>();
+		private int _mouseX, _mouseY;
+		private ButtonState _left, _right;
 
-        public override KeyboardState KeyboardState
-        {
-            get
-            {
-                return new KeyboardState(PressedKeys.ToArray());
-            }
-        }
+		public override KeyboardState KeyboardState => new KeyboardState(_pressedKeys.ToArray());
 
-        public override MouseState MouseState
-        {
-            get
-            {
-                return new MouseState(MouseX, MouseY, 0, Left, ButtonState.Released, Right, ButtonState.Released, ButtonState.Released);
-            }
-        }
+		public override MouseState MouseState => new MouseState(_mouseX, _mouseY, 0, _left, ButtonState.Released, _right, ButtonState.Released, ButtonState.Released);
 
-        public override void Dispatch(bool paused = false)
+		public override void Dispatch(bool paused = false)
         {
-            while (EventsToAdd.Count > 0)
+            while (_eventsToAdd.Count > 0)
             {
-                var Event = EventsToAdd.Dequeue();
-                Event.Paused = paused;
-                Notify(Event);
+                var @event = _eventsToAdd.Dequeue();
+                @event.Paused = paused;
+                Notify(@event);
             }
         }
 
         public void KeyDown(Keys key)
         {
-            EventsToAdd.Enqueue(InputEvent.KeyPress(KeyState.Down, 0, key));
-            if (!PressedKeys.Contains(key))
+            _eventsToAdd.Enqueue(InputEvent.KeyPress(KeyState.Down, 0, key));
+            if (!_pressedKeys.Contains(key))
             {
-                PressedKeys.Add(key);
+                _pressedKeys.Add(key);
             }
         }
 
         public void KeyUp(Keys key)
         {
-            EventsToAdd.Enqueue(InputEvent.KeyPress(KeyState.Up, 0, key));
-            if (PressedKeys.Contains(key))
+            _eventsToAdd.Enqueue(InputEvent.KeyPress(KeyState.Up, 0, key));
+            if (_pressedKeys.Contains(key))
             {
-                PressedKeys.Remove(key);
+                _pressedKeys.Remove(key);
             }
         }
 
         public void MouseDown(MouseButton button = MouseButton.Left)
         {
-            EventsToAdd.Enqueue(InputEvent.MouseClick(ButtonState.Pressed, 0, button));
+            _eventsToAdd.Enqueue(InputEvent.MouseClick(ButtonState.Pressed, 0, button));
             if (MouseButton.Left == button)
             {
-                Left = ButtonState.Pressed;
+                _left = ButtonState.Pressed;
             }
             else
             {
-                Right = ButtonState.Pressed;
+                _right = ButtonState.Pressed;
             }
         }
 
         public void MouseUp(MouseButton button = MouseButton.Left)
         {
-            EventsToAdd.Enqueue(InputEvent.MouseClick(ButtonState.Released, 0, button));
+            _eventsToAdd.Enqueue(InputEvent.MouseClick(ButtonState.Released, 0, button));
             if (MouseButton.Left == button)
             {
-                Left = ButtonState.Released;
+                _left = ButtonState.Released;
             }
             else
             {
-                Right = ButtonState.Released;
+                _right = ButtonState.Released;
             }
         }
 
         public void MouseMove(int x, int y)
         {
-            EventsToAdd.Enqueue(InputEvent.MouseMove(0, x, y));
-            MouseX = x;
-            MouseY = y;
+            _eventsToAdd.Enqueue(InputEvent.MouseMove(0, x, y));
+            _mouseX = x;
+            _mouseY = y;
         }
 
         public void MouseMove(Point p)

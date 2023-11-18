@@ -3,76 +3,64 @@ using System.Runtime.Serialization;
 
 namespace STACK.Components
 {
-    [Serializable]
-    public class SkipContent : Component, ISkipContent
-    {
-        [NonSerialized]
-        ISkipContent Interface;
+	[Serializable]
+	public class SkipContent : Component, ISkipContent
+	{
+		[NonSerialized]
+		private ISkipContent _interface;
 
-        /// <summary>
-        /// Serialize possible states in savegames.
-        /// </summary>
-        bool SkipTextPossible;
-        bool SkipCutscenePossible;
+		/// <summary>
+		/// Serialize possible states in savegames.
+		/// </summary>
+		private bool _skipTextPossible;
+		private bool _skipCutscenePossible;
 
-        [OnSerializing]
-        void OnSerializingMethod(StreamingContext context)
-        {
-            if (null != SkipText)
-            {
-                SkipTextPossible = SkipText.Possible;
-            }
-            else
-            {
-                SkipTextPossible = true;
-            }
+		[OnSerializing]
+		private void OnSerializingMethod(StreamingContext context)
+		{
+			if (null != SkipText)
+			{
+				_skipTextPossible = SkipText.Possible;
+			}
+			else
+			{
+				_skipTextPossible = true;
+			}
 
-            if (null != SkipCutscene)
-            {
-                SkipCutscenePossible = SkipCutscene.Possible;
-            }
-        }
+			if (null != SkipCutscene)
+			{
+				_skipCutscenePossible = SkipCutscene.Possible;
+			}
+		}
 
-        void PropagatePossibleStates()
-        {
-            if (null != SkipText)
-            {
-                SkipText.Possible = SkipTextPossible;
-            }
+		private void PropagatePossibleStates()
+		{
+			if (null != SkipText)
+			{
+				SkipText.Possible = _skipTextPossible;
+			}
 
-            if (null != SkipCutscene)
-            {
-                SkipCutscene.Possible = SkipCutscenePossible;
-            }
-        }
+			if (null != SkipCutscene)
+			{
+				SkipCutscene.Possible = _skipCutscenePossible;
+			}
+		}
 
-        public SkipContent()
-        {
+		public SkipContent()
+		{
 
-        }
+		}
 
-        public SkipCutscene SkipCutscene
-        {
-            get
-            {
-                return Interface?.SkipCutscene;
-            }
-        }
+		public SkipCutscene SkipCutscene => _interface?.SkipCutscene;
 
-        public SkipText SkipText
-        {
-            get
-            {
-                return Interface?.SkipText;
-            }
-        }
+		public SkipText SkipText => _interface?.SkipText;
 
-        public static SkipContent Create(World addTo)
-        {
-            return addTo.Add<SkipContent>();
-        }
+		public static SkipContent Create(World addTo)
+		{
+			return addTo.Add<SkipContent>();
+		}
 
-        public SkipContent SetInterface(ISkipContent value) { Interface = value; PropagatePossibleStates(); return this; }
-        public SkipContent SetInterfaceFromServiceProvider(IServiceProvider value) { if (null != value) Interface = value.GetService(typeof(ISkipContent)) as ISkipContent; PropagatePossibleStates(); return this; }
-    }
+		public SkipContent SetInterface(ISkipContent value) { _interface = value; PropagatePossibleStates(); return this; }
+		public SkipContent SetInterfaceFromServiceProvider(IServiceProvider value) { if (null != value) { _interface = value.GetService(typeof(ISkipContent)) as ISkipContent; } PropagatePossibleStates(); return this; }
+	}
 }

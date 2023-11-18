@@ -7,121 +7,122 @@ using System;
 
 namespace STACK
 {
-    public partial class Window : Game, ISkipContent
-    {
-        public GameSettings GameSettings { get; private set; }
-        public StackEngine StackEngine { get; private set; }
-        public SkipText SkipText { get; }
-        public SkipCutscene SkipCutscene { get; }
-        GameSpeed GameSpeed = GameSpeed.Default;
-        InputProvider InputProvider;
-        GraphicsDeviceManager Graphics;
-        StackGame Game;
-        FrameRateCounter Counter;
+	public partial class Window : Game, ISkipContent
+	{
+		public GameSettings GameSettings { get; private set; }
+		public StackEngine StackEngine { get; private set; }
+		public SkipText SkipText { get; }
+		public SkipCutscene SkipCutscene { get; }
 
-        public Window(StackGame game) : base()
-        {
-            Game = game;
+		private GameSpeed _gameSpeed = GameSpeed.Default;
+		private InputProvider _inputProvider;
+		private readonly GraphicsDeviceManager _graphics;
+		private readonly StackGame _game;
+		private FrameRateCounter _counter;
 
-            Log.AddLogger(new DebugLogHandler());
-            Log.WriteLine("Loading game settings");
+		public Window(StackGame game) : base()
+		{
+			_game = game;
 
-            GameSettings = GameSettings.LoadFromConfigFile(Game.SaveGameFolder);
+			Log.AddLogger(new DebugLogHandler());
+			Log.WriteLine("Loading game settings");
 
-            Log.WriteLine("Initializing graphics");
+			GameSettings = GameSettings.LoadFromConfigFile(_game.SaveGameFolder);
 
-            Graphics = GameSettings.CreateGraphicsDeviceManager(this);
+			Log.WriteLine("Initializing graphics");
 
-            Window.ClientSizeChanged += OnClientSizeChanged;
-            Window.AllowUserResizing = true;
-            Window.Title = game.Title;
+			_graphics = GameSettings.CreateGraphicsDeviceManager(this);
 
-            SkipText = new SkipText();
-            SkipCutscene = new SkipCutscene(SetSpeed);
-        }
+			Window.ClientSizeChanged += OnClientSizeChanged;
+			Window.AllowUserResizing = true;
+			Window.Title = game.Title;
 
-        protected override void Initialize()
-        {
-            IsFixedTimeStep = true;
-            IsMouseVisible = false;
+			SkipText = new SkipText();
+			SkipCutscene = new SkipCutscene(SetSpeed);
+		}
 
-            GameSettings.Initialize(Graphics, Game.VirtualResolution);
+		protected override void Initialize()
+		{
+			IsFixedTimeStep = true;
+			IsMouseVisible = false;
 
-            var Services = new GameServiceContainer();
-            Services.AddService(typeof(IGraphicsDeviceService), Graphics);
-            Services.AddService(typeof(ISkipContent), this);
+			GameSettings.Initialize(_graphics, _game.VirtualResolution);
 
-            InputProvider = new UserInputProvider();
-            StackEngine = new StackEngine(Game, Services, InputProvider, GameSettings);
+			var services = new GameServiceContainer();
+			services.AddService(typeof(IGraphicsDeviceService), _graphics);
+			services.AddService(typeof(ISkipContent), this);
 
-            if (GameSettings.Debug)
-            {
-                InputProvider.Handler += HandleDebugInputEvent;
-            }
+			_inputProvider = new UserInputProvider();
+			StackEngine = new StackEngine(_game, services, _inputProvider, GameSettings);
 
-            InputProvider.Handler += HandleSkipInputEvent;
+			if (GameSettings.Debug)
+			{
+				_inputProvider.Handler += HandleDebugInputEvent;
+			}
 
-            StackEngine.OnExit += Exit;
+			_inputProvider.Handler += HandleSkipInputEvent;
 
-            Counter = new FrameRateCounter();
-            SetSpeed(GameSpeed.Default);
+			StackEngine.OnExit += Exit;
 
-            base.Initialize();
-        }
+			_counter = new FrameRateCounter();
+			SetSpeed(GameSpeed.Default);
 
-        protected override void UnloadContent()
-        {
-            StackEngine.Dispose();
-        }
+			base.Initialize();
+		}
 
-        private void OnClientSizeChanged(object sender, EventArgs eventArgs)
-        {
-            if (StackEngine != null && StackEngine.Renderer != null)
-            {
-                StackEngine.Renderer.DisplaySettings.OnClientSizeChanged(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
-            }
-        }
+		protected override void UnloadContent()
+		{
+			StackEngine.Dispose();
+		}
 
-        protected override void Update(GameTime time)
-        {
-            if (EngineVariables.ShowFPS)
-            {
-                Counter.UpdateStart();
-            }
+		private void OnClientSizeChanged(object sender, EventArgs eventArgs)
+		{
+			if (StackEngine != null && StackEngine.Renderer != null)
+			{
+				StackEngine.Renderer.DisplaySettings.OnClientSizeChanged(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
+			}
+		}
 
-            StackEngine.Update();
+		protected override void Update(GameTime time)
+		{
+			if (EngineVariables.ShowFPS)
+			{
+				_counter.UpdateStart();
+			}
 
-            if (EngineVariables.ShowFPS)
-            {
-                Counter.UpdateEnd();
-            }
+			StackEngine.Update();
 
-            if (SkipCutscene.Enabled)
-            {
-                SuppressDraw();
-            }
+			if (EngineVariables.ShowFPS)
+			{
+				_counter.UpdateEnd();
+			}
 
-            base.Update(time);
-        }
+			if (SkipCutscene.Enabled)
+			{
+				SuppressDraw();
+			}
 
-        protected override void Draw(GameTime time)
-        {
-            StackEngine.Draw();
+			base.Update(time);
+		}
 
-            if (EngineVariables.ShowFPS)
-            {
-                Counter.Draw(StackEngine.Renderer.SpriteBatch, StackEngine.Renderer.DefaultFont, Vector2.Zero);
-            }
-        }
+		protected override void Draw(GameTime time)
+		{
+			StackEngine.Draw();
 
-        public void SetSpeed(GameSpeed speed)
-        {
-            if (!GameSpeed.Equals(speed))
-            {
-                Log.WriteLine("Setting game speed to " + speed.Description);
-                GameSpeed = speed;
-                TargetElapsedTime = speed.TargetElapsedTime;
-            }
-        }
-    }
+			if (EngineVariables.ShowFPS)
+			{
+				_counter.Draw(StackEngine.Renderer.SpriteBatch, StackEngine.Renderer.DefaultFont, Vector2.Zero);
+			}
+		}
+
+		public void SetSpeed(GameSpeed speed)
+		{
+			if (!_gameSpeed.Equals(speed))
+			{
+				Log.WriteLine("Setting game speed to " + speed.Description);
+				_gameSpeed = speed;
+				TargetElapsedTime = speed.TargetElapsedTime;
+			}
+		}
+	}
 }

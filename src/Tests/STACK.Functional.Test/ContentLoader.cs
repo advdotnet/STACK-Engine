@@ -4,27 +4,26 @@ using STACK.TestBase;
 
 namespace STACK.Functional.Test
 {
-    [TestClass]
-    public class ContentManagement
-    {
+	[TestClass]
+	public class ContentManagement
+	{
+		[TestMethod, TestCategory("GPU")]
+		public void SceneContentDisposed()
+		{
+			Texture2D sharedTexture;
+			using (var graphicsDevice = Mock.CreateGraphicsDevice())
+			using (var runner = new TestEngine(StackGame.Empty, Mock.Wrap(graphicsDevice), null))
+			{
+				sharedTexture = runner.EngineContent.Load<Texture2D>("stacklogo");
+				var scene = runner.Game.World["1"];
+				var sceneTexture = scene.Content.Load<Texture2D>("stacklogo");
 
-        [TestMethod, TestCategory("GPU")]
-        public void SceneContentDisposed()
-        {
-            Texture2D SharedTexture;
-            using (var GraphicsDevice = Mock.CreateGraphicsDevice())
-            using (var Runner = new TestEngine(StackGame.Empty, Mock.Wrap(GraphicsDevice), null))
-            {
-                SharedTexture = Runner.EngineContent.Load<Texture2D>("stacklogo");
-                var Scene = Runner.Game.World["1"];
-                var SceneTexture = Scene.Content.Load<Texture2D>("stacklogo");
+				scene.UnloadContent();
+				Assert.IsTrue(sceneTexture.IsDisposed);
+				Assert.IsFalse(sharedTexture.IsDisposed);
 
-                Scene.UnloadContent();
-                Assert.IsTrue(SceneTexture.IsDisposed);
-                Assert.IsFalse(SharedTexture.IsDisposed);
-
-            }
-            Assert.IsTrue(SharedTexture.IsDisposed);
-        }
-    }
+			}
+			Assert.IsTrue(sharedTexture.IsDisposed);
+		}
+	}
 }

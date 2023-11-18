@@ -1,68 +1,53 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace STACK.Debug
+﻿namespace STACK.Debug
 {
-    /// <summary>
-    /// Gets the value of a variable.
-    /// </summary>
-    class GetCommand : IConsoleCommand
-    {
-        public string Name
-        {
-            get
-            {
-                return "get";
-            }
-        }
+	/// <summary>
+	/// Gets the value of a variable.
+	/// </summary>
+	internal class GetCommand : IConsoleCommand
+	{
+		public string Name => "get";
 
-        public string Description
-        {
-            get
-            {
-                return "Gets a variable.";
-            }
-        }
+		public string Description => "Gets a variable.";
 
-        private readonly StackEngine Engine;
+#pragma warning disable IDE0052 // Ungelesene private Member entfernen
+		private readonly StackEngine _engine;
+#pragma warning restore IDE0052 // Ungelesene private Member entfernen
 
-        public GetCommand(StackEngine game)
-        {
-            Engine = game;
-        }
+		public GetCommand(StackEngine game)
+		{
+			_engine = game;
+		}
 
-        public void Execute(Console console, string[] arguments)
-        {
-            if (arguments.Length == 1)
-            {
-                var props = typeof(EngineVariables).GetFields();
+		public void Execute(Console console, string[] arguments)
+		{
+			if (arguments.Length == 1)
+			{
+				var props = typeof(EngineVariables).GetFields();
 
-                if (arguments[0].ToUpperInvariant() == "STACK")
-                {                    
-                    foreach (var prop in props)
-                    {
-                        console.WriteLine(" " + prop.Name + " = " + prop.GetValue(null), STACK.Debug.Console.Channel.System);
-                    }
-                }
-                else if (arguments[0].ToUpperInvariant().StartsWith("STACK."))
-                {
-                    string Variable = arguments[0].ToUpperInvariant().Replace("STACK.", "");
+				if (arguments[0].ToUpperInvariant() == "STACK")
+				{
+					foreach (var prop in props)
+					{
+						console.WriteLine(" " + prop.Name + " = " + prop.GetValue(null), Console.Channel.System);
+					}
+				}
+				else if (arguments[0].ToUpperInvariant().StartsWith("STACK."))
+				{
+					var variable = arguments[0].ToUpperInvariant().Replace("STACK.", string.Empty);
 
-                    string Value = "";
+					var value = string.Empty;
 
-                    foreach (var prop in props)
-                    {
-                        if (prop.Name.ToUpperInvariant() == Variable.Trim())
-                        {
-                            Value = prop.GetValue(null).ToString();
-                        }
-                    }
+					foreach (var prop in props)
+					{
+						if (prop.Name.ToUpperInvariant() == variable.Trim())
+						{
+							value = prop.GetValue(null).ToString();
+						}
+					}
 
-                    console.WriteLine(Value, STACK.Debug.Console.Channel.System);
-                }
-            }
-        }
-    }
+					console.WriteLine(value, Console.Channel.System);
+				}
+			}
+		}
+	}
 }

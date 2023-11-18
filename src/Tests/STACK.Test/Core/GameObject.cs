@@ -1,50 +1,42 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Xna.Framework;
-using STACK;
-using STACK.Input;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using STACK.Components;
 
 namespace STACK.Test.Room1
 {
-    public class MyObj : Entity { }
-    public class MyExit : Entity 
-    {
-        public MyExit()
-        {
-            Add<Exit>();
-        }
-    }
+	public class MyObj : Entity { }
+	public class MyExit : Entity
+	{
+		public MyExit()
+		{
+			Add<Exit>();
+		}
+	}
 }
 
 namespace STACK.Test
 {
-    [TestClass]
-    public class GameObjectTest
-    {               
-        [TestMethod]
-        public void GameObjectSetsNameSpaceAsID()
-        {
-            Room1.MyObj GameObject = new Room1.MyObj();
-            Assert.AreEqual("STACK.Test.Room1.MyObj", GameObject.ID);            
-        }
+	[TestClass]
+	public class GameObjectTest
+	{
+		[TestMethod]
+		public void GameObjectSetsNameSpaceAsID()
+		{
+			var gameObject = new Room1.MyObj();
+			Assert.AreEqual("STACK.Test.Room1.MyObj", gameObject.ID);
+		}
 
-        [TestMethod]
-        public void ExitSetsNameSpaceAsID()
-        {
-            Room1.MyExit Exit = new Room1.MyExit();
-            Assert.AreEqual("STACK.Test.Room1.MyExit", Exit.ID);
-        }
+		[TestMethod]
+		public void ExitSetsNameSpaceAsID()
+		{
+			var exit = new Room1.MyExit();
+			Assert.AreEqual("STACK.Test.Room1.MyExit", exit.ID);
+		}
 
-        [TestMethod]
-        public void KeepsManualID()
-        {
-            Entity GameObject = new STACK.Entity("myID");
-            Assert.AreEqual("myID", GameObject.ID);
-        }            
-    }
+		[TestMethod]
+		public void KeepsManualID()
+		{
+			var gameObject = new Entity("myID");
+			Assert.AreEqual("myID", gameObject.ID);
+		}
+	}
 }

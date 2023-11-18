@@ -7,166 +7,165 @@ using System.Text;
 
 namespace ContentAnalyzer
 {
-    /// <summary>
-    /// Intended to use in a T4 template to create a class containing all content files.
-    /// </summary>
-    public class ContentTree : BaseContentAnalyzer
-    {
-        string[] LastPathParts = null;
-        bool first = true;
+	/// <summary>
+	/// Intended to use in a T4 template to create a class containing all content files.
+	/// </summary>
+	public class ContentTree : BaseContentAnalyzer
+	{
+		string[] _lastPathParts = null;
+		bool _first = true;
 
-        ContentTree(string contentDirectory = "content", string buildDirectory = "content\\bin") : base(contentDirectory, buildDirectory) { }
+		ContentTree(string contentDirectory = "content", string buildDirectory = "content\\bin") : base(contentDirectory, buildDirectory) { }
 
-        public static string Create(string contentDirectory, string outputDirectory, string @namespace, string classname)
-        {
-            var Analyzer = new ContentTree(contentDirectory, outputDirectory);
+		public static string Create(string contentDirectory, string outputDirectory, string @namespace, string classname)
+		{
+			var analyzer = new ContentTree(contentDirectory, outputDirectory);
 
-            return Analyzer.CreateContentTree(@namespace, classname);
-        }
+			return analyzer.CreateContentTree(@namespace, classname);
+		}
 
-        private string Indent(int count)
-        {
-            return string.Empty.PadLeft(4 * (count), ' ');
-        }
+		private string Indent(int count)
+		{
+			return string.Empty.PadLeft(4 * (count), ' ');
+		}
 
-        private string CreateContentTree(string @namespace, string classname)
-        {
-            Dictionary<string, List<string>> TreeElements = new Dictionary<string, List<string>>();
+		private string CreateContentTree(string @namespace, string classname)
+		{
+			var treeElements = new Dictionary<string, List<string>>();
 
-            var Builder = new StringBuilder();
-            Builder.AppendLine(Indent(0) + "namespace " + @namespace);
-            Builder.AppendLine(Indent(0) + "{");
-            Builder.AppendLine(Indent(1) + "public static partial class " + classname);
-            Builder.AppendLine(Indent(1) + "{");
+			var builder = new StringBuilder();
+			builder.AppendLine($"{Indent(0)}namespace {@namespace}");
+			builder.AppendLine($"{Indent(0)}{{");
+			builder.AppendLine($"{Indent(1)}public static partial class {classname}");
+			builder.AppendLine($"{Indent(1)}{{");
 
-            foreach (var ContentType in ContentTypes)
-            {
-                foreach (var FileName in ContentType.EnumerateFiles(ContentDirectory, BuildDirectory))
-                {
-                    var WithoutContentDirAndExtension = StripExtension(RemoveContentDir(FileName));
-                    var NormalizedPath = WithoutContentDirAndExtension.Replace("\\", "/");
-                    var Parts = WithoutContentDirAndExtension.Split('\\');
-                    var PathParts = Parts.Take(Parts.Length - 1).ToArray();
-                    var Name = Parts.Last();
-                    var Relevant = string.Join(".", PathParts);
+			foreach (var contentType in ContentTypes)
+			{
+				foreach (var fileName in contentType.EnumerateFiles(ContentDirectory, BuildDirectory))
+				{
+					var withoutContentDirAndExtension = StripExtension(RemoveContentDir(fileName));
+					var normalizedPath = withoutContentDirAndExtension.Replace("\\", "/");
+					var parts = withoutContentDirAndExtension.Split('\\');
+					var pathParts = parts.Take(parts.Length - 1).ToArray();
+					var name = parts.Last();
+					var relevant = string.Join(".", pathParts);
 
-                    if (!TreeElements.ContainsKey(Relevant))
-                    {
-                        TreeElements[Relevant] = new List<string>();
-                    }
+					if (!treeElements.ContainsKey(relevant))
+					{
+						treeElements[relevant] = new List<string>();
+					}
 
-                    int Integer;
 
-                    if (int.TryParse(Name, out Integer))
-                    {
-                        Name = "_" + Name;
-                    }
+					if (int.TryParse(name, out var integer))
+					{
+						name = $"_{name}";
+					}
 
-                    var Content = "public const string " + Name + " = " + ToLiteral(NormalizedPath) + ";";
+					var content = $"public const string {name} = {ToLiteral(normalizedPath)};";
 
-                    TreeElements[Relevant].Add(Content);
-                }
-            }
+					treeElements[relevant].Add(content);
+				}
+			}
 
-            foreach (KeyValuePair<string, List<string>> Entry in TreeElements.OrderBy(entry => entry.Key))
-            {
-                var PathParts = Entry.Key.Split('.');
+			foreach (var entry in treeElements.OrderBy(entry => entry.Key))
+			{
+				var pathParts = entry.Key.Split('.');
 
-                ClosePath(Builder, LastPathParts, PathParts);
-                if (!first)
-                {
-                    Builder.AppendLine();
-                }
-                OpenPath(Builder, PathParts, LastPathParts);
+				ClosePath(builder, _lastPathParts, pathParts);
+				if (!_first)
+				{
+					builder.AppendLine();
+				}
+				OpenPath(builder, pathParts, _lastPathParts);
 
-                foreach (var Content in Entry.Value)
-                {
-                    Builder.AppendLine(Indent(2 + (IsRoot(PathParts) ? 0 : PathParts.Count())) + Content);
-                }
+				foreach (var content in entry.Value)
+				{
+					builder.AppendLine(Indent(2 + (IsRoot(pathParts) ? 0 : pathParts.Count())) + content);
+				}
 
-                first = false;
-                LastPathParts = PathParts;
-            }
+				_first = false;
+				_lastPathParts = pathParts;
+			}
 
-            ClosePath(Builder, LastPathParts, null);
+			ClosePath(builder, _lastPathParts, null);
 
-            Builder.AppendLine(Indent(1) + "}");
-            Builder.AppendLine(Indent(0) + "}");
-            return Builder.ToString();
-        }
+			builder.AppendLine($"{Indent(1)}}}");
+			builder.AppendLine($"{Indent(0)}}}");
+			return builder.ToString();
+		}
 
-        private void OpenPath(StringBuilder builder, string[] pathParts, string[] lastPathParts)
-        {
-            if (!IsRoot(pathParts))
-            {
-                for (int i = 0; i < pathParts.Count(); i++)
-                {
-                    if (lastPathParts != null && lastPathParts.ElementAtOrDefault(i) != null && lastPathParts[i] == pathParts[i])
-                    {
-                        continue;
-                    }
+		private void OpenPath(StringBuilder builder, string[] pathParts, string[] lastPathParts)
+		{
+			if (!IsRoot(pathParts))
+			{
+				for (var i = 0; i < pathParts.Count(); i++)
+				{
+					if (lastPathParts != null && lastPathParts.ElementAtOrDefault(i) != null && lastPathParts[i] == pathParts[i])
+					{
+						continue;
+					}
 
-                    builder.AppendLine(Indent(2 + i) + "public static partial class " + pathParts[i]);
-                    builder.AppendLine(Indent(2 + i) + "{");
-                    var CurrentPath = string.Join("/", pathParts.Take(i + 1)) + "/";
-                    builder.AppendLine(Indent(3 + i) + "public const string _path_ = " + ToLiteral(CurrentPath) + ";");
-                }
-            }
-        }
+					builder.AppendLine($"{Indent(2 + i)}public static partial class {pathParts[i]}");
+					builder.AppendLine($"{Indent(2 + i)}{{");
+					var currentPath = string.Join("/", pathParts.Take(i + 1)) + "/";
+					builder.AppendLine($"{Indent(3 + i)}public const string _path_ = {ToLiteral(currentPath)};");
+				}
+			}
+		}
 
-        private void ClosePath(StringBuilder builder, string[] lastPathParts, string[] pathParts)
-        {
-            if (null == lastPathParts)
-            {
-                return;
-            }
+		private void ClosePath(StringBuilder builder, string[] lastPathParts, string[] pathParts)
+		{
+			if (null == lastPathParts)
+			{
+				return;
+			}
 
-            if (!IsRoot(lastPathParts))
-            {
-                for (int i = lastPathParts.Count() - 1; i >= 0; i--)
-                {
-                    if (pathParts != null && pathParts.ElementAtOrDefault(i) != null && pathParts[i] == lastPathParts[i])
-                    {
-                        continue;
-                    }
+			if (!IsRoot(lastPathParts))
+			{
+				for (var i = lastPathParts.Count() - 1; i >= 0; i--)
+				{
+					if (pathParts != null && pathParts.ElementAtOrDefault(i) != null && pathParts[i] == lastPathParts[i])
+					{
+						continue;
+					}
 
-                    builder.AppendLine(Indent(2 + i) + "}");
-                }
-            }
-        }
+					builder.AppendLine(Indent(2 + i) + "}");
+				}
+			}
+		}
 
-        private bool IsRoot(string[] pathParts)
-        {
-            return pathParts.Count() == 1 && pathParts.First() == string.Empty;
-        }
+		private bool IsRoot(string[] pathParts)
+		{
+			return pathParts.Count() == 1 && pathParts.First() == string.Empty;
+		}
 
-        private string ToLiteral(string input)
-        {
-            using (var writer = new StringWriter())
-            {
-                using (var provider = CodeDomProvider.CreateProvider("CSharp"))
-                {
-                    provider.GenerateCodeFromExpression(new CodePrimitiveExpression(input), writer, null);
-                    return writer.ToString();
-                }
-            }
-        }
+		private string ToLiteral(string input)
+		{
+			using (var writer = new StringWriter())
+			{
+				using (var provider = CodeDomProvider.CreateProvider("CSharp"))
+				{
+					provider.GenerateCodeFromExpression(new CodePrimitiveExpression(input), writer, null);
+					return writer.ToString();
+				}
+			}
+		}
 
-        public string CreateBuildScript()
-        {
-            var Builder = new StringBuilder();
+		public string CreateBuildScript()
+		{
+			var builder = new StringBuilder();
 
-            foreach (var ContentType in ContentTypes)
-            {
-                foreach (var FileName in ContentType.EnumerateFiles(ContentDirectory, BuildDirectory))
-                {
-                    var WithoutContentDir = RemoveContentDir(FileName);
-                    var BuildCommand = ContentType.BuildAction.CreateBuildCommand(WithoutContentDir, RemoveContentDir(BuildDirectory), StripExtension(WithoutContentDir));
-                    Builder.AppendLine(BuildCommand);
-                }
-            }
+			foreach (var contentType in ContentTypes)
+			{
+				foreach (var fileName in contentType.EnumerateFiles(ContentDirectory, BuildDirectory))
+				{
+					var withoutContentDir = RemoveContentDir(fileName);
+					var buildCommand = contentType.BuildAction.CreateBuildCommand(withoutContentDir, RemoveContentDir(BuildDirectory), StripExtension(withoutContentDir));
+					builder.AppendLine(buildCommand);
+				}
+			}
 
-            return Builder.ToString();
-        }
-    }
+			return builder.ToString();
+		}
+	}
 }

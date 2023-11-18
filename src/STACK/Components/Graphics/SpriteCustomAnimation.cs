@@ -3,104 +3,104 @@ using System;
 
 namespace STACK.Components
 {
-    /// <summary>
-    /// Component for custom sprite animations.
-    /// </summary>
-    [Serializable]
-    public class SpriteCustomAnimation : Component, IPlayAnimation, IUpdate, IInitialize
-    {
-        Action<Transform, string, Frames> _GetFramesAction;
-        string _AnimationName = "";
-        int Step = 0;
-        [NonSerialized]
-        Sprite _Sprite = null;
-        [NonSerialized]
-        Transform _Transform = null;
-        Frames Frames = Frames.Empty;
-        bool _Playing;
-        bool _Looped;
-        bool _Enabled;
-        float _UpdateOrder;
+	/// <summary>
+	/// Component for custom sprite animations.
+	/// </summary>
+	[Serializable]
+	public class SpriteCustomAnimation : Component, IPlayAnimation, IUpdate, IInitialize
+	{
+		private Action<Transform, string, Frames> _getFramesAction;
+		private string _animationName = string.Empty;
+		private int _step = 0;
+		[NonSerialized]
+		private Sprite _sprite = null;
+		[NonSerialized]
+		private Transform _transform = null;
+		private readonly Frames _frames = Frames.Empty;
+		private bool _playing;
+		private bool _looped;
+		private bool _enabled;
+		private float _updateOrder;
 
-        public Action<Transform, string, Frames> GetFramesAction { get { return _GetFramesAction; } }
-        public bool Playing { get { return _Playing; } }
-        public bool Looped { get { return _Looped; } }
-        public string Animation { get { return _AnimationName; } }
-        public bool Enabled { get { return _Enabled; } set { _Enabled = value; } }
-        public float UpdateOrder { get { return _UpdateOrder; } set { _UpdateOrder = value; } }
+		public Action<Transform, string, Frames> GetFramesAction => _getFramesAction;
+		public bool Playing => _playing;
+		public bool Looped => _looped;
+		public string Animation => _animationName;
+		public bool Enabled { get => _enabled; set => _enabled = value; }
+		public float UpdateOrder { get => _updateOrder; set => _updateOrder = value; }
 
-        public SpriteCustomAnimation()
-        {
-            Enabled = true;
-        }
+		public SpriteCustomAnimation()
+		{
+			Enabled = true;
+		}
 
-        public void Initialize(bool restore)
-        {
-            CacheComponents();
-        }
+		public void Initialize(bool restore)
+		{
+			CacheComponents();
+		}
 
-        private void CacheComponents()
-        {
-            _Sprite = Get<Sprite>();
-            _Transform = Get<Transform>();
-        }
+		private void CacheComponents()
+		{
+			_sprite = Get<Sprite>();
+			_transform = Get<Transform>();
+		}
 
-        public void StopAnimation()
-        {
-            _Playing = false;
-            Step = 0;
-            _AnimationName = string.Empty;
-            _Looped = false;
-        }
+		public void StopAnimation()
+		{
+			_playing = false;
+			_step = 0;
+			_animationName = string.Empty;
+			_looped = false;
+		}
 
-        public void Update()
-        {
-            if (null == _Sprite || !Playing)
-            {
-                return;
-            }
+		public void Update()
+		{
+			if (null == _sprite || !Playing)
+			{
+				return;
+			}
 
-            _Sprite.CurrentFrame = Frames[Step];
+			_sprite.CurrentFrame = _frames[_step];
 
-            Step++;
+			_step++;
 
-            if (Step >= Frames.Count)
-            {
-                if (!Looped)
-                {
-                    StopAnimation();
-                }
-                else
-                {
-                    Step = 0;
-                }
-            }
-        }
+			if (_step >= _frames.Count)
+			{
+				if (!Looped)
+				{
+					StopAnimation();
+				}
+				else
+				{
+					_step = 0;
+				}
+			}
+		}
 
-        public void PlayAnimation(string animation, bool looped)
-        {
-            // avoid memory allocation
-            Frames.Clear();
-            GetFramesAction(_Transform, animation, Frames);
-            if (Frames.Count > 0)
-            {
-                _Looped = looped;
-                _Playing = true;
-                Step = 0;
-                _AnimationName = animation;
-                _Sprite.CurrentFrame = Frames[Step];
-            }
-            else
-            {
-                Log.WriteLine("Custom animation not found: " + animation, LogLevel.Notice);
-            }
-        }
+		public void PlayAnimation(string animation, bool looped)
+		{
+			// avoid memory allocation
+			_frames.Clear();
+			GetFramesAction(_transform, animation, _frames);
+			if (_frames.Count > 0)
+			{
+				_looped = looped;
+				_playing = true;
+				_step = 0;
+				_animationName = animation;
+				_sprite.CurrentFrame = _frames[_step];
+			}
+			else
+			{
+				Log.WriteLine("Custom animation not found: " + animation, LogLevel.Notice);
+			}
+		}
 
-        public static SpriteCustomAnimation Create(Entity addTo)
-        {
-            return addTo.Add<SpriteCustomAnimation>();
-        }
+		public static SpriteCustomAnimation Create(Entity addTo)
+		{
+			return addTo.Add<SpriteCustomAnimation>();
+		}
 
-        public SpriteCustomAnimation SetGetFramesAction(Action<Transform, string, Frames> value) { _GetFramesAction = value; return this; }
-    }
+		public SpriteCustomAnimation SetGetFramesAction(Action<Transform, string, Frames> value) { _getFramesAction = value; return this; }
+	}
 }

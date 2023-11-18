@@ -7,40 +7,38 @@ using System.IO;
 
 namespace STACK.Test
 {
+	[TestClass]
+	public class PathState
+	{
+		[TestMethod]
+		public void SerializePath()
+		{
+			var v1 = new Vector2(0, 0);
+			var v2 = new Vector2(0.33f, 1);
+			var v3 = new Vector2(1, 1);
+			var v4 = new Vector2(1, 0);
+			var v5 = new Vector2(1, 2);
+			var v6 = new Vector2(2, 1);
 
+			var a = new Triangle<TriangleVertexData>(v1, v4, v3);
+			var b = new Triangle<TriangleVertexData>(v1, v2, v3);
+			var c = new Triangle<TriangleVertexData>(v2, v3, v5);
+			var d = new Triangle<TriangleVertexData>(v3, v5, v6);
 
-    [TestClass]
-    public class PathState
-    {
-        [TestMethod]
-        public void SerializePath()
-        {
-            var V1 = new Vector2(0, 0);
-            var V2 = new Vector2(0.33f, 1);
-            var V3 = new Vector2(1, 1);
-            var V4 = new Vector2(1, 0);
-            var V5 = new Vector2(1, 2);
-            var V6 = new Vector2(2, 1);
+			var path = new Path(a, b, c, d);
 
-            var A = new Triangle<TriangleVertexData>(V1, V4, V3);
-            var B = new Triangle<TriangleVertexData>(V1, V2, V3);
-            var C = new Triangle<TriangleVertexData>(V2, V3, V5);
-            var D = new Triangle<TriangleVertexData>(V3, V5, V6);
+			var check = State.Serialization.SaveState(path);
+			File.WriteAllBytes("pathstate.txt", check);
 
-            var Path = new Path(A, B, C, D);
+			Console.Write(check.Length + " bytes.");
 
-            byte[] Check = STACK.State.Serialization.SaveState<Path>(Path);
-            File.WriteAllBytes("pathstate.txt", Check);
-
-            Console.Write(Check.Length + " bytes.");
-
-            var NewPath = STACK.State.Serialization.LoadState<Path>(Check);
-            Assert.AreEqual(2, NewPath.Mesh.MaxX);
-            Assert.AreEqual(0, NewPath.Mesh.MinX);
-            Assert.IsTrue(Check.Length < 4089);
-            Assert.AreEqual(4, NewPath.Mesh.Triangles.Length);
-            var WayPoints = new List<Vector2>();
-            NewPath.FindPath(V1, V6, ref WayPoints);
-        }
-    }
+			var newPath = State.Serialization.LoadState<Path>(check);
+			Assert.AreEqual(2, newPath.Mesh.MaxX);
+			Assert.AreEqual(0, newPath.Mesh.MinX);
+			Assert.IsTrue(check.Length < 4089);
+			Assert.AreEqual(4, newPath.Mesh.Triangles.Length);
+			var wayPoints = new List<Vector2>();
+			newPath.FindPath(v1, v6, ref wayPoints);
+		}
+	}
 }

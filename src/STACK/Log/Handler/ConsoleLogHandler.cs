@@ -3,71 +3,67 @@ using TomShane.Neoforce.Controls;
 
 namespace STACK.Logging
 {
-    class ConsoleLogHandler : ILogHandler
-    {
-        Debug.Console _Console;
-        List<ConsoleMessage> Buffer = new List<ConsoleMessage>();
+	internal class ConsoleLogHandler : ILogHandler
+	{
+		private Debug.Console _console;
+		private readonly List<ConsoleMessage> _buffer = new List<ConsoleMessage>();
 
-        public ConsoleLogHandler(STACK.Debug.Console console)
-        {
-            _Console = console;
-            Log.AddLogger(this);
-        }
+		public ConsoleLogHandler(Debug.Console console)
+		{
+			_console = console;
+			Log.AddLogger(this);
+		}
 
-        public STACK.Debug.Console Console
-        {
-            get
-            {
-                return _Console;
-            }
+		public Debug.Console Console
+		{
+			get => _console;
 
-            set
-            {
-                _Console = value;
-            }
-        }
+			set => _console = value;
+		}
 
-        public void WriteLine(string text, LogLevel level)
-        {
-            ConsoleMessage Message = new ConsoleMessage();
-            Message.Text = text;
+		public void WriteLine(string text, LogLevel level)
+		{
+			var message = new ConsoleMessage
+			{
+				Text = text
+			};
 
-            switch (level)
-            {
-                case LogLevel.Debug:
-                    Message.Channel = (byte)STACK.Debug.Console.Channel.Debug;
-                    break;
+			switch (level)
+			{
+				case LogLevel.Debug:
+					message.Channel = (byte)Debug.Console.Channel.Debug;
+					break;
 
-                case LogLevel.Error:
-                    Message.Channel = (byte)STACK.Debug.Console.Channel.Error;
-                    break;
+				case LogLevel.Error:
+					message.Channel = (byte)Debug.Console.Channel.Error;
+					break;
 
-                case LogLevel.Notice:
-                    Message.Channel = (byte)STACK.Debug.Console.Channel.Notice;
-                    break;
+				case LogLevel.Notice:
+					message.Channel = (byte)Debug.Console.Channel.Notice;
+					break;
 
-                case LogLevel.Warning:
-                    Message.Channel = (byte)STACK.Debug.Console.Channel.Warning;
-                    break;
-            }
+				case LogLevel.Warning:
+					message.Channel = (byte)Debug.Console.Channel.Warning;
+					break;
+			}
 
-            if (_Console == null)
-            {
-                Buffer.Add(Message);
-            }
-            else
-            {
-                if (Buffer.Count > 0)
-                {
-                    foreach (var Line in Buffer)
-                    {
-                        _Console.WriteLine(Line.Text, (STACK.Debug.Console.Channel)Line.Channel);
-                    }
+			if (_console == null)
+			{
+				_buffer.Add(message);
+			}
+			else
+			{
+				if (_buffer.Count > 0)
+				{
+					foreach (var line in _buffer)
+					{
+						_console.WriteLine(line.Text, (Debug.Console.Channel)line.Channel);
+					}
 
-                    Buffer.Clear();
-                }
-                _Console.WriteLine(Message.Text, (STACK.Debug.Console.Channel)Message.Channel);
-            }
-        }
-    }
+					_buffer.Clear();
+				}
+				_console.WriteLine(message.Text, (Debug.Console.Channel)message.Channel);
+			}
+		}
+	}
 }

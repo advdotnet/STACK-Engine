@@ -7,84 +7,84 @@ using System.Diagnostics;
 
 namespace STACK.Functional.Test
 {
-    [TestClass]
-    public class Performance
-    {
+	[TestClass]
+	public class Performance
+	{
 
-        public class PerformanceTestGame : StackGame
-        {
-            public PerformanceTestGame()
-            {
-                VirtualResolution = new Point(30, 20);
-            }
+		public class PerformanceTestGame : StackGame
+		{
+			public PerformanceTestGame()
+			{
+				VirtualResolution = new Point(30, 20);
+			}
 
-            class Player : Entity
-            {
-                public Player()
-                {
-                    Transform
-                        .Create(this);
+			private class Player : Entity
+			{
+				public Player()
+				{
+					Transform
+						.Create(this);
 
-                    CameraLocked
-                        .Create(this);
-                }
-            }
+					CameraLocked
+						.Create(this);
+				}
+			}
 
-            class TestScene : Location
-            {
-                public TestScene() : base("stacklogo")
-                {
-                    Enabled = true;
-                    this.Push(new Player());
-                }
+			private class TestScene : Location
+			{
+				public TestScene() : base("stacklogo")
+				{
+					Enabled = true;
+					Push(new Player());
+				}
 
-            }
+			}
 
-            protected override List<Scene> GetScenes()
-            {
-                return new List<Scene> { new TestScene() };
-            }
+			protected override List<Scene> GetScenes()
+			{
+				return new List<Scene> { new TestScene() };
+			}
 
-            protected override void OnStart()
-            {
-                this.StartWorld();
-            }
-        }
+			protected override void OnStart()
+			{
+				StartWorld();
+			}
+		}
 
-        [TestMethod, TestCategory("GPU")]
-        public void PerformanceTestCameraLocked()
-        {
-            using (var GraphicsDevice = Mock.CreateGraphicsDevice())
-            using (var Runner = new TestEngine(new PerformanceTestGame(), Mock.Wrap(GraphicsDevice), Mock.Input))
-            {
-                var Player = Runner.Game.World.GetGameObject("STACK.Functional.Test.Performance+PerformanceTestGame+Player");
-                var PlayerTransform = Player.Get<Transform>();
-                var Background = ((Location)Runner.Game.World.Scenes[0]).Background.Get<Sprite>();
-                var BackgroundWidth = Background.GetWidth();
-                var Watch = new Stopwatch();
-                var Right = true;
-                Runner.Resume();
-                PlayerTransform.SetPosition(0, 0);
+		[TestMethod, TestCategory("GPU")]
+		public void PerformanceTestCameraLocked()
+		{
+			using (var graphicsDevice = Mock.CreateGraphicsDevice())
+			using (var runner = new TestEngine(new PerformanceTestGame(), Mock.Wrap(graphicsDevice), Mock.Input))
+			{
+				var player = runner.Game.World.GetGameObject("STACK.Functional.Test.Performance+PerformanceTestGame+Player");
+				var playerTransform = player.Get<Transform>();
+				var background = ((Location)runner.Game.World.Scenes[0]).Background.Get<Sprite>();
+				var backgroundWidth = background.GetWidth();
+				var watch = new Stopwatch();
+				var right = true;
+				runner.Resume();
+				playerTransform.SetPosition(0, 0);
 
-                Watch.Start();
-                for (int i = 0; i < 100000; i++)
-                {
-                    PlayerTransform.SetPosition(PlayerTransform.Position.X + (Right ? 10 : -10), PlayerTransform.Position.Y);
+				watch.Start();
+				for (var i = 0; i < 100000; i++)
+				{
+					playerTransform.SetPosition(playerTransform.Position.X + (right ? 10 : -10), playerTransform.Position.Y);
 
-                    if (PlayerTransform.Position.X >= BackgroundWidth)
-                    {
-                        Right = false;
-                    }
-                    else if (PlayerTransform.Position.X <= 0)
-                    {
-                        Right = true;
-                    }
+					if (playerTransform.Position.X >= backgroundWidth)
+					{
+						right = false;
+					}
+					else if (playerTransform.Position.X <= 0)
+					{
+						right = true;
+					}
 
-                    Runner.Tick();
-                }
-                Watch.Stop();
-                System.Console.WriteLine("Elapsed: " + Watch.ElapsedMilliseconds);
-            }
-        }
-    }
+					runner.Tick();
+				}
+				watch.Stop();
+				System.Console.WriteLine("Elapsed: " + watch.ElapsedMilliseconds);
+			}
+		}
+	}
 }

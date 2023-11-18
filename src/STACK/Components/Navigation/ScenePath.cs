@@ -3,76 +3,74 @@ using System;
 
 namespace STACK.Components
 {
-    [Serializable]
-    public class ScenePath : Component, IDraw, IContent
-    {
-        public bool Visible { get; set; }
-        public float DrawOrder { get; set; }
-        [NonSerialized]
-        private bool Loaded = false;
-        public string PathFile { get; private set; }
-        Path _Path;
+	[Serializable]
+	public class ScenePath : Component, IDraw, IContent
+	{
+		public bool Visible { get; set; }
+		public float DrawOrder { get; set; }
+		[NonSerialized]
+		private readonly bool _loaded = false;
+		public string PathFile { get; private set; }
 
-        public ScenePath()
-        {
-            PathFile = string.Empty;
-            Visible = true;
-        }
+		private Path _path;
 
-        public Path Path
-        {
-            get
-            {
-                return _Path;
-            }
-            set
-            {
-                if (_Path == value)
-                {
-                    return;
-                }
+		public ScenePath()
+		{
+			PathFile = string.Empty;
+			Visible = true;
+		}
 
-                _Path = value;
+		public Path Path
+		{
+			get => _path;
+			set
+			{
+				if (_path == value)
+				{
+					return;
+				}
 
-                Parent?.Notify(Messages.ScenePathChanged, value);
-            }
-        }
+				_path = value;
 
-        public void Draw(Renderer renderer)
-        {
-            bool DrawPath = EngineVariables.DebugPath && Path != null && renderer.Stage != RenderStage.PostBloom;
+				Parent?.Notify(Messages.ScenePathChanged, value);
+			}
+		}
 
-            if (DrawPath)
-            {
-                Path.Draw(renderer.PrimitivesRenderer.DrawTriangle, renderer.PrimitivesRenderer.DrawLine, Scene.World.Get<Mouse>().Position);
-            }
-        }
+		public void Draw(Renderer renderer)
+		{
+			var drawPath = EngineVariables.DebugPath && Path != null && renderer.Stage != RenderStage.PostBloom;
 
-        public void LoadContent(ContentLoader content)
-        {
-            if (!string.IsNullOrEmpty(PathFile))
-            {
-                Path = content.Load<Path>(PathFile);
-            }
-        }
+			if (drawPath)
+			{
+				Path.Draw(renderer.PrimitivesRenderer.DrawTriangle, renderer.PrimitivesRenderer.DrawLine, Scene.World.Get<Mouse>().Position);
+			}
+		}
 
-        public void UnloadContent() { }
+		public void LoadContent(ContentLoader content)
+		{
+			if (!string.IsNullOrEmpty(PathFile))
+			{
+				Path = content.Load<Path>(PathFile);
+			}
+		}
 
-        void LoadPath(string file)
-        {
-            PathFile = file;
-            if (Loaded)
-            {
-                LoadContent(((Scene)Parent).Content);
-            }
-        }
+		public void UnloadContent() { }
 
-        public static ScenePath Create(Scene addTo)
-        {
-            return addTo.Add<ScenePath>();
-        }
+		private void LoadPath(string file)
+		{
+			PathFile = file;
+			if (_loaded)
+			{
+				LoadContent(((Scene)Parent).Content);
+			}
+		}
 
-        public ScenePath SetPathFile(string value) { LoadPath(value); return this; }
-        public ScenePath SetPath(Path value) { Path = value; return this; }
-    }
+		public static ScenePath Create(Scene addTo)
+		{
+			return addTo.Add<ScenePath>();
+		}
+
+		public ScenePath SetPathFile(string value) { LoadPath(value); return this; }
+		public ScenePath SetPath(Path value) { Path = value; return this; }
+	}
 }

@@ -4,179 +4,165 @@ using System.Collections.Generic;
 
 namespace STACK.Components
 {
-    [Serializable]
-    public class Navigation : Component, INotify, IUpdate
-    {
-        public bool Enabled { get; set; }
-        public float UpdateOrder { get; set; }
+	[Serializable]
+	public class Navigation : Component, INotify, IUpdate
+	{
+		public bool Enabled { get; set; }
+		public float UpdateOrder { get; set; }
 
-        public List<Vector2> WayPoints
-        {
-            get
-            {
-                return _WayPoints;
-            }
-        }
+		public List<Vector2> WayPoints => _wayPoints;
 
-        private List<Vector2> _WayPoints;
-        private float _Scale = 1f;
-        public float Scale
-        {
-            get
-            {
-                return _Scale;
-            }
-            set
-            {
-                if (value != _Scale)
-                {
-                    _Scale = value;
-                    _IsDirty = true;
-                }
-            }
-        }
-        public bool ApplyScale { get; set; }
-        public bool RestrictPosition { get; set; }
-        public bool ApplyColoring { get; set; }
-        public bool UseScenePath { get; set; }
-        Path _Path;
+		private List<Vector2> _wayPoints;
+		private float _scale = 1f;
+		public float Scale
+		{
+			get => _scale;
+			set
+			{
+				if (value != _scale)
+				{
+					_scale = value;
+					_isDirty = true;
+				}
+			}
+		}
+		public bool ApplyScale { get; set; }
+		public bool RestrictPosition { get; set; }
+		public bool ApplyColoring { get; set; }
+		public bool UseScenePath { get; set; }
 
-        public Path Path
-        {
-            get
-            {
-                return _Path;
-            }
-            set
-            {
-                _Path = value;
+		private Path _path;
 
-                if (RestrictPosition && Path != null)
-                {
-                    var Transform = Parent.Get<Transform>();
-                    if (Transform != null)
-                    {
-                        if (!_Path.Contains(Transform.Position))
-                        {
-                            Transform.Position = Path.GetClosestPoint(Transform.Position);
-                        }
-                    }
-                }
+		public Path Path
+		{
+			get => _path;
+			set
+			{
+				_path = value;
 
-                _IsDirty = true;
-            }
-        }
+				if (RestrictPosition && Path != null)
+				{
+					var transform = Parent.Get<Transform>();
+					if (transform != null)
+					{
+						if (!_path.Contains(transform.Position))
+						{
+							transform.Position = Path.GetClosestPoint(transform.Position);
+						}
+					}
+				}
 
-        public Navigation()
-        {
-            Scale = 1f;
-            ApplyScale = true;
-            ApplyColoring = false;
-            RestrictPosition = true;
-            Enabled = true;
-            UseScenePath = true;
-            _WayPoints = new List<Vector2>(5);
-        }
+				_isDirty = true;
+			}
+		}
 
-        public void Notify<T>(string message, T data)
-        {
-            if (message == Messages.ScenePathChanged && UseScenePath)
-            {
-                var ScenePath = Entity.DrawScene.Get<ScenePath>();
-                Path = ScenePath == null ? null : ScenePath.Path;
-            }
+		public Navigation()
+		{
+			Scale = 1f;
+			ApplyScale = true;
+			ApplyColoring = false;
+			RestrictPosition = true;
+			Enabled = true;
+			UseScenePath = true;
+			_wayPoints = new List<Vector2>(5);
+		}
 
-            if (message == Messages.SceneEnter && UseScenePath)
-            {
-                // sanity check
-                var Scripts = Entity.Get<Scripts>();
-                if (Scripts != null)
-                {
-                    if (Scripts.HasScript(ActorScripts.GOTOSCRIPTID)) throw new Exception();
-                }
+		public void Notify<T>(string message, T data)
+		{
+			if (message == Messages.ScenePathChanged && UseScenePath)
+			{
+				var scenePath = Entity.DrawScene.Get<ScenePath>();
+				Path = scenePath?.Path;
+			}
 
-                Scene Scene = (Scene)(object)data;
-                if (Scene != null)
-                {
-                    var ScenePath = Scene.Get<ScenePath>();
-                    Path = (ScenePath == null) ? null : ScenePath.Path;
-                }
-            }
-        }
+			if (message == Messages.SceneEnter && UseScenePath)
+			{
+				// sanity check
+				var scripts = Entity.Get<Scripts>();
+				if (scripts != null)
+				{
+					if (scripts.HasScript(ActorScripts.GOTOSCRIPTID))
+					{
+						throw new Exception();
+					}
+				}
 
-        public List<Vector2> FindPath(Vector2 target)
-        {
-            var Transform = Get<Transform>();
+				var scene = (Scene)(object)data;
+				if (scene != null)
+				{
+					var scenePath = scene.Get<ScenePath>();
+					Path = scenePath?.Path;
+				}
+			}
+		}
 
-            if (Path == null || Transform == null || !RestrictPosition)
-            {
-                WayPoints.Clear();
-                WayPoints.Add(target);
-            }
-            else
-            {
-                Path.FindPath(Transform.Position, target, ref _WayPoints);
-            }
+		public List<Vector2> FindPath(Vector2 target)
+		{
+			var transform = Get<Transform>();
 
-            return _WayPoints;
-        }
+			if (Path == null || transform == null || !RestrictPosition)
+			{
+				WayPoints.Clear();
+				WayPoints.Add(target);
+			}
+			else
+			{
+				Path.FindPath(transform.Position, target, ref _wayPoints);
+			}
 
-        private Color LastColor = Color.Transparent;
-        private Vector2 LastPosition = Vector2.Zero;
-        private bool _IsDirty = false;
+			return _wayPoints;
+		}
 
-        public void Update()
-        {
-            var Transform = Get<Transform>();
+		private Color _lastColor = Color.Transparent;
+		private Vector2 _lastPosition = Vector2.Zero;
+		private bool _isDirty = false;
 
-            if (Transform == null || Path == null || Path.Mesh == null || (Transform.Position == LastPosition && !_IsDirty))
-            {
-                return;
-            }
+		public void Update()
+		{
+			var transform = Get<Transform>();
 
-            LastPosition = Transform.Position;
+			if (transform == null || Path == null || Path.Mesh == null || (transform.Position == _lastPosition && !_isDirty))
+			{
+				return;
+			}
 
-            if (ApplyScale)
-            {
-                Transform.Scale = Path.GetScale(Transform.Position.Y) * Scale;
-            }
+			_lastPosition = transform.Position;
 
-            if (ApplyColoring)
-            {
-                var Position = Transform.Position;
-                var WithinPath = Path.Contains(Transform.Position);
+			if (ApplyScale)
+			{
+				transform.Scale = Path.GetScale(transform.Position.Y) * Scale;
+			}
 
-                if (!WithinPath)
-                {
-                    var ClosestPoint = Path.GetClosestPoint(Position);
-                    WithinPath = (ClosestPoint - Position).LengthSquared() < 3;
-                    Position = ClosestPoint;
-                }
-                else
-                {
-                    var Color = Path.GetVertexData(Position).Color;
+			if (ApplyColoring)
+			{
+				var position = transform.Position;
+				var withinPath = Path.Contains(transform.Position);
 
-                    if (LastColor != Color)
-                    {
-                        Parent?.Notify(Messages.ColorChanged, Color);
-                        LastColor = Color;
-                    }
-                }
-            }
+				if (withinPath)
+				{
+					var color = Path.GetVertexData(position).Color;
 
-            _IsDirty = false;
-        }
+					if (_lastColor != color)
+					{
+						Parent?.Notify(Messages.ColorChanged, color);
+						_lastColor = color;
+					}
+				}
+			}
 
-        public static Navigation Create(Entity addTo)
-        {
-            return addTo.Add<Navigation>();
-        }
+			_isDirty = false;
+		}
 
-        public Navigation SetScale(float value) { Scale = value; return this; }
-        public Navigation SetApplyScale(bool value) { ApplyScale = value; return this; }
-        public Navigation SetUseScenePath(bool value) { UseScenePath = value; return this; }
-        public Navigation SetRestrictPosition(bool value) { RestrictPosition = value; return this; }
-        public Navigation SetApplyColoring(bool value) { ApplyColoring = value; return this; }
-        public Navigation SetPath(Path value) { Path = value; return this; }
-    }
+		public static Navigation Create(Entity addTo)
+		{
+			return addTo.Add<Navigation>();
+		}
+
+		public Navigation SetScale(float value) { Scale = value; return this; }
+		public Navigation SetApplyScale(bool value) { ApplyScale = value; return this; }
+		public Navigation SetUseScenePath(bool value) { UseScenePath = value; return this; }
+		public Navigation SetRestrictPosition(bool value) { RestrictPosition = value; return this; }
+		public Navigation SetApplyColoring(bool value) { ApplyColoring = value; return this; }
+		public Navigation SetPath(Path value) { Path = value; return this; }
+	}
 }

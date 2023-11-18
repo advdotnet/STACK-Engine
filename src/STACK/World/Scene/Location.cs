@@ -3,32 +3,26 @@ using System;
 
 namespace STACK
 {
-    [Serializable]
-    public class Location : Scene
-    {
-        public const string BACKGROUND_ENTITY_ID = "SCENE_BACKGROUND_ENTITY_ID";
+	[Serializable]
+	public class Location : Scene
+	{
+		public const string BACKGROUND_ENTITY_ID = "SCENE_BACKGROUND_ENTITY_ID";
 
-        public Location(string image, int columns = 1, int rows = 1)
-        {
-            var Background = new Entity(BACKGROUND_ENTITY_ID);
-            Background.SetDrawOrder(-2);
+		public Location(string image, int columns = 1, int rows = 1)
+		{
+			var background = new Entity(BACKGROUND_ENTITY_ID);
+			background.SetDrawOrder(-2);
 
-            Sprite
-                .Create(Background)
-                .SetImage(image, columns, rows);
+			Sprite
+				.Create(background)
+				.SetImage(image, columns, rows);
 
-            SpriteData
-                .Create(Background);
+			SpriteData
+				.Create(background);
 
-            Push(Background);
-        }
+			Push(background);
+		}
 
-        public Entity Background
-        {
-            get
-            {
-                return this[BACKGROUND_ENTITY_ID];
-            }
-        }
-    }
+		public Entity Background => this[BACKGROUND_ENTITY_ID];
+	}
 }

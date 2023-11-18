@@ -16,15 +16,9 @@ namespace STACK.TestBase
             Input = input;
         }
 
-        public bool IsInteractive
-        {
-            get
-            {
-                return Game.World.Interactive;
-            }
-        }
+		public bool IsInteractive => Game.World.Interactive;
 
-        public void Tick()
+		public void Tick()
         {
             Update();
         }
@@ -96,41 +90,38 @@ namespace STACK.TestBase
 
         public void KeyPress(params Keys[] keys)
         {
-            foreach (var Key in keys)
+            foreach (var key in keys)
             {
-                Input.KeyDown(Key);
+                Input.KeyDown(key);
             }
             Tick();
 
-            foreach (var Key in keys)
+            foreach (var key in keys)
             {
-                Input.KeyUp(Key);
+                Input.KeyUp(key);
             }
             Tick();
         }
 
         public void EnterText(string text)
         {
-            foreach (char Char in text)
+            foreach (var @char in text)
             {
-                List<string> Input = TranslateChar(Char);
-                List<Keys> KeySet = new List<Keys>();
-                foreach (var Identifier in Input)
+                var input = TranslateChar(@char);
+                var keySet = new List<Keys>();
+                foreach (var identifier in input)
                 {
-                    KeySet.Add((Keys)Enum.Parse(typeof(Keys), Identifier));
+                    keySet.Add((Keys)Enum.Parse(typeof(Keys), identifier));
                 }
-                KeyPress(KeySet.ToArray());
+                KeyPress(keySet.ToArray());
             }
 
             KeyPress(Keys.Enter);
         }
 
-        private List<string> Set(params string[] keys)
-        {
-            return new List<string>(keys);
-        }
+		private List<string> Set(params string[] keys) => new List<string>(keys);
 
-        private List<string> TranslateChar(char key)
+		private List<string> TranslateChar(char key)
         {
             switch ((int)key)
             {

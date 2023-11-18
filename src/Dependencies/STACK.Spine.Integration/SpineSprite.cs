@@ -8,290 +8,285 @@ using System;
 
 namespace STACK.Spine
 {
-    /// <summary>
-    /// Renders a spine animation.
-    /// </summary>
-    [Serializable]
-    public class SpineSprite : Component, IPlayAnimation, IContent, IDraw, IUpdate, INotify
-    {
-        public bool Enabled { get; set; }
-        public float UpdateOrder { get; set; }
-        string AnimationName = "";
-        public string Animation { get { return AnimationName; } }
-        public bool Visible { get; set; }
-        public float DrawOrder { get; set; }
-        public float AnimationTime = 0;
-        public bool AnimationLooped = false;
-        public bool Playing { get; private set; }
-        public string Image { get; private set; }
-        public RenderStage RenderStage { get; private set; }
-        public Action<AnimationStateData> AnimationMixFn;
-        public Action<AnimationState> OnSpineAnimationEnd;
-        public Action<Event> OnSpineEvent;
+	/// <summary>
+	/// Renders a spine animation.
+	/// </summary>
+	[Serializable]
+	public class SpineSprite : Component, IPlayAnimation, IContent, IDraw, IUpdate, INotify
+	{
+		public bool Enabled { get; set; }
+		public float UpdateOrder { get; set; }
 
-        [NonSerialized]
-        public Texture2D NormalMap;
-        [NonSerialized]
-        public Skeleton Skeleton;
-        [NonSerialized]
-        public SkeletonBounds SkeletonBounds;
-        [NonSerialized]
-        public AnimationState AnimationState;
-        [NonSerialized]
-        public AnimationStateData AnimationStateData;
+		private string _animationName = string.Empty;
+		public string Animation => _animationName;
+		public bool Visible { get; set; }
+		public float DrawOrder { get; set; }
+		public float AnimationTime = 0;
+		public bool AnimationLooped = false;
+		public bool Playing { get; private set; }
+		public string Image { get; private set; }
+		public RenderStage RenderStage { get; private set; }
+		public Action<AnimationStateData> AnimationMixFn;
+		public Action<AnimationState> OnSpineAnimationEnd;
+		public Action<Event> OnSpineEvent;
 
-        public SpineSprite()
-        {
-            RenderStage = RenderStage.Bloom;
-            Enabled = true;
-            Visible = true;
-        }
+		[NonSerialized]
+		public Texture2D NormalMap;
+		[NonSerialized]
+		public Skeleton Skeleton;
+		[NonSerialized]
+		public SkeletonBounds SkeletonBounds;
+		[NonSerialized]
+		public AnimationState AnimationState;
+		[NonSerialized]
+		public AnimationStateData AnimationStateData;
 
-        void UpdateSkeletonEffect()
-        {
-            if (Skeleton == null)
-            {
-                return;
-            }
+		public SpineSprite()
+		{
+			RenderStage = RenderStage.Bloom;
+			Enabled = true;
+			Visible = true;
+		}
 
-            Skeleton.FlipX = ((Data.Effects & SpriteEffects.FlipHorizontally) == SpriteEffects.FlipHorizontally);
-            Skeleton.FlipY = ((Data.Effects & SpriteEffects.FlipVertically) == SpriteEffects.FlipVertically);
-        }
+		private void UpdateSkeletonEffect()
+		{
+			if (Skeleton == null)
+			{
+				return;
+			}
 
-        public SpriteData Data
-        {
-            get
-            {
-                return Get<SpriteData>();
-            }
-        }
+			Skeleton.FlipX = (Data.Effects & SpriteEffects.FlipHorizontally) == SpriteEffects.FlipHorizontally;
+			Skeleton.FlipY = (Data.Effects & SpriteEffects.FlipVertically) == SpriteEffects.FlipVertically;
+		}
 
-        public void LoadContent(ContentLoader content)
-        {
-            SkeletonBounds = new SkeletonBounds();
+		public SpriteData Data => Get<SpriteData>();
 
-            var Loader = Entity.World.Get<SpineTextureLoader>();
-            Skeleton = Loader.Load(Image);
+		public void LoadContent(ContentLoader content)
+		{
+			SkeletonBounds = new SkeletonBounds();
 
-            var NormalsImage = Image + "_normals.png";
+			var loader = Entity.World.Get<SpineTextureLoader>();
+			Skeleton = loader.Load(Image);
 
-            if (System.IO.File.Exists(content.RootDirectory + "\\" + NormalsImage))
-            {
-                NormalMap = content.Load<Texture2D>(NormalsImage);
-            }
+			var normalsImage = $"{Image}_normals.png";
 
-            UpdateSkeletonEffect();
-            SetSkin(Data.Skin);
+			if (System.IO.File.Exists($"{content.RootDirectory}\\{normalsImage}"))
+			{
+				NormalMap = content.Load<Texture2D>(normalsImage);
+			}
 
-            AnimationStateData = AnimationStateData ?? new AnimationStateData(Skeleton.Data);
+			UpdateSkeletonEffect();
+			SetSkin(Data.Skin);
 
-            AnimationMixFn?.Invoke(AnimationStateData);
+			AnimationStateData = AnimationStateData ?? new AnimationStateData(Skeleton.Data);
 
-            if (AnimationState == null)
-            {
-                AnimationState = new AnimationState(AnimationStateData);
-                AnimationState.Complete += AnimationComplete;
-                AnimationState.Event += AnimationState_Event;
-            }
+			AnimationMixFn?.Invoke(AnimationStateData);
 
-            if (!string.IsNullOrEmpty(AnimationName))
-            {
-                AnimationState.SetAnimation(0, AnimationName, true);
-                AnimationState.Update(AnimationTime);
-                AnimationState.Apply(Skeleton);
-            }
-            AnimationState.End += AnimationState_End;
-        }
+			if (AnimationState == null)
+			{
+				AnimationState = new AnimationState(AnimationStateData);
+				AnimationState.Complete += AnimationComplete;
+				AnimationState.Event += AnimationState_Event;
+			}
 
-        public void UnloadContent() { }
+			if (!string.IsNullOrEmpty(_animationName))
+			{
+				AnimationState.SetAnimation(0, _animationName, true);
+				AnimationState.Update(AnimationTime);
+				AnimationState.Apply(Skeleton);
+			}
+			AnimationState.End += AnimationState_End;
+		}
 
-        void AnimationState_End(AnimationState state, int trackIndex)
-        {
-            OnSpineAnimationEnd?.Invoke(state);
-        }
+		public void UnloadContent() { }
 
-        void AnimationState_Event(AnimationState state, int trackIndex, Event e)
-        {
-            OnSpineEvent?.Invoke(e);
-        }
+		private void AnimationState_End(AnimationState state, int trackIndex)
+		{
+			OnSpineAnimationEnd?.Invoke(state);
+		}
 
-        public void SetSkin(string skin)
-        {
-            if (!string.IsNullOrEmpty(skin))
-            {
-                Skeleton.SetSkin(skin);
-            }
-        }
+		private void AnimationState_Event(AnimationState state, int trackIndex, Event e)
+		{
+			OnSpineEvent?.Invoke(e);
+		}
 
-        public bool IsRectangleHit(Vector2 point)
-        {
-            return SkeletonBounds.AabbContainsPoint(point.X, point.Y);
-        }
+		public void SetSkin(string skin)
+		{
+			if (!string.IsNullOrEmpty(skin))
+			{
+				Skeleton.SetSkin(skin);
+			}
+		}
 
-        public bool IsPixelHit(Vector2 point)
-        {
-            return SkeletonBounds.ContainsPoint(point.X, point.Y) != null;
-        }
+		public bool IsRectangleHit(Vector2 point)
+		{
+			return SkeletonBounds.AabbContainsPoint(point.X, point.Y);
+		}
 
-        public void Draw(Renderer renderer)
-        {
-            if (RenderStage != renderer.Stage)
-            {
-                return;
-            }
+		public bool IsPixelHit(Vector2 point)
+		{
+			return SkeletonBounds.ContainsPoint(point.X, point.Y) != null;
+		}
 
-            var Lightning = Entity.Get<Lightning>();
+		public void Draw(Renderer renderer)
+		{
+			if (RenderStage != renderer.Stage)
+			{
+				return;
+			}
 
-            var Position = Vector2.Zero;
+			var lightning = Entity.Get<Lightning>();
 
-            var Transform = Entity.Get<Transform>();
-            if (Transform != null)
-            {
-                Position = Transform.Position;
-            }
+			var position = Vector2.Zero;
 
-            renderer.End();
+			var transform = Entity.Get<Transform>();
+			if (transform != null)
+			{
+				position = transform.Position;
+			}
 
-            Skeleton.FlipX = Data.Effects.Has(SpriteEffects.FlipHorizontally);
-            Skeleton.FlipY = Data.Effects.Has(SpriteEffects.FlipVertically);
+			renderer.End();
 
-            Skeleton.X = Position.X;
-            Skeleton.Y = Position.Y;
+			Skeleton.FlipX = Data.Effects.Has(SpriteEffects.FlipHorizontally);
+			Skeleton.FlipY = Data.Effects.Has(SpriteEffects.FlipVertically);
 
-            Skeleton.RootBone.ScaleX = Data.Scale.X;
-            Skeleton.RootBone.ScaleY = Data.Scale.Y;
+			Skeleton.X = position.X;
+			Skeleton.Y = position.Y;
 
-            if (Transform != null)
-            {
-                Skeleton.RootBone.ScaleX *= Transform.Scale;
-                Skeleton.RootBone.ScaleY *= Transform.Scale;
-            }
+			Skeleton.RootBone.ScaleX = Data.Scale.X;
+			Skeleton.RootBone.ScaleY = Data.Scale.Y;
 
-            Skeleton.UpdateWorldTransform();
+			if (transform != null)
+			{
+				Skeleton.RootBone.ScaleX *= transform.Scale;
+				Skeleton.RootBone.ScaleY *= transform.Scale;
+			}
 
-            var SpineRenderer = Entity.World.Get<SpineRenderer>();
+			Skeleton.UpdateWorldTransform();
 
-            SpineRenderer.SkeletonRenderer.Begin(renderer.Projection);
-            Skeleton.R = Data.Color.R / 255f;
-            Skeleton.G = Data.Color.G / 255f;
-            Skeleton.B = Data.Color.B / 255f;
-            Skeleton.A = Data.Color.A / 255f;
-            SpineRenderer.SkeletonRenderer.Draw(Skeleton);
+			var spineRenderer = Entity.World.Get<SpineRenderer>();
 
-            if (NormalMap != null && Lightning != null)
-            {
-                renderer.ApplyNormalmapEffectParameter(Lightning, NormalMap);
-                SpineRenderer.SkeletonRenderer.End(renderer.NormalmapEffect);
-            }
-            else
-            {
-                SpineRenderer.SkeletonRenderer.End(null);
-            }
+			spineRenderer.SkeletonRenderer.Begin(renderer.Projection);
+			Skeleton.R = Data.Color.R / 255f;
+			Skeleton.G = Data.Color.G / 255f;
+			Skeleton.B = Data.Color.B / 255f;
+			Skeleton.A = Data.Color.A / 255f;
+			spineRenderer.SkeletonRenderer.Draw(Skeleton);
 
-            renderer.Begin(renderer.Projection);
-        }
+			if (NormalMap != null && lightning != null)
+			{
+				renderer.ApplyNormalmapEffectParameter(lightning, NormalMap);
+				spineRenderer.SkeletonRenderer.End(renderer.NormalmapEffect);
+			}
+			else
+			{
+				spineRenderer.SkeletonRenderer.End(null);
+			}
 
-        public void Update()
-        {
-            SkeletonBounds.Update(Skeleton, true);
-            if (!Playing)
-            {
-                return;
-            }
-            AnimationState.Update(GameSpeed.TickDuration);
+			renderer.Begin(renderer.Projection);
+		}
 
-            AnimationState.Apply(Skeleton);
-            AnimationTime += GameSpeed.TickDuration;
-        }
+		public void Update()
+		{
+			SkeletonBounds.Update(Skeleton, true);
+			if (!Playing)
+			{
+				return;
+			}
+			AnimationState.Update(GameSpeed.TickDuration);
 
-        void AnimationComplete(AnimationState state, int trackIndex, int loopCount)
-        {
-            if (!AnimationLooped)
-            {
-                AnimationState.ClearTracks();
-                AnimationName = "";
-                AnimationTime = 0;
-                Data.Animation = "";
-                AnimationLooped = false;
-                Playing = false;
+			AnimationState.Apply(Skeleton);
+			AnimationTime += GameSpeed.TickDuration;
+		}
 
-                Log.WriteLine("Finished Animation" + state.ToString() + " " + loopCount);
-            }
-        }
+		private void AnimationComplete(AnimationState state, int trackIndex, int loopCount)
+		{
+			if (!AnimationLooped)
+			{
+				AnimationState.ClearTracks();
+				_animationName = string.Empty;
+				AnimationTime = 0;
+				Data.Animation = string.Empty;
+				AnimationLooped = false;
+				Playing = false;
 
-        public void PlayAnimation(string animation, bool looped)
-        {
-            if (!string.IsNullOrEmpty(animation) && AnimationExists(animation))
-            {
-                if (Animation != animation || !Playing)
-                {
-                    Playing = true;
-                    Skeleton.SetSlotsToSetupPose();
-                    AnimationState.SetAnimation(0, animation, looped);
-                    AnimationName = animation;
-                    Data.Animation = animation;
-                    AnimationLooped = looped;
-                }
-            }
-            else
-            {
-                Reset();
-            }
-        }
+				Log.WriteLine("Finished Animation" + state.ToString() + " " + loopCount);
+			}
+		}
 
-        private bool AnimationExists(string name)
-        {
-            foreach (var Animation in AnimationStateData.SkeletonData.Animations)
-            {
-                if (Animation.Name == name)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
+		public void PlayAnimation(string animation, bool looped)
+		{
+			if (!string.IsNullOrEmpty(animation) && AnimationExists(animation))
+			{
+				if (Animation != animation || !Playing)
+				{
+					Playing = true;
+					Skeleton.SetSlotsToSetupPose();
+					AnimationState.SetAnimation(0, animation, looped);
+					_animationName = animation;
+					Data.Animation = animation;
+					AnimationLooped = looped;
+				}
+			}
+			else
+			{
+				Reset();
+			}
+		}
 
-        public void Reset()
-        {
-            AnimationState.ClearTrack(0);
-            Skeleton.SetToSetupPose();
-            AnimationName = "";
-            AnimationTime = 0;
-            Data.Animation = "";
-            AnimationLooped = false;
-            Playing = false;
-        }
+		private bool AnimationExists(string name)
+		{
+			foreach (var animation in AnimationStateData.SkeletonData.Animations)
+			{
+				if (animation.Name == name)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
 
-        public float GetHeight()
-        {
-            return SkeletonBounds.Height;
-        }
+		public void Reset()
+		{
+			AnimationState.ClearTrack(0);
+			Skeleton.SetToSetupPose();
+			_animationName = string.Empty;
+			AnimationTime = 0;
+			Data.Animation = string.Empty;
+			AnimationLooped = false;
+			Playing = false;
+		}
 
-        public void Notify<T>(string message, T data)
-        {
-            if (message == Messages.AnimationStateChanged)
-            {
-                var NewState = (STACK.Components.State)(object)data;
+		public float GetHeight()
+		{
+			return SkeletonBounds.Height;
+		}
 
-                PlayAnimation(NewState.ToAnimationName(), true);
-            }
-        }
+		public void Notify<T>(string message, T data)
+		{
+			if (message == Messages.AnimationStateChanged)
+			{
+				var newState = (Components.State)(object)data;
 
-        public void LoadSprite(string image)
-        {
-            Image = image;
-            LoadContent(Entity.UpdateScene.Content);
-        }
+				PlayAnimation(newState.ToAnimationName(), true);
+			}
+		}
 
-        public static SpineSprite Create(Entity addTo)
-        {
-            return addTo.Add<SpineSprite>();
-        }
+		public void LoadSprite(string image)
+		{
+			Image = image;
+			LoadContent(Entity.UpdateScene.Content);
+		}
 
-        public SpineSprite SetImage(string value) { Image = value; return this; }
-        public SpineSprite SetAnimationMixFn(Action<AnimationStateData> value) { AnimationMixFn = value; return this; }
-        public SpineSprite SetOnSpineEvent(Action<Event> value) { OnSpineEvent = value; return this; }
-        public SpineSprite SetOnSpineAnimationEnd(Action<AnimationState> value) { OnSpineAnimationEnd = value; return this; }
-        public SpineSprite SetRenderStage(RenderStage value) { RenderStage = value; return this; }
-    }
+		public static SpineSprite Create(Entity addTo)
+		{
+			return addTo.Add<SpineSprite>();
+		}
+
+		public SpineSprite SetImage(string value) { Image = value; return this; }
+		public SpineSprite SetAnimationMixFn(Action<AnimationStateData> value) { AnimationMixFn = value; return this; }
+		public SpineSprite SetOnSpineEvent(Action<Event> value) { OnSpineEvent = value; return this; }
+		public SpineSprite SetOnSpineAnimationEnd(Action<AnimationState> value) { OnSpineAnimationEnd = value; return this; }
+		public SpineSprite SetRenderStage(RenderStage value) { RenderStage = value; return this; }
+	}
 }

@@ -1,82 +1,68 @@
 ﻿using System;
-using System.Reflection;
 
 namespace STACK.Debug
 {
-    /// <summary>
-    /// Sets a variable.
-    /// </summary>
-    class SetCommand : IConsoleCommand
-    {
-        public string Name
-        {
-            get
-            {
-                return "set";
-            }
-        }
+	/// <summary>
+	/// Sets a variable.
+	/// </summary>
+	internal class SetCommand : IConsoleCommand
+	{
+		public string Name => "set";
 
-        public string Description
-        {
-            get
-            {
-                return "Sets a variable.";
-            }
-        }
+		public string Description => "Sets a variable.";
 
-        private readonly StackEngine Engine;
+#pragma warning disable IDE0052 // Ungelesene private Member entfernen
+		private readonly StackEngine _engine;
+#pragma warning restore IDE0052 // Ungelesene private Member entfernen
 
-        public SetCommand(StackEngine game)
-        {
-            Engine = game;
-        }
+		public SetCommand(StackEngine game)
+		{
+			_engine = game;
+		}
 
-        public static T Parse<T>(string value)
-        {
-            return (T)System.ComponentModel.TypeDescriptor.GetConverter(typeof(T)).ConvertFromString(value);
-        }
+		public static T Parse<T>(string value)
+		{
+			return (T)System.ComponentModel.TypeDescriptor.GetConverter(typeof(T)).ConvertFromString(value);
+		}
 
-        public void Execute(Console console, string[] arguments)
-        {
-            if (arguments.Length == 3 && arguments[1] == "=" && arguments[0].Contains("."))
-            {
+		public void Execute(Console console, string[] arguments)
+		{
+			if (arguments.Length == 3 && arguments[1] == "=" && arguments[0].Contains("."))
+			{
+				var variableName = arguments[0].Split('.')[1].ToUpperInvariant();
+				var properties = typeof(EngineVariables).GetFields();
+				var value = arguments[2].Trim();
 
-                var VariableName = arguments[0].Split('.')[1].ToUpperInvariant();
-                var Properties = typeof(EngineVariables).GetFields();
-                string Value = arguments[2].Trim();
+				foreach (var prop in properties)
+				{
+					if (prop.Name.ToUpperInvariant() == variableName)
+					{
+						try
+						{
+							var test = prop.FieldType;
+							var method = typeof(SetCommand).GetMethod("Parse").MakeGenericMethod(new Type[] { test });
+							var result = method.Invoke(this, new object[] { value });
 
-                foreach (var prop in Properties)
-                {
-                    if (prop.Name.ToUpperInvariant() == VariableName)
-                    {
-                        try
-                        {
-                            Type Test = prop.FieldType;
+							prop.SetValue(null, result);
+							value = prop.GetValue(null).ToString();
 
-                            MethodInfo method = typeof(SetCommand).GetMethod("Parse").MakeGenericMethod(new Type[] { Test });
+							console.WriteLine(value, Console.Channel.System);
+						}
+						catch
+						{
+							console.WriteLine("Could not set value.", Console.Channel.Error);
+						}
 
-                            object Result = method.Invoke(this, new object[] { Value });
+						return;
+					}
+				}
 
-                            prop.SetValue(null, Result);
-                            Value = prop.GetValue(null).ToString();
-
-                            console.WriteLine(Value, Console.Channel.System);
-                        }
-                        catch
-                        {
-                            console.WriteLine("Could not set value.", Console.Channel.Error);
-                        }
-
-                        return;
-                    }
-                }
-
-                console.WriteLine("Variable not found.", Console.Channel.Error);
-            }
-            else
-            {
-                console.WriteLine("Syntax is SET <namespace>.<variable> = <value>", Console.Channel.Error);
-            }
-        }
-    }
+				console.WriteLine("Variable not found.", Console.Channel.Error);
+			}
+			else
+			{
+				console.WriteLine("Syntax is SET <namespace>.<variable> = <value>", Console.Channel.Error);
+			}
+		}
+	}
 }

@@ -8,398 +8,406 @@ using System.Runtime.Serialization;
 
 namespace STACK
 {
-    [Serializable]
-    public class Text : Component, IContent, IDraw, IUpdate, IInitialize
-    {
-        Alignment _Align = Alignment.Center;
-        RenderStage _RenderStage = RenderStage.PostBloom;
-
-        [NonSerialized]
-        public Func<string, Vector2> MeasureStringFn = null;
-        public Alignment Align { get { return _Align; } set { _Align = value; } }
-        public SpriteFont SpriteFont { get { return _SpriteFont; } }
-        public Rectangle Bounds;
-        public Vector2 Offset = Vector2.Zero;
-        public RenderStage RenderStage { get { return _RenderStage; } set { _RenderStage = value; } }
-        public List<TextLine> Lines = new List<TextLine>(5);
-        public Rectangle ConstrainingRectangle = Rectangle.Empty;
-        public bool Constrain = false;
-
-        /// <summary>
-        /// Fadein and fadeout duration in seconds.
-        /// </summary>
-        public float FadeDuration = 0.0f;
-        public bool WordWrap = true;
-        public int Width = 400;
-        public int Height = 100;
-        public string Font = "fonts/stack";
-
-        [NonSerialized]
-        internal Transform Transform = null;
-
-        [NonSerialized]
-        SpriteFont _SpriteFont;
-        Vector2 Position;
-        Color _Color = Color.White;
-        float Timer = 0;
-        float AlphaPercentage = 1;
-        float Duration = -1;
-
-        Vector2 _ConstrainOffset;
-        bool _Visible;
-        float _DrawOrder;
-        bool _Enabled;
-        float _UpdateOrder;
-
-        const char SPACE = ' ';
-        const char NL = '\n';
-
-        public Vector2 ConstrainOffset { get { return _ConstrainOffset; } }
-        public bool Visible { get { return _Visible; } set { _Visible = value; } }
-        public float DrawOrder { get { return _DrawOrder; } set { _DrawOrder = value; } }
-        public bool Enabled { get { return _Enabled; } set { _Enabled = value; } }
-        public float UpdateOrder { get { return _UpdateOrder; } set { _UpdateOrder = value; } }
-
-        Vector2 TextBounds = Vector2.Zero;
-
-        public Color Color
-        {
-            get
-            {
-                return _Color;
-            }
-            set
-            {
-                _Color = value;
-                for (int i = 0; i < Lines.Count; i++)
-                {
-                    Lines[i] = Lines[i].ChangeColor(value);
-                }
-            }
-        }
-
-        public Text()
-        {
-            Enabled = true;
-            Visible = true;
-        }
-
-        [OnSerializing]
-        public void OnSerializing(StreamingContext context)
-        {
-            if (null != Lines && Lines.Count == 0)
-            {
-                Lines = null;
-            }
-        }
-
-        [OnSerialized]
-        public void OnSerialized(StreamingContext context)
-        {
-            if (null == Lines)
-            {
-                Lines = new List<TextLine>(5);
-            }
-        }
-
-        [OnDeserialized]
-        void OnDeserialized(StreamingContext c)
-        {
-            OnSerialized(c);
-        }
-
-        public void Initialize(bool restore)
-        {
-            Transform = Get<Transform>();
-        }
-
-        public void LoadContent(ContentLoader content)
-        {
-            _SpriteFont = content.Load<SpriteFont>(Font);
-
-            // use SpriteFont's MeasureString method as default - can be overriden in tests
-            if (null == MeasureStringFn)
-            {
-                MeasureStringFn = _SpriteFont.MeasureString;
-            }
-        }
-
-        public void UnloadContent() { }
-
-        public void Set(string text, float duration, Vector2 position)
-        {
-            if (null == text)
-            {
-                text = string.Empty;
-            }
-
-            SetBounds(position);
-
-            var wrappedText = WordWrapText(text);
-
-            Duration = TextDuration.Default(text, duration);
-
-            if (Duration >= 0)
-            {
-                Duration += 2 * FadeDuration;
-                AlphaPercentage = 0;
-            }
-
-            CreateLines(position, wrappedText, null);
-            _ConstrainOffset = ConstrainBounds();
-        }
-
-        public void Set(List<TextInfo> textInfos, float duration, Vector2 position)
-        {
-            if (null == textInfos)
-            {
-                return;
-            }
-
-            SetBounds(position);
-            var Tags = new List<string>();
-            string WrappedText = string.Empty;
-
-            foreach (var TextInfo in textInfos)
-            {
-                var CurrentWrappedText = WordWrapText(TextInfo.Text);
-                var LinesCount = CurrentWrappedText.Count(x => x == NL) + 1;
-                Tags.AddRange(Enumerable.Repeat(TextInfo.Tag, LinesCount));
-                WrappedText += CurrentWrappedText + NL;
-            }
-
-            WrappedText = WrappedText.TrimEnd(NL);
-
-            Duration = TextDuration.Default(WrappedText, duration);
-
-            if (Duration >= 0)
-            {
-                Duration += 2 * FadeDuration;
-                AlphaPercentage = 0;
-            }
-
-            CreateLines(position, WrappedText, Tags);
-            _ConstrainOffset = ConstrainBounds();
-        }
-
-        private void SetBounds(Vector2 position)
-        {
-            Bounds.X = (int)position.X - Width / 2;
-            Bounds.Y = (int)position.Y - Height / 2;
-            Bounds.Width = Width;
-            Bounds.Height = Height;
-        }
-
-        private Vector2 ConstrainBounds()
-        {
-            if (Constrain && !ConstrainingRectangle.Contains(Bounds))
-            {
-                var ConstrainedBounds = ConstrainRectangle(Bounds, ConstrainingRectangle);
-                var Diff = ConstrainedBounds.Center - Position.ToPoint();
-                return new Vector2(Diff.X, 0);
-            }
-
-            return Vector2.Zero;
-        }
-
-        public static Rectangle ConstrainRectangle(Rectangle inner, Rectangle outer)
-        {
-            if (outer.Contains(inner))
-            {
-                return inner;
-            }
-
-            int Width = Math.Min(inner.Width, outer.Width);
-            int Height = Math.Min(inner.Height, outer.Height);
-            int X = inner.X;
-            int Y = inner.Y;
-
-            if (X < outer.X) X = outer.X;
-            if (Y < outer.Y) Y = outer.Y;
-
-            if (X + Width > outer.Right) X = outer.Right - Width;
-            if (Y + Height > outer.Bottom) Y = outer.Bottom - Height;
-
-            return new Rectangle(X, Y, Width, Height);
-        }
-
-        /// <summary>
-        /// Takes a string and performs word wrapping by adding newline 
-        /// characters when needed.
-        /// </summary>
-        private string WordWrapText(string text)
-        {
-
-            if (string.IsNullOrEmpty(text) || !WordWrap || MeasureStringFn == null)
-            {
-                return text;
-            }
-
-            var Line = string.Empty;
-            var Result = string.Empty;
-            var Words = text.Split(SPACE);
-
-            foreach (string Word in Words)
-            {
-                if (MeasureStringFn(Line + Word).X > Bounds.Width)
-                {
-                    Result = Result + Line + NL;
-                    Line = string.Empty;
-                }
-
-                Line = Line + Word + SPACE;
-            }
-
-            return Result + Line.TrimEnd(SPACE);
-        }
-
-        void CreateLines(Vector2 position, string wrappedText, List<string> tags = null)
-        {
-            TextBounds = MeasureStringFn(wrappedText);
-            var TextPosition = position;
-            var Origin = TextBounds * 0.5f;
-
-            if (Align.Has(Alignment.Top))
-            {
-                Origin.Y += Bounds.Height / 2f - TextBounds.Y / 2f;
-            }
-
-            if (Align.Has(Alignment.Bottom))
-            {
-                Origin.Y -= Bounds.Height / 2f - TextBounds.Y / 2f;
-            }
-
-            string[] TextLines = wrappedText.Split(NL);
-
-            Lines.Clear();
-
-            for (int i = 0; i < TextLines.Length; i++)
-            {
-                var LineSize = MeasureStringFn(TextLines[i]);
-                var LineOffset = new Vector2((TextBounds.X - LineSize.X) * 0.5f, i * (TextBounds.Y / TextLines.Length + 3));
-
-                if (Align.Has(Alignment.Left))
-                {
-                    LineOffset.X -= Bounds.Width / 2f - LineSize.X / 2f;
-                }
-
-                if (Align.Has(Alignment.Right))
-                {
-                    LineOffset.X += Bounds.Width / 2f - LineSize.X / 2f;
-                }
-
-                var LinePosition = TextPosition + LineOffset;
-                var Hitbox = new Rectangle((int)(LinePosition.X - Origin.X), (int)(LinePosition.Y - Origin.Y), (int)LineSize.X, (int)LineSize.Y);
-                string Tag = null;
-                if (tags != null && i < tags.Count)
-                {
-                    Tag = tags[i];
-                }
-
-                var NewLine = new TextLine(TextLines[i], LinePosition, Origin, Hitbox, Color, Tag);
-
-                Lines.Add(NewLine);
-            }
-
-            Position = position;
-        }
-
-        public void Clear()
-        {
-            Lines.Clear();
-            Position = Vector2.Zero;
-            Timer = 0;
-            Duration = -1;
-            AlphaPercentage = 1;
-        }
-
-        public void SetPosition(Vector2 position)
-        {
-            if (Position != position)
-            {
-                var delta = Position - position;
-                for (int i = 0; i < Lines.Count; i++)
-                {
-                    Lines[i] = Lines[i].Move(delta);
-                }
-
-                Position = position;
-                SetBounds(position);
-                _ConstrainOffset = ConstrainBounds();
-            }
-        }
-
-        public void Update()
-        {
-            if (Duration > 0)
-            {
-                if (Timer >= Duration)
-                {
-                    Clear();
-                }
-
-                AlphaPercentage = 1.0f;
-
-                if (Timer <= FadeDuration)
-                {
-                    AlphaPercentage = 1 - (FadeDuration - Timer) / FadeDuration;
-                }
-                else if (Timer >= Duration - FadeDuration)
-                {
-                    AlphaPercentage = ((Duration - Timer)) / FadeDuration;
-                }
-
-                Timer += GameSpeed.TickDuration;
-            }
-        }
-
-        public void Draw(Graphics.Renderer renderer)
-        {
-            if (RenderStage != renderer.Stage || Lines.Count == 0 || _SpriteFont == null)
-            {
-                return;
-            }
-
-            var TransformIsAbsolute = (null != Transform && Transform.Absolute);
-            var Camera = Entity.DrawScene.Get<Camera>();
-
-            for (int i = 0; i < Lines.Count; i++)
-            {
-                var Line = Lines[i];
-                var CurrentColor = new Color(Line.Color.R, Line.Color.G, Line.Color.B, (byte)(Line.Color.A * AlphaPercentage));
-                var LinePositon = (Line.Position - Offset).ToInt();
-
-                if (TransformIsAbsolute)
-                {
-                    LinePositon = Camera.TransformInverse(LinePositon);
-                }
-
-                LinePositon += ConstrainOffset;
-                var LineOrigin = (Line.Origin).ToInt();
-                if (LineOrigin.X > LinePositon.X)
-                {
-                    LineOrigin.X = (int)LinePositon.X;
-                }
-
-                renderer.SpriteBatch.DrawString(_SpriteFont, Line.Text, LinePositon, CurrentColor, 0, LineOrigin, 1, SpriteEffects.None, 0);
-            }
-        }
-
-        public static Text Create(Entity addTo)
-        {
-            return addTo.Add<Text>();
-        }
-
-        public Text SetFont(string value) { Font = value; return this; }
-        public Text SetHeight(int value) { Height = value; return this; }
-        public Text SetWordWrap(bool value) { WordWrap = value; return this; }
-        public Text SetAlign(Alignment value) { Align = value; return this; }
-        public Text SetColor(Color value) { Color = value; return this; }
-        public Text SetWidth(int value) { Width = value; return this; }
-        public Text SetRenderStage(RenderStage value) { RenderStage = value; return this; }
-        public Text SetConstrain(bool value) { Constrain = value; return this; }
-        public Text SetConstrainingRectangle(Rectangle value) { ConstrainingRectangle = value; return this; }
-        public Text SetVisible(bool value) { Visible = value; return this; }
-        public Text SetFadeDuration(float value) { FadeDuration = value; return this; }
-    }
+	[Serializable]
+	public class Text : Component, IContent, IDraw, IUpdate, IInitialize
+	{
+		private Alignment _align = Alignment.Center;
+		private RenderStage _renderStage = RenderStage.PostBloom;
+
+		[NonSerialized]
+		public Func<string, Vector2> MeasureStringFn = null;
+		public Alignment Align { get => _align; set => _align = value; }
+		public SpriteFont SpriteFont => _spriteFont;
+		public Rectangle Bounds;
+		public Vector2 Offset = Vector2.Zero;
+		public RenderStage RenderStage { get => _renderStage; set => _renderStage = value; }
+		public List<TextLine> Lines = new List<TextLine>(5);
+		public Rectangle ConstrainingRectangle = Rectangle.Empty;
+		public bool Constrain = false;
+
+		/// <summary>
+		/// Fadein and fadeout duration in seconds.
+		/// </summary>
+		public float FadeDuration = 0.0f;
+		public bool WordWrap = true;
+		public int Width = 400;
+		public int Height = 100;
+		public string Font = "fonts/stack";
+
+		[NonSerialized]
+		internal Transform Transform = null;
+
+		[NonSerialized]
+		private SpriteFont _spriteFont;
+		private Vector2 _position;
+		private Color _color = Color.White;
+		private float _timer = 0;
+		private float _alphaPercentage = 1;
+		private float _duration = -1;
+		private Vector2 _constrainOffset;
+		private bool _visible;
+		private float _drawOrder;
+		private bool _enabled;
+		private float _updateOrder;
+		private const char _space = ' ';
+		private const char _nl = '\n';
+		private Vector2 _textBounds = Vector2.Zero;
+
+		public Vector2 ConstrainOffset => _constrainOffset;
+		public bool Visible { get => _visible; set => _visible = value; }
+		public float DrawOrder { get => _drawOrder; set => _drawOrder = value; }
+		public bool Enabled { get => _enabled; set => _enabled = value; }
+		public float UpdateOrder { get => _updateOrder; set => _updateOrder = value; }
+
+		public Color Color
+		{
+			get => _color;
+			set
+			{
+				_color = value;
+				for (var i = 0; i < Lines.Count; i++)
+				{
+					Lines[i] = Lines[i].ChangeColor(value);
+				}
+			}
+		}
+
+		public Text()
+		{
+			Enabled = true;
+			Visible = true;
+		}
+
+		[OnSerializing]
+		public void OnSerializing(StreamingContext context)
+		{
+			if (null != Lines && Lines.Count == 0)
+			{
+				Lines = null;
+			}
+		}
+
+		[OnSerialized]
+		public void OnSerialized(StreamingContext context)
+		{
+			if (null == Lines)
+			{
+				Lines = new List<TextLine>(5);
+			}
+		}
+
+		[OnDeserialized]
+		private void OnDeserialized(StreamingContext c)
+		{
+			OnSerialized(c);
+		}
+
+		public void Initialize(bool restore)
+		{
+			Transform = Get<Transform>();
+		}
+
+		public void LoadContent(ContentLoader content)
+		{
+			_spriteFont = content.Load<SpriteFont>(Font);
+
+			// use SpriteFont's MeasureString method as default - can be overriden in tests
+			if (null == MeasureStringFn)
+			{
+				MeasureStringFn = _spriteFont.MeasureString;
+			}
+		}
+
+		public void UnloadContent() { }
+
+		public void Set(string text, float duration, Vector2 position)
+		{
+			if (null == text)
+			{
+				text = string.Empty;
+			}
+
+			SetBounds(position);
+
+			var wrappedText = WordWrapText(text);
+
+			_duration = TextDuration.Default(text, duration);
+
+			if (_duration >= 0)
+			{
+				_duration += 2 * FadeDuration;
+				_alphaPercentage = 0;
+			}
+
+			CreateLines(position, wrappedText, null);
+			_constrainOffset = ConstrainBounds();
+		}
+
+		public void Set(List<TextInfo> textInfos, float duration, Vector2 position)
+		{
+			if (null == textInfos)
+			{
+				return;
+			}
+
+			SetBounds(position);
+			var tags = new List<string>();
+			var wrappedText = string.Empty;
+
+			foreach (var textInfo in textInfos)
+			{
+				var currentWrappedText = WordWrapText(textInfo.Text);
+				var linesCount = currentWrappedText.Count(x => x == _nl) + 1;
+				tags.AddRange(Enumerable.Repeat(textInfo.Tag, linesCount));
+				wrappedText += currentWrappedText + _nl;
+			}
+
+			wrappedText = wrappedText.TrimEnd(_nl);
+
+			_duration = TextDuration.Default(wrappedText, duration);
+
+			if (_duration >= 0)
+			{
+				_duration += 2 * FadeDuration;
+				_alphaPercentage = 0;
+			}
+
+			CreateLines(position, wrappedText, tags);
+			_constrainOffset = ConstrainBounds();
+		}
+
+		private void SetBounds(Vector2 position)
+		{
+			Bounds.X = (int)position.X - Width / 2;
+			Bounds.Y = (int)position.Y - Height / 2;
+			Bounds.Width = Width;
+			Bounds.Height = Height;
+		}
+
+		private Vector2 ConstrainBounds()
+		{
+			if (Constrain && !ConstrainingRectangle.Contains(Bounds))
+			{
+				var constrainedBounds = ConstrainRectangle(Bounds, ConstrainingRectangle);
+				var diff = constrainedBounds.Center - _position.ToPoint();
+				return new Vector2(diff.X, 0);
+			}
+
+			return Vector2.Zero;
+		}
+
+		public static Rectangle ConstrainRectangle(Rectangle inner, Rectangle outer)
+		{
+			if (outer.Contains(inner))
+			{
+				return inner;
+			}
+
+			var width = Math.Min(inner.Width, outer.Width);
+			var height = Math.Min(inner.Height, outer.Height);
+			var x = inner.X;
+			var y = inner.Y;
+
+			if (x < outer.X)
+			{
+				x = outer.X;
+			}
+
+			if (y < outer.Y)
+			{
+				y = outer.Y;
+			}
+
+			if (x + width > outer.Right)
+			{
+				x = outer.Right - width;
+			}
+
+			if (y + height > outer.Bottom)
+			{
+				y = outer.Bottom - height;
+			}
+
+			return new Rectangle(x, y, width, height);
+		}
+
+		/// <summary>
+		/// Takes a string and performs word wrapping by adding newline 
+		/// characters when needed.
+		/// </summary>
+		private string WordWrapText(string text)
+		{
+
+			if (string.IsNullOrEmpty(text) || !WordWrap || MeasureStringFn == null)
+			{
+				return text;
+			}
+
+			var line = string.Empty;
+			var result = string.Empty;
+			var words = text.Split(_space);
+
+			foreach (var word in words)
+			{
+				if (MeasureStringFn(line + word).X > Bounds.Width)
+				{
+					result = result + line + _nl;
+					line = string.Empty;
+				}
+
+				line = line + word + _space;
+			}
+
+			return result + line.TrimEnd(_space);
+		}
+
+		private void CreateLines(Vector2 position, string wrappedText, List<string> tags = null)
+		{
+			_textBounds = MeasureStringFn(wrappedText);
+			var textPosition = position;
+			var origin = _textBounds * 0.5f;
+
+			if (Align.Has(Alignment.Top))
+			{
+				origin.Y += Bounds.Height / 2f - _textBounds.Y / 2f;
+			}
+
+			if (Align.Has(Alignment.Bottom))
+			{
+				origin.Y -= Bounds.Height / 2f - _textBounds.Y / 2f;
+			}
+
+			var textLines = wrappedText.Split(_nl);
+
+			Lines.Clear();
+
+			for (var i = 0; i < textLines.Length; i++)
+			{
+				var lineSize = MeasureStringFn(textLines[i]);
+				var lineOffset = new Vector2((_textBounds.X - lineSize.X) * 0.5f, i * (_textBounds.Y / textLines.Length + 3));
+
+				if (Align.Has(Alignment.Left))
+				{
+					lineOffset.X -= Bounds.Width / 2f - lineSize.X / 2f;
+				}
+
+				if (Align.Has(Alignment.Right))
+				{
+					lineOffset.X += Bounds.Width / 2f - lineSize.X / 2f;
+				}
+
+				var linePosition = textPosition + lineOffset;
+				var hitbox = new Rectangle((int)(linePosition.X - origin.X), (int)(linePosition.Y - origin.Y), (int)lineSize.X, (int)lineSize.Y);
+				string tag = null;
+				if (tags != null && i < tags.Count)
+				{
+					tag = tags[i];
+				}
+
+				var newLine = new TextLine(textLines[i], linePosition, origin, hitbox, Color, tag);
+
+				Lines.Add(newLine);
+			}
+
+			_position = position;
+		}
+
+		public void Clear()
+		{
+			Lines.Clear();
+			_position = Vector2.Zero;
+			_timer = 0;
+			_duration = -1;
+			_alphaPercentage = 1;
+		}
+
+		public void SetPosition(Vector2 position)
+		{
+			if (_position != position)
+			{
+				var delta = _position - position;
+				for (var i = 0; i < Lines.Count; i++)
+				{
+					Lines[i] = Lines[i].Move(delta);
+				}
+
+				_position = position;
+				SetBounds(position);
+				_constrainOffset = ConstrainBounds();
+			}
+		}
+
+		public void Update()
+		{
+			if (_duration > 0)
+			{
+				if (_timer >= _duration)
+				{
+					Clear();
+				}
+
+				_alphaPercentage = 1.0f;
+
+				if (_timer <= FadeDuration)
+				{
+					_alphaPercentage = 1 - (FadeDuration - _timer) / FadeDuration;
+				}
+				else if (_timer >= _duration - FadeDuration)
+				{
+					_alphaPercentage = ((_duration - _timer)) / FadeDuration;
+				}
+
+				_timer += GameSpeed.TickDuration;
+			}
+		}
+
+		public void Draw(Graphics.Renderer renderer)
+		{
+			if (RenderStage != renderer.Stage || Lines.Count == 0 || _spriteFont == null)
+			{
+				return;
+			}
+
+			var transformIsAbsolute = (null != Transform && Transform.Absolute);
+			var camera = Entity.DrawScene.Get<Camera>();
+
+			for (var i = 0; i < Lines.Count; i++)
+			{
+				var line = Lines[i];
+				var currentColor = new Color(line.Color.R, line.Color.G, line.Color.B, (byte)(line.Color.A * _alphaPercentage));
+				var linePositon = (line.Position - Offset).ToInt();
+
+				if (transformIsAbsolute)
+				{
+					linePositon = camera.TransformInverse(linePositon);
+				}
+
+				linePositon += ConstrainOffset;
+				var lineOrigin = (line.Origin).ToInt();
+				if (lineOrigin.X > linePositon.X)
+				{
+					lineOrigin.X = (int)linePositon.X;
+				}
+
+				renderer.SpriteBatch.DrawString(_spriteFont, line.Text, linePositon, currentColor, 0, lineOrigin, 1, SpriteEffects.None, 0);
+			}
+		}
+
+		public static Text Create(Entity addTo)
+		{
+			return addTo.Add<Text>();
+		}
+
+		public Text SetFont(string value) { Font = value; return this; }
+		public Text SetHeight(int value) { Height = value; return this; }
+		public Text SetWordWrap(bool value) { WordWrap = value; return this; }
+		public Text SetAlign(Alignment value) { Align = value; return this; }
+		public Text SetColor(Color value) { Color = value; return this; }
+		public Text SetWidth(int value) { Width = value; return this; }
+		public Text SetRenderStage(RenderStage value) { RenderStage = value; return this; }
+		public Text SetConstrain(bool value) { Constrain = value; return this; }
+		public Text SetConstrainingRectangle(Rectangle value) { ConstrainingRectangle = value; return this; }
+		public Text SetVisible(bool value) { Visible = value; return this; }
+		public Text SetFadeDuration(float value) { FadeDuration = value; return this; }
+	}
 }

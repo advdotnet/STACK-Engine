@@ -1,7 +1,7 @@
 ﻿namespace STACK
 {
-    public interface IWorldAutoAdd
-    {
+	public interface IWorldAutoAdd
+	{
 
-    }
+	}
 }

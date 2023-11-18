@@ -7,92 +7,91 @@ using System.Linq;
 
 namespace STACK.Test
 {
-    [TestClass]
-    public class WorldState
-    {
+	[TestClass]
+	public class WorldState
+	{
+		[TestMethod]
+		public void SerializeGameObject()
+		{
+			var test = new Entity("stackobj");
+			test.Add<Transform>().Position = Vector2.UnitY;
 
-        [TestMethod]
-        public void SerializeGameObject()
-        {
-            Entity Test = new Entity("stackobj");
-            Test.Add<Transform>().Position = Vector2.UnitY;
+			var check = State.Serialization.SaveState(test);
 
-            byte[] Check = STACK.State.Serialization.SaveState<Entity>(Test);
+			var second = State.Serialization.LoadState<Entity>(check);
+			Assert.AreEqual(test.ID, second.ID);
+			Assert.AreEqual(test.Items.Count, second.Items.Count);
+			Assert.AreEqual(test.Get<Transform>().Position, second.Get<Transform>().Position);
+		}
 
-            Entity Second = STACK.State.Serialization.LoadState<Entity>(Check);
-            Assert.AreEqual(Test.ID, Second.ID);
-            Assert.AreEqual(Test.Items.Count, Second.Items.Count);
-            Assert.AreEqual(Test.Get<Transform>().Position, Second.Get<Transform>().Position);
-        }
+		[TestMethod]
+		public void TestSize()
+		{
+			var test = new Entity("obj");
+			System.Diagnostics.Debug.WriteLine(State.Serialization.SaveState(test).Length);
+			var stack = new Scene("stack");
+			System.Diagnostics.Debug.WriteLine(State.Serialization.SaveState(stack).Length);
+			stack.Push(test);
+			System.Diagnostics.Debug.WriteLine(State.Serialization.SaveState(stack).Length);
+		}
 
-        [TestMethod]
-        public void TestSize()
-        {
-            Entity Test = new Entity("obj");
-            System.Diagnostics.Debug.WriteLine(STACK.State.Serialization.SaveState<Entity>(Test).Length);
-            Scene Stack = new Scene("stack");
-            System.Diagnostics.Debug.WriteLine(STACK.State.Serialization.SaveState<Scene>(Stack).Length);
-            Stack.Push(Test);
-            System.Diagnostics.Debug.WriteLine(STACK.State.Serialization.SaveState<Scene>(Stack).Length);
-        }
+		[Serializable]
+		private class Derived : Entity
+		{
+			public List<string> List = new List<string>();
+			public Derived(string id) : base(id) { }
+		}
 
-        [Serializable]
-        class Derived : Entity
-        {
-            public List<string> List = new List<string>();
-            public Derived(string id) : base(id) { }
-        }
+		[TestMethod]
+		public void DerivedGameObjectState()
+		{
+			var test = new Derived("derived");
 
-        [TestMethod]
-        public void DerivedGameObjectState()
-        {
-            Derived Test = new Derived("derived");
+			test.List.Add("list-item");
+			var check = State.Serialization.SaveState<Entity>(test);
+			var second = (Derived)State.Serialization.LoadState<Entity>(check);
+			Assert.AreEqual(test.ID, second.ID);
+			Assert.AreEqual(1, second.List.Count);
+			Assert.AreEqual(test.List[0], second.List[0]);
+		}
 
-            Test.List.Add("list-item");
-            byte[] Check = STACK.State.Serialization.SaveState<Entity>(Test);
-            Derived Second = (Derived)STACK.State.Serialization.LoadState<Entity>(Check);
-            Assert.AreEqual(Test.ID, Second.ID);
-            Assert.AreEqual(1, Second.List.Count);
-            Assert.AreEqual(Test.List[0], Second.List[0]);
-        }
+		[TestMethod]
+		public void ReferencesAfterDeserializing()
+		{
+			var world = WorldTest.GetTestWorld();
+			var scene = new Scene("s2");
+			scene.Push(new Entity("o2") { DrawScene = world["s1"] });
+			scene.Push(new Entity("o3") { DrawScene = world["s1"] });
+			world.Push(scene);
+			var check = State.Serialization.SaveState(world);
+			var world2 = State.Serialization.LoadState<World>(check);
+			world2.Initialize(true);
+			var secondScene = world2.Scenes.FirstOrDefault(s => s.ID == "s2");
 
-        [TestMethod]
-        public void ReferencesAfterDeserializing()
-        {
-            var World = WorldTest.GetTestWorld();
-            var Scene = new Scene("s2");
-            Scene.Push(new Entity("o2") { DrawScene = World["s1"] });
-            Scene.Push(new Entity("o3") { DrawScene = World["s1"] });
-            World.Push(Scene);
-            var Check = State.Serialization.SaveState(World);
-            var World2 = State.Serialization.LoadState<World>(Check);
-            World2.Initialize(true);
-            var SecondScene = World2.Scenes.FirstOrDefault(s => s.ID == "s2");
+			Assert.AreSame(secondScene, secondScene.GameObjectCache.Entities[0].UpdateScene);
+			Assert.AreSame(secondScene, secondScene.GameObjectCache.Entities[1].UpdateScene);
+		}
 
-            Assert.AreSame(SecondScene, SecondScene.GameObjectCache.Entities[0].UpdateScene);
-            Assert.AreSame(SecondScene, SecondScene.GameObjectCache.Entities[1].UpdateScene);
-        }
+		[TestMethod]
+		public void WorldComponentCacheAfterDeserializing()
+		{
+			var world = WorldTest.GetTestWorld();
+			var state = STACK.State.Serialization.SaveState(world);
+			var temp = STACK.State.Serialization.LoadState<World>(state);
 
-        [TestMethod]
-        public void WorldComponentCacheAfterDeserializing()
-        {
-            var World = WorldTest.GetTestWorld();
-            var State = STACK.State.Serialization.SaveState<World>(World);
-            var Temp = (World)STACK.State.Serialization.LoadState<World>(State);
+			Assert.AreSame(world.Get<Mouse>(), world.Components.Where(i => i is Mouse).FirstOrDefault());
+		}
 
-            Assert.AreSame(World.Get<Mouse>(), World.Components.Where(i => i is Mouse).FirstOrDefault());
-        }
+		[TestMethod]
+		public void WorldComponentsAfterDeserializing()
+		{
+			var world = WorldTest.GetTestWorld();
+			world.Get<Camera>().Zoom = 2f;
 
-        [TestMethod]
-        public void WorldComponentsAfterDeserializing()
-        {
-            var World = WorldTest.GetTestWorld();
-            World.Get<Camera>().Zoom = 2f;
+			var bytes = State.Serialization.SaveState(world);
+			var deserializedWorld = (World)State.Serialization.LoadState<World>(bytes);
 
-            var Bytes = STACK.State.Serialization.SaveState<World>(World);
-            var DeserializedWorld = (World)STACK.State.Serialization.LoadState<World>(Bytes);
-
-            Assert.AreEqual(2f, DeserializedWorld.Get<Camera>().Zoom);
-        }
-    }
+			Assert.AreEqual(2f, deserializedWorld.Get<Camera>().Zoom);
+		}
+	}
 }

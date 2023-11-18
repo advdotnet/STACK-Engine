@@ -1,181 +1,176 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework;
 
 namespace StarFinder
 {
-    /// <summary>
-    /// A mesh represents a collection of triangles.
-    /// </summary>    
-    [Serializable]
-    public class Mesh<T> where T : IScalable<T>
-    {                
-        public float MinY { get; private set; }
-        public float MaxY { get; private set; }        
-        public float MinX { get; private set; }        
-        public float MaxX { get; private set; }
-        Triangle<T>[] _Triangles; 
+	/// <summary>
+	/// A mesh represents a collection of triangles.
+	/// </summary>    
+	[Serializable]
+	public class Mesh<T> where T : IScalable<T>
+	{
+		public float MinY { get; private set; }
+		public float MaxY { get; private set; }
+		public float MinX { get; private set; }
+		public float MaxX { get; private set; }
 
-        [NonSerialized]
-        Vector2[] _Vertices;
+		private Triangle<T>[] _triangles;
 
-        public Mesh()
-        {
-        }
+		[NonSerialized]
+		private Vector2[] _vertices;
 
-        public Mesh(DataVertex<T>[] points, int[] indices)
-        {            
-            SetTriangles(points, indices);
-        }        
+		public Mesh()
+		{
+		}
 
-        public Mesh(List<Triangle<T>> triangles)
-        {
-            DataVertex<T>[] Points = new DataVertex<T>[triangles.Count * 3];
-            int[] Indices = new int[triangles.Count * 3];
+		public Mesh(DataVertex<T>[] points, int[] indices)
+		{
+			SetTriangles(points, indices);
+		}
 
-            for (int i = 0; i < triangles.Count; i++)
-            {
-                Points[i * 3 + 0] = triangles[i].A;
-                Points[i * 3 + 1] = triangles[i].B;
-                Points[i * 3 + 2] = triangles[i].C;
+		public Mesh(List<Triangle<T>> triangles)
+		{
+			var points = new DataVertex<T>[triangles.Count * 3];
+			var indices = new int[triangles.Count * 3];
 
-                Indices[i * 3] = i * 3;
-                Indices[i * 3 + 1] = i * 3 + 1;
-                Indices[i * 3 + 2] = i * 3 + 2;
-            }  
-          
-            SetTriangles(Points, Indices);
-        }
+			for (var i = 0; i < triangles.Count; i++)
+			{
+				points[(i * 3) + 0] = triangles[i].A;
+				points[(i * 3) + 1] = triangles[i].B;
+				points[(i * 3) + 2] = triangles[i].C;
 
-        void ExtendBounds(Vector2 point)
-        {
-            MaxX = Math.Max(MaxX, point.X);
-            MinX = Math.Min(MinX, point.X);
+				indices[i * 3] = i * 3;
+				indices[(i * 3) + 1] = (i * 3) + 1;
+				indices[(i * 3) + 2] = (i * 3) + 2;
+			}
 
-            MaxY = Math.Max(MaxY, point.Y);
-            MinY = Math.Min(MinY, point.Y);            
-        }        
+			SetTriangles(points, indices);
+		}
 
-        /// <summary>
-        /// Creates the underlying triangle structure using a set of vertices and indices.
-        /// </summary>
-        void SetTriangles(DataVertex<T>[] points, int[] indices)
-        {
-            if (indices.Length % 3 != 0)
-            {
-                throw new ArgumentException("Triangle indices is not multiple of three.");
-            }
+		private void ExtendBounds(Vector2 point)
+		{
+			MaxX = Math.Max(MaxX, point.X);
+			MinX = Math.Min(MinX, point.X);
 
-            _Triangles = new Triangle<T>[indices.Length / 3];            
+			MaxY = Math.Max(MaxY, point.Y);
+			MinY = Math.Min(MinY, point.Y);
+		}
 
-            var a = 0;
+		/// <summary>
+		/// Creates the underlying triangle structure using a set of vertices and indices.
+		/// </summary>
+		private void SetTriangles(DataVertex<T>[] points, int[] indices)
+		{
+			if (indices.Length % 3 != 0)
+			{
+				throw new ArgumentException("Triangle indices is not multiple of three.");
+			}
 
-            MaxX = points[0].Point.X;
-            MinX = MaxX;            
+			_triangles = new Triangle<T>[indices.Length / 3];
 
-            MaxY = points[0].Point.Y;
-            MinY = MaxY;            
+			var a = 0;
 
-            for (int i = 0; i <= indices.Length - 3; i += 3)
-            {
-                ExtendBounds(points[indices[i]].Point);
-                ExtendBounds(points[indices[i + 1]].Point);
-                ExtendBounds(points[indices[i + 2]].Point);
+			MaxX = points[0].Point.X;
+			MinX = MaxX;
 
-                _Triangles[a] = new Triangle<T>(points[indices[i]], points[indices[i + 1]], points[indices[i + 2]], a++);                           
-            }            
-        }
+			MaxY = points[0].Point.Y;
+			MinY = MaxY;
 
-        private void CacheVertices()
-        {
-            _Vertices = new Vector2[_Triangles.Length * 3];
+			for (var i = 0; i <= indices.Length - 3; i += 3)
+			{
+				ExtendBounds(points[indices[i]].Point);
+				ExtendBounds(points[indices[i + 1]].Point);
+				ExtendBounds(points[indices[i + 2]].Point);
 
-            for (var i = 0; i < _Triangles.Length; i++)
-            {
-                _Vertices[i * 3] = _Triangles[i].A.Point;
-                _Vertices[i * 3 + 1] = _Triangles[i].B.Point;
-                _Vertices[i * 3 + 2] = _Triangles[i].C.Point;
-            }
-        }
+				_triangles[a] = new Triangle<T>(points[indices[i]], points[indices[i + 1]], points[indices[i + 2]], a++);
+			}
+		}
 
-        public Triangle<T>[] Triangles
-        {
-            get
-            {
-                return _Triangles;
-            }
-        }               
+		private void CacheVertices()
+		{
+			_vertices = new Vector2[_triangles.Length * 3];
 
-        public Vector2[] Vertices
-        {
-            get 
-            {
-                if (_Vertices == null)
-                {
-                    CacheVertices();
-                }
+			for (var i = 0; i < _triangles.Length; i++)
+			{
+				_vertices[i * 3] = _triangles[i].A.Point;
+				_vertices[(i * 3) + 1] = _triangles[i].B.Point;
+				_vertices[(i * 3) + 2] = _triangles[i].C.Point;
+			}
+		}
 
-                return _Vertices;
-            }
-        }
+		public Triangle<T>[] Triangles => _triangles;
 
-        /// <summary>
-        /// Returns the triangle which contains the given position.
-        /// </summary>
-        public Triangle<T> GetTriangleAt(Vector2 position)
-        {
-            for (int i = 0; i < _Triangles.Length; i++)
-            {
-                if (_Triangles[i].Encloses(position))
-                {
-                    return _Triangles[i];
-                }
-            }
+		public Vector2[] Vertices
+		{
+			get
+			{
+				if (_vertices == null)
+				{
+					CacheVertices();
+				}
 
-            return null;
-        }
+				return _vertices;
+			}
+		}
 
-        /// <summary>
-        /// Returns whether the mesh contains the given point.
-        /// </summary>
-        public bool Contains(Vector2 point)
-        {
-            if (point.X < MinX || point.Y < MinY || point.X > MaxX || point.Y > MaxY)
-            {
-                return false;
-            }
+		/// <summary>
+		/// Returns the triangle which contains the given position.
+		/// </summary>
+		public Triangle<T> GetTriangleAt(Vector2 position)
+		{
+			for (var i = 0; i < _triangles.Length; i++)
+			{
+				if (_triangles[i].Encloses(position))
+				{
+					return _triangles[i];
+				}
+			}
 
-            return GetTriangleAt(point) != null;
-        }
+			return null;
+		}
 
-        /// <summary>
-        /// Returns the closest triangle to the given position.
-        /// </summary>
-        public Triangle<T> GetClosestTriangle(Vector2 position)
-        {
-            float ResultDistance = -1;
-            Triangle<T> Result = null;
+		/// <summary>
+		/// Returns whether the mesh contains the given point.
+		/// </summary>
+		public bool Contains(Vector2 point)
+		{
+			if (point.X < MinX || point.Y < MinY || point.X > MaxX || point.Y > MaxY)
+			{
+				return false;
+			}
 
-            for (int i = 0; i < _Triangles.Length; i++)
-            {
-                if (_Triangles[i].Encloses(position))
-                {
-                    return _Triangles[i];
-                }
+			return GetTriangleAt(point) != null;
+		}
 
-                Vector2 ClosestPoint = _Triangles[i].GetClosestPoint(position);
+		/// <summary>
+		/// Returns the closest triangle to the given position.
+		/// </summary>
+		public Triangle<T> GetClosestTriangle(Vector2 position)
+		{
+			var resultDistance = -1f;
+			Triangle<T> result = null;
 
-                float Distance = (ClosestPoint - position).LengthSquared();
+			for (var i = 0; i < _triangles.Length; i++)
+			{
+				if (_triangles[i].Encloses(position))
+				{
+					return _triangles[i];
+				}
 
-                if (ResultDistance == -1 || Distance < ResultDistance)
-                {                        
-                    Result = _Triangles[i];
-                    ResultDistance = Distance;
-                }
-            }
+				var closestPoint = _triangles[i].GetClosestPoint(position);
 
-            return Result;
-        }               
+				var distance = (closestPoint - position).LengthSquared();
 
-    }
+				if (resultDistance == -1 || distance < resultDistance)
+				{
+					result = _triangles[i];
+					resultDistance = distance;
+				}
+			}
+
+			return result;
+		}
+
+	}
 }

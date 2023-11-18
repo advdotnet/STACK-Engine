@@ -6,331 +6,311 @@ using System;
 
 namespace STACK.Components
 {
-    [Serializable]
-    public class Sprite : Component, IContent, IDraw
-    {
-        public const string EXISTINGTEXTUREIMAGE = "@ExistingTexture";
-        public const string WHITEPIXELIMAGE = "@WhitePixel";
+	[Serializable]
+	public class Sprite : Component, IContent, IDraw
+	{
+		public const string EXISTINGTEXTUREIMAGE = "@ExistingTexture";
+		public const string WHITEPIXELIMAGE = "@WhitePixel";
 
-        [NonSerialized]
-        Texture2D _Texture;
-        [NonSerialized]
-        Texture2D _NormalMap;
-        [NonSerialized]
-        bool Loaded = false;
-        bool _Visible;
-        float _DrawOrder;
-        string _Image;
-        Rectangle _CurrentFrameRectangle;
-        float _Depth;
-        bool _EnableNormalMap;
-        string _NormalMapImage;
-        RenderStage _RenderStage;
-        Func<Vector2> _GetPositionFn;
-        int _Rows;
-        int _Columns;
-        int _TotalFrames;
-        int _InitialFrame = 0;
-        int _CurrentFrame = -1;
-        /// <summary>
-        /// Cache texture data to not load it from gpu each time.
-        /// </summary>
-        [NonSerialized]
-        Color[] ImageCache = null;
+		[NonSerialized]
+		private Texture2D _texture;
+		[NonSerialized]
+		private Texture2D _normalMap;
+		[NonSerialized]
+		private bool _loaded = false;
+		private bool _visible;
+		private float _drawOrder;
+		private string _image;
+		private Rectangle _currentFrameRectangle;
+		private float _depth;
+		private bool _enableNormalMap;
+		private string _normalMapImage;
+		private RenderStage _renderStage;
+		private Func<Vector2> _getPositionFn;
+		private int _rows;
+		private int _columns;
+		private int _totalFrames;
+		private int _initialFrame = 0;
+		private int _currentFrame = -1;
+		/// <summary>
+		/// Cache texture data to not load it from gpu each time.
+		/// </summary>
+		[NonSerialized]
+		private Color[] _imageCache = null;
 
-        public bool Visible { get { return _Visible; } set { _Visible = value; } }
-        public float DrawOrder { get { return _DrawOrder; } set { _DrawOrder = value; } }
-        public string Image { get { return _Image; } }
-        public Texture2D Texture { get { return _Texture; } }
-        public Texture2D NormalMap { get { return _NormalMap; } }
-        public Rectangle CurrentFrameRectangle { get { return _CurrentFrameRectangle; } }
-        public float Depth { get { return _Depth; } set { _Depth = value; } }
-        public bool EnableNormalMap { get { return _EnableNormalMap; } }
-        public string NormalMapImage { get { return _NormalMapImage; } }
-        public RenderStage RenderStage { get { return _RenderStage; } set { _RenderStage = value; } }
-        public Func<Vector2> GetPositionFn { get { return _GetPositionFn; } set { _GetPositionFn = value; } }
-        public int Rows { get { return _Rows; } set { _Rows = value; } }
-        public int Columns { get { return _Columns; } set { _Columns = value; } }
-        public int TotalFrames { get { return _TotalFrames; } set { _TotalFrames = value; } }
+		public bool Visible { get => _visible; set => _visible = value; }
+		public float DrawOrder { get => _drawOrder; set => _drawOrder = value; }
+		public string Image => _image;
+		public Texture2D Texture => _texture;
+		public Texture2D NormalMap => _normalMap;
+		public Rectangle CurrentFrameRectangle => _currentFrameRectangle;
+		public float Depth { get => _depth; set => _depth = value; }
+		public bool EnableNormalMap => _enableNormalMap;
+		public string NormalMapImage => _normalMapImage;
+		public RenderStage RenderStage { get => _renderStage; set => _renderStage = value; }
+		public Func<Vector2> GetPositionFn { get => _getPositionFn; set => _getPositionFn = value; }
+		public int Rows { get => _rows; set => _rows = value; }
+		public int Columns { get => _columns; set => _columns = value; }
+		public int TotalFrames { get => _totalFrames; set => _totalFrames = value; }
 
-        public Sprite()
-        {
-            Depth = 0;
-            Columns = 1;
-            Rows = 1;
-            RenderStage = RenderStage.Bloom;
-            Visible = true;
-        }
+		public Sprite()
+		{
+			Depth = 0;
+			Columns = 1;
+			Rows = 1;
+			RenderStage = RenderStage.Bloom;
+			Visible = true;
+		}
 
-        /// <summary>
-        /// One based
-        /// </summary>
-        public int CurrentFrame
-        {
-            get
-            {
-                return _CurrentFrame + 1;
-            }
-            set
-            {
-                var NewValue = Math.Min(TotalFrames, Math.Max(0, value - 1));
-                if (NewValue == _CurrentFrame)
-                {
-                    return;
-                }
-                _CurrentFrame = NewValue;
+		/// <summary>
+		/// One based
+		/// </summary>
+		public int CurrentFrame
+		{
+			get => _currentFrame + 1;
+			set
+			{
+				var newValue = Math.Min(TotalFrames, Math.Max(0, value - 1));
+				if (newValue == _currentFrame)
+				{
+					return;
+				}
+				_currentFrame = newValue;
 
-                int Row = (int)((float)_CurrentFrame / (float)Columns);
-                int Column = _CurrentFrame % Columns;
-                int Width = (Texture == null) ? 1 : Texture.Width / Columns;
-                int Height = (Texture == null) ? 1 : Texture.Height / Rows;
+				var row = (int)((float)_currentFrame / (float)Columns);
+				var column = _currentFrame % Columns;
+				var width = (Texture == null) ? 1 : Texture.Width / Columns;
+				var height = (Texture == null) ? 1 : Texture.Height / Rows;
 
-                _CurrentFrameRectangle = new Rectangle(Width * Column, Height * Row, Width, Height);
-                _InitialFrame = _CurrentFrame;
-            }
-        }
+				_currentFrameRectangle = new Rectangle(width * column, height * row, width, height);
+				_initialFrame = _currentFrame;
+			}
+		}
 
-        public void LoadContent(ContentLoader content)
-        {
-            ImageCache = null;
+		public void LoadContent(ContentLoader content)
+		{
+			_imageCache = null;
 
-            if (Image != WHITEPIXELIMAGE && Image != EXISTINGTEXTUREIMAGE && !string.IsNullOrEmpty(Image))
-            {
-                Log.WriteLine("Loading Sprite " + Image);
+			if (Image != WHITEPIXELIMAGE && Image != EXISTINGTEXTUREIMAGE && !string.IsNullOrEmpty(Image))
+			{
+				Log.WriteLine("Loading Sprite " + Image);
 
-                _Texture = content.Load<Texture2D>(Image);
+				_texture = content.Load<Texture2D>(Image);
 
-                if (EnableNormalMap)
-                {
-                    if (string.IsNullOrEmpty(NormalMapImage))
-                    {
-                        _NormalMapImage = Image + "_normals";
-                    }
+				if (EnableNormalMap)
+				{
+					if (string.IsNullOrEmpty(NormalMapImage))
+					{
+						_normalMapImage = Image + "_normals";
+					}
 
-                    Log.WriteLine("Loading NormalMap " + NormalMapImage);
-                    _NormalMap = content.Load<Texture2D>(NormalMapImage);
-                }
-            }
+					Log.WriteLine("Loading NormalMap " + NormalMapImage);
+					_normalMap = content.Load<Texture2D>(NormalMapImage);
+				}
+			}
 
-            if (_CurrentFrame == -1)
-            {
-                CurrentFrame = _InitialFrame;
-            }
+			if (_currentFrame == -1)
+			{
+				CurrentFrame = _initialFrame;
+			}
 
-            Loaded = true;
-        }
+			_loaded = true;
+		}
 
-        public void UnloadContent() { }
+		public void UnloadContent() { }
 
-        public void Draw(Renderer renderer)
-        {
-            if (RenderStage == renderer.Stage)
-            {
-                var Position = GetSpritePosition();
+		public void Draw(Renderer renderer)
+		{
+			if (RenderStage == renderer.Stage)
+			{
+				var position = GetSpritePosition();
 
-                Draw(renderer, Position);
-            }
-        }
+				Draw(renderer, position);
+			}
+		}
 
-        public void Draw(Renderer renderer, Vector2 position)
-        {
-            var Transform = Get<Transform>();
+		public void Draw(Renderer renderer, Vector2 position)
+		{
+			var transform = Get<Transform>();
 
-            if (Transform != null && Transform.Absolute)
-            {
-                var Camera = Entity.DrawScene.Get<Camera>();
-                position = Camera.TransformInverse(position);
-            }
+			if (transform != null && transform.Absolute)
+			{
+				var camera = Entity.DrawScene.Get<Camera>();
+				position = camera.TransformInverse(position);
+			}
 
-            var Lightning = Entity.Get<Lightning>();
+			var lightning = Entity.Get<Lightning>();
 
-            if (NormalMap != null && Lightning != null)
-            {
-                renderer.End();
+			if (NormalMap != null && lightning != null)
+			{
+				renderer.End();
 
-                renderer.ApplyNormalmapEffectParameter(Lightning, NormalMap);
-                renderer.NormalmapEffect.Parameters["MatrixTransform"].SetValue(renderer.SpriteBatchProjection);
-                renderer.Begin(renderer.Projection, null, null, renderer.NormalmapEffect);
-            }
+				renderer.ApplyNormalmapEffectParameter(lightning, NormalMap);
+				renderer.NormalmapEffect.Parameters["MatrixTransform"].SetValue(renderer.SpriteBatchProjection);
+				renderer.Begin(renderer.Projection, null, null, renderer.NormalmapEffect);
+			}
 
-            if (Data != null && true)
-            {
-                var Scale = Data.Scale;
-                if (Transform != null)
-                {
-                    Scale.X *= Transform.Scale;
-                    Scale.Y *= Transform.Scale;
-                }
-                var pos = (position + Data.Offset * Scale);
-                renderer.SpriteBatch.Draw(Texture ?? renderer.WhitePixelTexture, pos, CurrentFrameRectangle, Data.Color, Data.Rotation, Data.Origin, Scale, Data.Effects, Depth);
-            }
-            else
-            {
-                var pos = position;
-                renderer.SpriteBatch.Draw(Texture ?? renderer.WhitePixelTexture, pos, CurrentFrameRectangle, Color.White);
-            }
+			if (Data != null && true)
+			{
+				var scale = Data.Scale;
+				if (transform != null)
+				{
+					scale.X *= transform.Scale;
+					scale.Y *= transform.Scale;
+				}
+				var pos = (position + Data.Offset * scale);
+				renderer.SpriteBatch.Draw(Texture ?? renderer.WhitePixelTexture, pos, CurrentFrameRectangle, Data.Color, Data.Rotation, Data.Origin, scale, Data.Effects, Depth);
+			}
+			else
+			{
+				var pos = position;
+				renderer.SpriteBatch.Draw(Texture ?? renderer.WhitePixelTexture, pos, CurrentFrameRectangle, Color.White);
+			}
 
-            if (NormalMap != null && Lightning != null)
-            {
-                renderer.End();
-                renderer.Begin(renderer.Projection);
-            }
-        }
+			if (NormalMap != null && lightning != null)
+			{
+				renderer.End();
+				renderer.Begin(renderer.Projection);
+			}
+		}
 
-        private Vector2 GetSpritePosition()
-        {
-            if (null != GetPositionFn)
-            {
-                return GetPositionFn();
-            }
+		private Vector2 GetSpritePosition()
+		{
+			if (null != GetPositionFn)
+			{
+				return GetPositionFn();
+			}
 
-            var Transform = Entity.Get<Transform>();
-            if (Transform != null)
-            {
-                return Transform.Position;
-            }
+			var transform = Entity.Get<Transform>();
 
-            return Vector2.Zero;
-        }
+			return transform != null ? transform.Position : Vector2.Zero;
+		}
 
-        public bool IsRectangleHit(Vector2 point)
-        {
-            if (Texture == null)
-            {
-                return false;
-            }
+		public bool IsRectangleHit(Vector2 point)
+		{
+			if (Texture == null)
+			{
+				return false;
+			}
 
-            var Position = GetSpritePosition();
-            var ImagePosition = (point - Position);
+			var position = GetSpritePosition();
+			var imagePosition = (point - position);
 
-            if (Data != null)
-            {
-                var Scale = Data.Scale;
-                var Transform = Entity.Get<Transform>();
-                if (Transform != null)
-                {
-                    Scale.X *= Transform.Scale;
-                    Scale.Y *= Transform.Scale;
-                }
+			if (Data != null)
+			{
+				var scale = Data.Scale;
+				var transform = Entity.Get<Transform>();
+				if (transform != null)
+				{
+					scale.X *= transform.Scale;
+					scale.Y *= transform.Scale;
+				}
 
-                ImagePosition -= Data.Offset * Scale;
-                ImagePosition /= Scale;
-            }
+				imagePosition -= Data.Offset * scale;
+				imagePosition /= scale;
+			}
 
-            return new Rectangle(0, 0, Texture.Width / Columns, Texture.Height / Rows).Contains(ImagePosition);
-        }
+			return new Rectangle(0, 0, Texture.Width / Columns, Texture.Height / Rows).Contains(imagePosition);
+		}
 
-        public bool IsPixelHit(Vector2 point)
-        {
-            if (Texture == null)
-            {
-                return false;
-            }
+		public bool IsPixelHit(Vector2 point)
+		{
+			if (Texture == null)
+			{
+				return false;
+			}
 
-            var Position = GetSpritePosition();
-            var ImagePosition = (point - Position);
+			var position = GetSpritePosition();
+			var imagePosition = (point - position);
 
-            if (Data != null)
-            {
-                var Scale = Data.Scale;
-                var Transform = Entity.Get<Transform>();
-                if (Transform != null)
-                {
-                    Scale.X *= Transform.Scale;
-                    Scale.Y *= Transform.Scale;
-                }
+			if (Data != null)
+			{
+				var scale = Data.Scale;
+				var transform = Entity.Get<Transform>();
+				if (transform != null)
+				{
+					scale.X *= transform.Scale;
+					scale.Y *= transform.Scale;
+				}
 
-                ImagePosition -= Data.Offset * Scale;
-                ImagePosition /= Scale;
-            }
+				imagePosition -= Data.Offset * scale;
+				imagePosition /= scale;
+			}
 
-            var SourceRectangle = new Rectangle((int)ImagePosition.X, (int)ImagePosition.Y, 1, 1);
+			var sourceRectangle = new Rectangle((int)imagePosition.X, (int)imagePosition.Y, 1, 1);
 
-            if (SourceRectangle.X < 0 || SourceRectangle.X > Texture.Width / Columns - 1 || SourceRectangle.Y < 0 || SourceRectangle.Y > Texture.Height / Rows - 1)
-            {
-                return false;
-            }
+			if (sourceRectangle.X < 0 || sourceRectangle.X > Texture.Width / Columns - 1 || sourceRectangle.Y < 0 || sourceRectangle.Y > Texture.Height / Rows - 1)
+			{
+				return false;
+			}
 
-            if (ImageCache == null)
-            {
-                ImageCache = new Color[Texture.Width * Texture.Height];
-                Texture.GetData<Color>(ImageCache);
-            }
+			if (_imageCache == null)
+			{
+				_imageCache = new Color[Texture.Width * Texture.Height];
+				Texture.GetData(_imageCache);
+			}
 
-            int index = (int)ImagePosition.X + CurrentFrameRectangle.Left + ((int)ImagePosition.Y + CurrentFrameRectangle.Top) * Texture.Width;
+			var index = (int)imagePosition.X + CurrentFrameRectangle.Left + ((int)imagePosition.Y + CurrentFrameRectangle.Top) * Texture.Width;
 
-            return ImageCache[index].A > 40;
-        }
+			return _imageCache[index].A > 40;
+		}
 
-        private SpriteData Data
-        {
-            get
-            {
-                return Get<SpriteData>();
-            }
-        }
+		private SpriteData Data => Get<SpriteData>();
 
-        public float GetHeight()
-        {
-            var Transform = Get<Transform>();
-            return (Texture == null) ? 0 : Texture.Height / Rows * (Data == null ? 1 : Data.Scale.Y) * (Transform == null ? 1 : Transform.Scale);
-        }
+		public float GetHeight()
+		{
+			var transform = Get<Transform>();
+			return (Texture == null) ? 0 : Texture.Height / Rows * (Data == null ? 1 : Data.Scale.Y) * (transform == null ? 1 : transform.Scale);
+		}
 
-        public float GetWidth()
-        {
-            var Transform = Get<Transform>();
-            return (Texture == null) ? 0 : Texture.Width / Columns * (Data == null ? 1 : Data.Scale.X) * (Transform == null ? 1 : Transform.Scale);
-        }
+		public float GetWidth()
+		{
+			var transform = Get<Transform>();
+			return (Texture == null) ? 0 : Texture.Width / Columns * (Data == null ? 1 : Data.Scale.X) * (transform == null ? 1 : transform.Scale);
+		}
 
-        void LoadSprite(string image, int columns = 1, int rows = 1, int totalFrames = 0, string normalMapImage = null)
-        {
-            _Image = image;
-            _NormalMapImage = normalMapImage;
+		private void LoadSprite(string image, int columns = 1, int rows = 1, int totalFrames = 0, string normalMapImage = null)
+		{
+			_image = image;
+			_normalMapImage = normalMapImage;
 
-            if (Loaded)
-            {
-                LoadContent(Entity.UpdateScene.Content);
-            }
+			if (_loaded)
+			{
+				LoadContent(Entity.UpdateScene.Content);
+			}
 
-            Rows = rows;
-            Columns = columns;
-            TotalFrames = totalFrames == 0 ? Rows * Columns : totalFrames;
+			Rows = rows;
+			Columns = columns;
+			TotalFrames = totalFrames == 0 ? Rows * Columns : totalFrames;
 
-            var Animation = Get<SpriteTransformAnimation>();
-            if (null != Animation)
-            {
-                Animation.SetFrame();
-            }
-        }
+			var animation = Get<SpriteTransformAnimation>();
+			animation?.SetFrame();
+		}
 
-        void LoadTexture(Texture2D texture, int columns = 1, int rows = 1, int totalFrames = 0, Texture2D normalMap = null)
-        {
-            if (null == texture)
-            {
-                throw new ArgumentNullException("Texture must not be null.");
-            }
-            _CurrentFrame = -1;
-            _Texture = texture;
-            _NormalMap = normalMap;
-            LoadSprite(EXISTINGTEXTUREIMAGE, columns, rows, totalFrames, EXISTINGTEXTUREIMAGE);
-        }
+		private void LoadTexture(Texture2D texture, int columns = 1, int rows = 1, int totalFrames = 0, Texture2D normalMap = null)
+		{
+			_texture = texture ?? throw new ArgumentNullException("Texture must not be null.");
+			_currentFrame = -1;
+			_normalMap = normalMap;
+			LoadSprite(EXISTINGTEXTUREIMAGE, columns, rows, totalFrames, EXISTINGTEXTUREIMAGE);
+		}
 
-        public static Sprite Create(Entity addTo)
-        {
-            return addTo.Add<Sprite>();
-        }
+		public static Sprite Create(Entity addTo)
+		{
+			return addTo.Add<Sprite>();
+		}
 
-        public Sprite SetImage(string value, int columns = 1, int rows = 1, int totalFrames = 0, string normalMapImage = null) { LoadSprite(value, columns, rows, totalFrames, normalMapImage); return this; }
-        public Sprite SetTexture(Texture2D value, int columns = 1, int rows = 1, int totalFrames = 0, Texture2D normalMapTexture = null) { LoadTexture(value, columns, rows, totalFrames, normalMapTexture); return this; }
-        public Sprite SetRenderStage(RenderStage value) { RenderStage = value; return this; }
-        public Sprite SetEnableNormalMap(bool value) { _EnableNormalMap = value; return this; }
-        public Sprite SetGetPositionFn(Func<Vector2> value) { GetPositionFn = value; return this; }
-        /// <summary>
-        /// 1 based
-        /// </summary>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        public Sprite SetFrame(int value) { _InitialFrame = value; return this; }
-        public Sprite SetVisible(bool value) { Visible = value; return this; }
-    }
+		public Sprite SetImage(string value, int columns = 1, int rows = 1, int totalFrames = 0, string normalMapImage = null) { LoadSprite(value, columns, rows, totalFrames, normalMapImage); return this; }
+		public Sprite SetTexture(Texture2D value, int columns = 1, int rows = 1, int totalFrames = 0, Texture2D normalMapTexture = null) { LoadTexture(value, columns, rows, totalFrames, normalMapTexture); return this; }
+		public Sprite SetRenderStage(RenderStage value) { RenderStage = value; return this; }
+		public Sprite SetEnableNormalMap(bool value) { _enableNormalMap = value; return this; }
+		public Sprite SetGetPositionFn(Func<Vector2> value) { GetPositionFn = value; return this; }
+		/// <summary>
+		/// 1 based
+		/// </summary>
+		/// <param name="value"></param>
+		/// <returns></returns>
+		public Sprite SetFrame(int value) { _initialFrame = value; return this; }
+		public Sprite SetVisible(bool value) { Visible = value; return this; }
+	}
 }
