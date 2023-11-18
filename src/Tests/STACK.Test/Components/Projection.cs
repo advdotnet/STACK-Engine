@@ -12,8 +12,9 @@ namespace STACK.Test
         public void EqualityTest()
         {
             Assert.IsTrue(Projection2D.Zero.Equals(Projection2D.Zero));
-            Assert.IsTrue(Projection2D.Zero == Projection2D.Zero);
-            var Test = Projection2D.Zero.GetHashCode();
+#pragma warning disable CS1718 // Vergleich erfolgte mit derselben Variable
+			Assert.IsTrue(Projection2D.Zero == Projection2D.Zero);
+#pragma warning restore CS1718 // Vergleich erfolgte mit derselben Variable			
         }
 
         [TestMethod]

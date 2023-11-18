@@ -38,11 +38,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -205,10 +200,6 @@
     <None Include="Content\Skins\Default.skin" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Content\bin\**\*.*">
-      <Link>Content\%(RecursiveDir)%(FileName)%(Extension)</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="Content\build.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>build.bat</LastGenOutput>

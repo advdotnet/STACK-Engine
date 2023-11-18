@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.34301.259
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StarFinder", "Dependencies\StarFinder\StarFinder.csproj", "{3785DF4D-65EF-40E4-9177-2A8B396AFB0C}"
 EndProject
@@ -40,6 +40,11 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TomShane.Neoforce.Controls", "Dependencies\Neoforce\Neoforce\TomShane.Neoforce.Controls.csproj", "{AC5F1CD8-AA8E-4DB5-814F-86C214175841}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "STACK.TestBase", "Tests\STACK.TestBase\STACK.TestBase.csproj", "{A0CCDFD1-14C8-4B91-80CE-209C2EA6C4F7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C9839192-007D-48CB-979C-C465980C1AD5}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -126,5 +131,8 @@ Global
 		{35253CE1-C864-4CD3-8249-4D1319748E8F} = {592CAE4F-81B6-4CAD-88EF-0BEDC14BA608}
 		{AC5F1CD8-AA8E-4DB5-814F-86C214175841} = {592CAE4F-81B6-4CAD-88EF-0BEDC14BA608}
 		{A0CCDFD1-14C8-4B91-80CE-209C2EA6C4F7} = {4B3B21EA-0DD4-4207-AD01-C39116AB7E9F}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D7E2DB0A-1399-4D24-BB28-CADDF2C1EE44}
 	EndGlobalSection
 EndGlobal
