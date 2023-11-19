@@ -3,85 +3,84 @@ using Microsoft.Xna.Framework;
 
 namespace StarFinder.Test
 {
-    [TestClass]
-    public class TriangleEdgeTests
-    {        
-        [TestMethod]
-        public void IntersectionPoint()
-        {
-            Vector2 Intersection;
-            var Edge = new LineSegment(Vector2.Zero, Vector2.UnitY * 3);            
-            var Crosses = Edge.Crosses(new Vector2(-1, 1), new Vector2(1, 1), out Intersection);
+	[TestClass]
+	public class TriangleEdgeTests
+	{
+		[TestMethod]
+		public void IntersectionPoint()
+		{
+			var edge = new LineSegment(Vector2.Zero, Vector2.UnitY * 3);
+			var crosses = edge.Crosses(new Vector2(-1, 1), new Vector2(1, 1), out var intersection);
 
-            Assert.IsTrue(Crosses);
-            Assert.AreEqual(Vector2.UnitY, Intersection);            
-        }
+			Assert.IsTrue(crosses);
+			Assert.AreEqual(Vector2.UnitY, intersection);
+		}
 
-        [TestMethod]
-        public void OnePointSegmentNearestPoint()
-        {
-            var Edge = new LineSegment(Vector2.Zero, Vector2.Zero);
-            Assert.AreEqual(Vector2.Zero, Edge.GetClosestPoint(Vector2.UnitY));
-        }
+		[TestMethod]
+		public void OnePointSegmentNearestPoint()
+		{
+			var edge = new LineSegment(Vector2.Zero, Vector2.Zero);
+			Assert.AreEqual(Vector2.Zero, edge.GetClosestPoint(Vector2.UnitY));
+		}
 
-        [TestMethod]
-        public void Equality()
-        {
-            var Edge1 = new LineSegment(Vector2.Zero, Vector2.UnitX);
-            var Edge2 = new LineSegment(Vector2.UnitX, Vector2.Zero);
-            var Edge3 = new LineSegment(Vector2.UnitY, Vector2.Zero);
+		[TestMethod]
+		public void Equality()
+		{
+			var edge1 = new LineSegment(Vector2.Zero, Vector2.UnitX);
+			var edge2 = new LineSegment(Vector2.UnitX, Vector2.Zero);
+			var edge3 = new LineSegment(Vector2.UnitY, Vector2.Zero);
 
-            Assert.IsTrue(Edge1 == Edge2);
-            Assert.IsTrue(Edge1.Equals(Edge2));
+			Assert.IsTrue(edge1 == edge2);
+			Assert.IsTrue(edge1.Equals(edge2));
 
-            Assert.IsFalse(Edge1 == Edge3);
-            Assert.IsFalse(Edge1.Equals(Edge3));
-        }   
-   
-        [TestMethod]
-        public void Crosses()
-        {
-            var Edge = new LineSegment(-Vector2.UnitX, Vector2.UnitX);
+			Assert.IsFalse(edge1 == edge3);
+			Assert.IsFalse(edge1.Equals(edge3));
+		}
 
-            Assert.IsTrue(Edge.Crosses(Vector2.UnitY, -Vector2.UnitY));
-            Assert.IsFalse(Edge.Crosses(Vector2.UnitX, Vector2.UnitX + Vector2.UnitY));
-            Assert.IsFalse(Edge.Crosses(new Vector2(-2, 1), new Vector2(-2, -1)));
-        }
+		[TestMethod]
+		public void Crosses()
+		{
+			var edge = new LineSegment(-Vector2.UnitX, Vector2.UnitX);
 
-        [TestMethod]
-        public void ClosestPoint()
-        {
-            var Edge = new LineSegment(Vector2.Zero, Vector2.UnitX);
+			Assert.IsTrue(edge.Crosses(Vector2.UnitY, -Vector2.UnitY));
+			Assert.IsFalse(edge.Crosses(Vector2.UnitX, Vector2.UnitX + Vector2.UnitY));
+			Assert.IsFalse(edge.Crosses(new Vector2(-2, 1), new Vector2(-2, -1)));
+		}
 
-            Assert.AreEqual(Vector2.Zero, Edge.GetClosestPoint(new Vector2(-0.1f, -0.1f)));
-            Assert.AreEqual(Vector2.UnitX, Edge.GetClosestPoint(new Vector2(1.1f, 0)));
-            Assert.AreEqual(Vector2.UnitX / 2, Edge.GetClosestPoint(new Vector2(0.5f, 10)));
-        }
+		[TestMethod]
+		public void ClosestPoint()
+		{
+			var edge = new LineSegment(Vector2.Zero, Vector2.UnitX);
 
-        [TestMethod]
-        public void CrossesAccuracy()
-        {
-            var Edge = new LineSegment(Vector2.UnitY, Vector2.UnitX);
+			Assert.AreEqual(Vector2.Zero, edge.GetClosestPoint(new Vector2(-0.1f, -0.1f)));
+			Assert.AreEqual(Vector2.UnitX, edge.GetClosestPoint(new Vector2(1.1f, 0)));
+			Assert.AreEqual(Vector2.UnitX / 2, edge.GetClosestPoint(new Vector2(0.5f, 10)));
+		}
 
-            Assert.IsFalse(Edge.Crosses(new Vector2(0.1f, 0.14f), new Vector2(0.998f, 0.002f)));
-        }     
+		[TestMethod]
+		public void CrossesAccuracy()
+		{
+			var edge = new LineSegment(Vector2.UnitY, Vector2.UnitX);
 
-        [TestMethod]
-        public void CrossesAccuracyAlongEdge()
-        {            
-            for (int i = 1; i < 3; i++)
-            {
-                var Edge = new LineSegment(Vector2.Zero, new Vector2(10000 * i*3000, 7008 * i*3000));
-                var Dx = (Vector2)(Edge.Vertex1 - Edge.Vertex2);
+			Assert.IsFalse(edge.Crosses(new Vector2(0.1f, 0.14f), new Vector2(0.998f, 0.002f)));
+		}
 
-                for (float a = 0f; a <= 1; a += 0.05f)
-                {
-                    Vector2 EdgePoint = Edge.Vertex2 + Dx * a;
-                    Assert.IsTrue(Edge.Contains(EdgePoint));
-                    Assert.IsTrue(Edge.Contains(Edge.Vertex1));
-                    Assert.IsTrue(Edge.Contains(Edge.Vertex2));
-                }
-            }
-        }           
-    }
+		[TestMethod]
+		public void CrossesAccuracyAlongEdge()
+		{
+			for (var i = 1; i < 3; i++)
+			{
+				var edge = new LineSegment(Vector2.Zero, new Vector2(10000 * i * 3000, 7008 * i * 3000));
+				var dx = edge.Vertex1 - edge.Vertex2;
+
+				for (var a = 0f; a <= 1; a += 0.05f)
+				{
+					var edgePoint = edge.Vertex2 + (dx * a);
+					Assert.IsTrue(edge.Contains(edgePoint));
+					Assert.IsTrue(edge.Contains(edge.Vertex1));
+					Assert.IsTrue(edge.Contains(edge.Vertex2));
+				}
+			}
+		}
+	}
 }

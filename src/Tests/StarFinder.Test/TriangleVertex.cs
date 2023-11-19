@@ -1,108 +1,150 @@
-﻿using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 
 namespace StarFinder.Test
 {
 
-    [TestClass]
-    public class TriangleVertexTests
-    {        
-        [TestMethod]
-        public void Equality()
-        {
-            Vertex One = new Vertex(Vector2.UnitX);
-            Vertex Two = new Vertex(Vector2.UnitX);
+	[TestClass]
+	public class TriangleVertexTests
+	{
+		[TestMethod]
+		public void Equality()
+		{
+			var one = new Vertex(Vector2.UnitX);
+			var two = new Vertex(Vector2.UnitX);
 
-            Assert.IsTrue(One == Two);
-            Assert.IsTrue(One.Equals(Two));
-        }
+			Assert.IsTrue(one == two);
+			Assert.IsTrue(one.Equals(two));
+		}
 
-        Vertex A = new Vertex(-200, 0);
-        Vertex BB = new Vector2(-100, 100);
-        Vertex BT = new Vector2(-100, 200);
-        Vertex BC = new Vector2(0, 150);
-        Vertex CB = new Vector2(100, 100);
-        Vertex CT = new Vector2(100, 200);
-        Vertex D = new Vector2(200, 0);
+		private readonly Vertex _a = new Vertex(-200, 0);
+		private readonly Vertex _bb = new Vector2(-100, 100);
+		private readonly Vertex _bt = new Vector2(-100, 200);
+		private readonly Vertex _bc = new Vector2(0, 150);
+		private readonly Vertex _cb = new Vector2(100, 100);
+		private readonly Vertex _ct = new Vector2(100, 200);
+		private readonly Vertex _d = new Vector2(200, 0);
 
-        IEnumerable<Vertex> GetNeighbors(Vertex a) 
-        {
-            if (a == A) return new Vertex[] { BB, BT };
-            if (a == BB) return new Vertex[] { A, BT, CB, CT };
-            if (a == BT) return new Vertex[] { A, BB, CB, CT };
-            if (a == CT) return new Vertex[] { D, BB, BT, CB };
-            if (a == CB) return new Vertex[] { D, BB, BT, CT };
-            if (a == D) return new Vertex[] { CB, CT };
-            return new Vertex[] { };
-        }
+		private IEnumerable<Vertex> GetNeighbors(Vertex a)
+		{
+			if (a == _a)
+			{
+				return new Vertex[] { _bb, _bt };
+			}
 
-        [TestMethod]
-        public void FindShortestPath1()
-        {
-            AStar<Vertex> Finder = new AStar<Vertex>(GetNeighbors);
-            var Result = new List<Vertex>();
-            Finder.Search(A, D, ref Result, Vertex.Heuristic);
-            Assert.IsNotNull(Result);
-            
-            Assert.AreEqual(4,  Result.Count);
-            Assert.AreEqual(A,  Result[0]);
-            Assert.AreEqual(BB, Result[1]);
-            Assert.AreEqual(CB, Result[2]);
-            Assert.AreEqual(D,  Result[3]);            
-        }
+			if (a == _bb)
+			{
+				return new Vertex[] { _a, _bt, _cb, _ct };
+			}
 
-        IEnumerable<Vertex> GetNeighbors2(Vertex a)
-        {
-            if (a == A) return new Vertex[] { BB, BT };
-            if (a == BB) return new Vertex[] { A, BT, BC };
-            if (a == BT) return new Vertex[] { A, BB, CT };
-            if (a == CT) return new Vertex[] { BC, BT };
-            if (a == BC) return new Vertex[] { BB, CT };
-            return new Vertex[] { };
-        }
+			if (a == _bt)
+			{
+				return new Vertex[] { _a, _bb, _cb, _ct };
+			}
 
-        [TestMethod]
-        public void FindShortestPath2()
-        {
-            AStar<Vertex> Finder = new AStar<Vertex>(GetNeighbors2);
-            var Result = new List<Vertex>();
-            Finder.Search(A, CT, ref Result, null);
-            Assert.IsNotNull(Result);            
-            Assert.AreEqual(4,  Result.Count);
-            Assert.AreEqual(A,  Result[0]);
-            Assert.AreEqual(BB, Result[1]);
-            Assert.AreEqual(BC, Result[2]);
-            Assert.AreEqual(CT, Result[3]);
-        }
+			if (a == _ct)
+			{
+				return new Vertex[] { _d, _bb, _bt, _cb };
+			}
 
-        [TestMethod]
-        public void FindShortestPath3()
-        {
-            DataVertex<TriangleVertexData>[] Points = new DataVertex<TriangleVertexData>[14];
-            Points[0] = new DataVertex<TriangleVertexData>(new Vector2(0, 0));
-            Points[1] = new DataVertex<TriangleVertexData>(new Vector2(100, 0));
-            Points[2] = new DataVertex<TriangleVertexData>(new Vector2(0, 100));
-            Points[3] = new DataVertex<TriangleVertexData>(new Vector2(100, 110));
-            Points[4] = new DataVertex<TriangleVertexData>(new Vector2(50, 150));
-            Points[5] = new DataVertex<TriangleVertexData>(new Vector2(250, 250));
-            Points[6] = new DataVertex<TriangleVertexData>(new Vector2(500, 500));
-            Points[7] = new DataVertex<TriangleVertexData>(new Vector2(250, 0));
+			if (a == _cb)
+			{
+				return new Vertex[] { _d, _bb, _bt, _ct };
+			}
 
-            int[] Indices = new int[36];
-            Indices[0] = 0; Indices[1] = 1; Indices[2] = 2;
-            Indices[3] = 1; Indices[4] = 2; Indices[5] = 3;
-            Indices[6] = 2; Indices[7] = 3; Indices[8] = 4;
-            Indices[9] = 3; Indices[10] = 4; Indices[11] = 5;
-            Indices[12] = 4; Indices[13] = 5; Indices[14] = 6;
-            Indices[15] = 5; Indices[16] = 6; Indices[17] = 7;
-            var Path = new Path<TriangleVertexData>(Points, Indices, 1.1f, 0.475f);
+			if (a == _d)
+			{
+				return new Vertex[] { _cb, _ct };
+			}
 
-            var Result = new List<Vector2>();
-            Path.FindPath(new Vector2(10, 10), new Vector2(250, 0), ref Result);
-            Assert.AreNotEqual(Points[2], Result[1]);
-        }
+			return new Vertex[] { };
+		}
 
-     
-    }
+		[TestMethod]
+		public void FindShortestPath1()
+		{
+			var finder = new AStar<Vertex>(GetNeighbors);
+			var result = new List<Vertex>();
+			finder.Search(_a, _d, ref result, Vertex.Heuristic);
+			Assert.IsNotNull(result);
+
+			Assert.AreEqual(4, result.Count);
+			Assert.AreEqual(_a, result[0]);
+			Assert.AreEqual(_bb, result[1]);
+			Assert.AreEqual(_cb, result[2]);
+			Assert.AreEqual(_d, result[3]);
+		}
+
+		private IEnumerable<Vertex> GetNeighbors2(Vertex a)
+		{
+			if (a == _a)
+			{
+				return new Vertex[] { _bb, _bt };
+			}
+
+			if (a == _bb)
+			{
+				return new Vertex[] { _a, _bt, _bc };
+			}
+
+			if (a == _bt)
+			{
+				return new Vertex[] { _a, _bb, _ct };
+			}
+
+			if (a == _ct)
+			{
+				return new Vertex[] { _bc, _bt };
+			}
+
+			if (a == _bc)
+			{
+				return new Vertex[] { _bb, _ct };
+			}
+
+			return new Vertex[] { };
+		}
+
+		[TestMethod]
+		public void FindShortestPath2()
+		{
+			var finder = new AStar<Vertex>(GetNeighbors2);
+			var result = new List<Vertex>();
+			finder.Search(_a, _ct, ref result, null);
+			Assert.IsNotNull(result);
+			Assert.AreEqual(4, result.Count);
+			Assert.AreEqual(_a, result[0]);
+			Assert.AreEqual(_bb, result[1]);
+			Assert.AreEqual(_bc, result[2]);
+			Assert.AreEqual(_ct, result[3]);
+		}
+
+		[TestMethod]
+		public void FindShortestPath3()
+		{
+			var points = new DataVertex<TriangleVertexData>[14];
+			points[0] = new DataVertex<TriangleVertexData>(new Vector2(0, 0));
+			points[1] = new DataVertex<TriangleVertexData>(new Vector2(100, 0));
+			points[2] = new DataVertex<TriangleVertexData>(new Vector2(0, 100));
+			points[3] = new DataVertex<TriangleVertexData>(new Vector2(100, 110));
+			points[4] = new DataVertex<TriangleVertexData>(new Vector2(50, 150));
+			points[5] = new DataVertex<TriangleVertexData>(new Vector2(250, 250));
+			points[6] = new DataVertex<TriangleVertexData>(new Vector2(500, 500));
+			points[7] = new DataVertex<TriangleVertexData>(new Vector2(250, 0));
+
+			var indices = new int[36];
+			indices[0] = 0; indices[1] = 1; indices[2] = 2;
+			indices[3] = 1; indices[4] = 2; indices[5] = 3;
+			indices[6] = 2; indices[7] = 3; indices[8] = 4;
+			indices[9] = 3; indices[10] = 4; indices[11] = 5;
+			indices[12] = 4; indices[13] = 5; indices[14] = 6;
+			indices[15] = 5; indices[16] = 6; indices[17] = 7;
+			var path = new Path<TriangleVertexData>(points, indices, 1.1f, 0.475f);
+
+			var result = new List<Vector2>();
+			path.FindPath(new Vector2(10, 10), new Vector2(250, 0), ref result);
+			Assert.AreNotEqual(points[2], result[1]);
+		}
+	}
 }

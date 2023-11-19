@@ -14,11 +14,11 @@ namespace STACK.Spine
 
 		public override bool IsHit(Vector2 mouse)
 		{
-			var Sprite = Get<SpineSprite>();
+			var sprite = Get<SpineSprite>();
 
-			if (Sprite != null)
+			if (sprite != null)
 			{
-				return PixelPerfect ? Sprite.IsPixelHit(mouse) : Sprite.IsRectangleHit(mouse);
+				return PixelPerfect ? sprite.IsPixelHit(mouse) : sprite.IsRectangleHit(mouse);
 			}
 
 			return false;

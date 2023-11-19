@@ -10,32 +10,32 @@ namespace STACK
 	public class SpineTextureLoader : Component, TextureLoader, IContent, IWorldAutoAdd
 	{
 		[NonSerialized]
-		private GraphicsDevice GraphicsDevice;
-		private string RootDirectory;
+		private GraphicsDevice _graphicsDevice;
+		private string _rootDirectory;
 
 		public void Load(AtlasPage page, string path)
 		{
-			var Texture = Util.LoadTexture(GraphicsDevice, path);
+			var texture = Util.LoadTexture(_graphicsDevice, path);
 
-			page.rendererObject = Texture;
-			page.width = Texture.Width;
-			page.height = Texture.Height;
+			page.rendererObject = texture;
+			page.width = texture.Width;
+			page.height = texture.Height;
 		}
 
 		public Skeleton Load(string assetName)
 		{
-			var Atlas = new Atlas(RootDirectory + "/" + assetName + ".atlas", this);
-			var Json = new SkeletonJson(Atlas);
-			var Skeleton = new Skeleton(Json.ReadSkeletonData(RootDirectory + "/" + assetName + ".json"));
+			var atlas = new Atlas(_rootDirectory + "/" + assetName + ".atlas", this);
+			var json = new SkeletonJson(atlas);
+			var skeleton = new Skeleton(json.ReadSkeletonData(_rootDirectory + "/" + assetName + ".json"));
 
-			return Skeleton;
+			return skeleton;
 		}
 
 		public void LoadContent(ContentLoader content)
 		{
-			RootDirectory = content.RootDirectory;
-			var DeviceService = (IGraphicsDeviceService)content.ServiceProvider.GetService(typeof(IGraphicsDeviceService));
-			GraphicsDevice = DeviceService.GraphicsDevice;
+			_rootDirectory = content.RootDirectory;
+			var deviceService = (IGraphicsDeviceService)content.ServiceProvider.GetService(typeof(IGraphicsDeviceService));
+			_graphicsDevice = deviceService.GraphicsDevice;
 		}
 
 		public void Unload(object texture)
